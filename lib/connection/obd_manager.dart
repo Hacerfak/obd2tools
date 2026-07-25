@@ -9,7 +9,7 @@ import '../state/obd_providers.dart';
 
 class ObdManager {
   final ObdConnection connection;
-  final WidgetRef ref;
+  final Ref ref;
 
   // Fila de comandos aguardando para serem enviados
   final Queue<String> _commandQueue = Queue<String>();

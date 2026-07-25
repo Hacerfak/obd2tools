@@ -14,7 +14,18 @@ final Map<int, ObdPid> pidRegistry = {
     name: "Status do Sistema de Combustível",
     unit: "",
     expectedBytes: 2,
-    calculate: (bytes) => bytes[0].toDouble(),
+    calculate: (bytes) => bytes[0].toDouble(), // Analisa apenas o sistema 1
+    // NOVO: O tradutor humano
+    formatValue: (value) {
+      int val = value.toInt();
+      if (val == 0) return "Motor Desligado / Iniciando";
+      if (val == 1) return "Malha Aberta (Frio)";
+      if (val == 2) return "Malha Fechada (Lambda)";
+      if (val == 4) return "Malha Aberta (Carga/Falha)";
+      if (val == 8) return "Malha Fechada (Erro Lambda)";
+      if (val == 16) return "Malha Aberta (Defeito)";
+      return "Status: $val";
+    },
   ),
   0x04: ObdPid(
     id: 0x04,

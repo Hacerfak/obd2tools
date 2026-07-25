@@ -1,11 +1,12 @@
 class ObdPid {
-  final int id; // O código Hex do PID (ex: 0x0C)
-  final String name; // Nome amigável para a interface
-  final String unit; // Unidade de medida (RPM, °C, %, kPa)
-  final int expectedBytes; // Quantos bytes a ECU devolve para este sensor
-
-  // A função matemática injetada que transforma bytes brutos no valor real
+  final int id;
+  final String name;
+  final String unit;
+  final int expectedBytes;
   final double Function(List<int> bytes) calculate;
+
+  // NOVO: Função opcional que traduz um valor matemático para um texto (ex: 2.0 -> "Malha Fechada")
+  final String Function(double value)? formatValue;
 
   const ObdPid({
     required this.id,
@@ -13,5 +14,6 @@ class ObdPid {
     required this.unit,
     required this.expectedBytes,
     required this.calculate,
+    this.formatValue, // Pode ser nulo
   });
 }
