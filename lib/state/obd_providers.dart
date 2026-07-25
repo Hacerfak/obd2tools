@@ -48,3 +48,28 @@ final vehicleInfoStateProvider =
     NotifierProvider<VehicleInfoNotifier, Map<String, String>>(() {
       return VehicleInfoNotifier();
     });
+
+// ============================================================================
+// TÚNEL 3: AUTO-DESCOBERTA DE SENSORES (PIDs Suportados)
+// ============================================================================
+
+class SupportedPidsNotifier extends Notifier<Set<int>> {
+  @override
+  Set<int> build() {
+    return {}; // Começa vazio
+  }
+
+  void addPids(List<int> pids) {
+    state = {...state, ...pids};
+  }
+
+  void clear() {
+    state = {};
+  }
+}
+
+final supportedPidsProvider = NotifierProvider<SupportedPidsNotifier, Set<int>>(
+  () {
+    return SupportedPidsNotifier();
+  },
+);

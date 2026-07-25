@@ -65,6 +65,7 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
     if (success) {
       setState(() => _isConnected = true);
       _manager.initializeScanner(); // Envia os AT Z, etc.
+      _manager.discoverSupportedSensors();
     }
   }
 

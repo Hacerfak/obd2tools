@@ -205,6 +205,11 @@ class ObdManager {
     // Joga a lista limpa e bonita na tela do app
     _addLog(supportedSensors.join('\n'));
   } */
+  void discoverSupportedSensors() {
+    ref.read(supportedPidsProvider.notifier).clear();
+    queueCommand("0100"); // A faísca que inicia a auto-descoberta
+  }
+
   void _handleCompleteResponse(String response) {
     if (response.contains("NO DATA") || response.contains("ERROR")) {
       _addLog("ALERTA: Erro ou dado inexistente.");
@@ -224,19 +229,47 @@ class ObdManager {
       _addLog("=====================================");
 
       if (cleanHex.startsWith("41")) {
-        Map<String, ObdReadResult> parsedData = Mode01Parser.parse(cleanHex);
+        String pidHex = cleanHex.substring(2, 4);
 
-        if (parsedData.isEmpty) {
-          _addLog("Aguardando pacote completo...");
+        // 1. Verifica se é uma resposta de Auto-Descoberta
+        if (["00", "20", "40", "60", "80", "A0", "C0"].contains(pidHex)) {
+          int basePid = int.parse(pidHex, radix: 16);
+          // Pega apenas os 4 bytes da resposta
+          String dataHex = cleanHex.length >= 12
+              ? cleanHex.substring(4, 12)
+              : cleanHex.substring(4);
+
+          List<int> supported = Mode01Parser.parseSupportedPids(
+            dataHex,
+            basePid,
+          );
+
+          // Salva os sensores descobertos no Riverpod
+          ref.read(supportedPidsProvider.notifier).addPids(supported);
+          _addLog("=> Sensores Suportados Encontrados: $supported");
+
+          // 2. O Dominó: Se o último sensor (ex: 0x20) estiver suportado, pede o próximo bloco!
+          if (supported.contains(basePid + 0x20)) {
+            String nextHex = (basePid + 0x20)
+                .toRadixString(16)
+                .padLeft(2, '0')
+                .toUpperCase();
+            queueCommand("01$nextHex"); // Pede o próximo (0120, 0140, etc)
+          }
         } else {
-          // A MÁGICA AQUI: Injeta os dados no túnel do Modo 01!
-          ref.read(realTimeStateProvider.notifier).updateData(parsedData);
+          // 3. Se não for descoberta, é leitura normal de dados (RPM, Temp, etc)
+          Map<String, ObdReadResult> parsedData = Mode01Parser.parse(cleanHex);
 
-          parsedData.forEach((nome, resultado) {
-            _addLog(
-              "=> $nome: ${resultado.value.toStringAsFixed(1)} ${resultado.unit}",
-            );
-          });
+          if (parsedData.isEmpty) {
+            _addLog("Aguardando pacote completo...");
+          } else {
+            ref.read(realTimeStateProvider.notifier).updateData(parsedData);
+            parsedData.forEach((nome, resultado) {
+              _addLog(
+                "=> $nome: ${resultado.value.toStringAsFixed(1)} ${resultado.unit}",
+              );
+            });
+          }
         }
       } else if (cleanHex.startsWith("49")) {
         Map<String, String> parsedInfo = Mode09Parser.parse(cleanHex);

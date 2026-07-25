@@ -9,6 +9,31 @@ class ObdReadResult {
 }
 
 class Mode01Parser {
+  /// Lê o mapa de bits de auto-descoberta (PIDs 00, 20, 40, 60...)
+  static List<int> parseSupportedPids(String dataHex, int basePid) {
+    List<int> supported = [];
+
+    // Precisamos de exatos 4 bytes (8 caracteres hexadecimais)
+    if (dataHex.length < 8) return supported;
+
+    // Converte os 8 caracteres em um número inteiro de 32 bits
+    int bitmask = int.parse(dataHex.substring(0, 8), radix: 16);
+
+    // O primeiro bit da esquerda (maior valor) representa o basePid + 1.
+    int mask = 0x80000000;
+
+    for (int i = 1; i <= 32; i++) {
+      // Se o bit estiver ligado (1), o sensor existe no carro!
+      if ((bitmask & mask) != 0) {
+        supported.add(basePid + i);
+      }
+      // Empurra a máscara de leitura para o próximo bit à direita
+      mask = mask >> 1;
+    }
+
+    return supported;
+  }
+
   static Map<String, ObdReadResult> parse(String cleanHex) {
     Map<String, ObdReadResult> results = {};
 
