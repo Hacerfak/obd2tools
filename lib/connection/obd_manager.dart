@@ -4,9 +4,12 @@ import 'obd_connection.dart';
 import '/parser/obd_parser.dart';
 import '../parser/parsers/mode_01_parser.dart';
 import '../parser/parsers/mode_09_parser.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../state/obd_providers.dart';
 
 class ObdManager {
   final ObdConnection connection;
+  final WidgetRef ref;
 
   // Fila de comandos aguardando para serem enviados
   final Queue<String> _commandQueue = Queue<String>();
@@ -21,7 +24,7 @@ class ObdManager {
   final _logStreamController = StreamController<String>.broadcast();
   Stream<String> get logStream => _logStreamController.stream;
 
-  ObdManager({required this.connection}) {
+  ObdManager({required this.connection, required this.ref}) {
     // Fica escutando os dados puros que vêm do Bluetooth
     connection.dataStream.listen(_onDataReceived);
   }
@@ -221,11 +224,14 @@ class ObdManager {
       _addLog("=====================================");
 
       if (cleanHex.startsWith("41")) {
-        // ENCAMINHA PARA O ESPECIALISTA DE TEMPO REAL
         Map<String, ObdReadResult> parsedData = Mode01Parser.parse(cleanHex);
+
         if (parsedData.isEmpty) {
           _addLog("Aguardando pacote completo...");
         } else {
+          // A MÁGICA AQUI: Injeta os dados no túnel do Modo 01!
+          ref.read(realTimeStateProvider.notifier).updateData(parsedData);
+
           parsedData.forEach((nome, resultado) {
             _addLog(
               "=> $nome: ${resultado.value.toStringAsFixed(1)} ${resultado.unit}",
@@ -233,11 +239,14 @@ class ObdManager {
           });
         }
       } else if (cleanHex.startsWith("49")) {
-        // ENCAMINHA PARA O ESPECIALISTA DE INFO DO VEÍCULO
         Map<String, String> parsedInfo = Mode09Parser.parse(cleanHex);
+
         if (parsedInfo.isEmpty) {
           _addLog("Aguardando dados do veículo...");
         } else {
+          // A MÁGICA AQUI: Injeta os dados no túnel do Modo 09!
+          ref.read(vehicleInfoStateProvider.notifier).updateInfo(parsedInfo);
+
           parsedInfo.forEach((nome, valor) {
             _addLog("=> $nome: $valor");
           });
