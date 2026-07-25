@@ -1,4 +1,4 @@
-import 'obd_pid.dart';
+import '../obd_pid.dart';
 
 final Map<int, ObdPid> pidRegistry = {
   0x04: ObdPid(
@@ -136,4 +136,47 @@ final Map<int, ObdPid> pidRegistry = {
   ),
 
   // Siga exatamente esse padrão de 5 linhas para inserir os outros sensores da Wikipédia
+  // Dicionário com os nomes dos sensores mais comuns em português
+  /* final Map<int, String> _pidNames = {
+    // Grupo 01 a 20
+    0x01: "Status dos Monitores de Emissão",
+    0x03: "Status do Sistema de Combustível",
+    0x04: "Carga Calculada do Motor",
+    0x05: "Temperatura do Líquido de Arrefecimento",
+    0x06: "Ajuste de Combustível a Curto Prazo (Banco 1)",
+    0x07: "Ajuste de Combustível a Longo Prazo (Banco 1)",
+    0x0B: "Pressão Absoluta do Coletor (MAP)",
+    0x0C: "Rotação do Motor (RPM)",
+    0x0D: "Velocidade do Veículo",
+    0x0E: "Avanço do Ponto de Ignição",
+    0x0F: "Temperatura do Ar de Admissão",
+    0x10: "Taxa de Fluxo de Ar (MAF)",
+    0x11: "Posição do Acelerador (TPS)",
+    0x13: "Sensores de Oxigênio Presentes (Sonda Lambda)",
+    0x1C: "Padrão OBD suportado",
+    0x1F: "Tempo de Funcionamento do Motor",
+
+    // Grupo 21 a 40
+    0x21: "Distância Percorrida com Luz de Injeção Acesa",
+    0x2E: "Purga Evaporativa Comandada",
+    0x2F: "Nível do Tanque de Combustível",
+    0x30: "Aquecimentos desde que os erros foram limpos",
+    0x31: "Distância percorrida desde a limpeza de erros",
+    0x32: "Pressão de Vapor do Sistema Evaporativo",
+    0x33: "Pressão Atmosférica Absoluta",
+
+    // Grupo 41 a 60
+    0x41: "Status do Monitor no Ciclo de Direção Atual",
+    0x42: "Tensão do Módulo de Controle (ECU)",
+    0x43: "Valor Absoluto da Carga do Motor",
+    0x44: "Relação Ar/Combustível Comandada",
+    0x45: "Posição Relativa do Acelerador",
+    0x46: "Temperatura do Ar Ambiente",
+    0x47: "Posição Absoluta do Acelerador B",
+    0x49: "Posição do Pedal do Acelerador D",
+    0x4A: "Posição do Pedal do Acelerador E",
+    0x4C: "Atuador do Acelerador Comandado",
+    0x51: "Tipo de Combustível do Veículo",
+    0x5C: "Temperatura do Óleo do Motor",
+  }; */
 };

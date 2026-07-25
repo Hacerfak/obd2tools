@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'connection/obd_connection.dart';
 import 'connection/obd_manager.dart';
-import 'parser/pid_registry.dart';
-import 'parser/mode_09_registry.dart';
+import 'parser/registries/mode_01_registry.dart';
+import 'parser/registries/mode_09_registry.dart';
 
 void main() {
   runApp(const MontanaObdApp());

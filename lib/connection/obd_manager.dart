@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'obd_connection.dart';
 import '/parser/obd_parser.dart';
+import '../parser/parsers/mode_01_parser.dart';
 import '../parser/parsers/mode_09_parser.dart';
 
 class ObdManager {
@@ -209,7 +210,8 @@ class ObdManager {
 
     String rawResponse = response.replaceAll("SEARCHING...", "").trim();
 
-    _addLog("BRUTO: $rawResponse");
+    // Log para debug com o retorno bruto do ELM327
+    //_addLog("ELM327: $rawResponse");
 
     if (rawResponse.startsWith("0") ||
         rawResponse.startsWith("41") ||
@@ -220,9 +222,7 @@ class ObdManager {
 
       if (cleanHex.startsWith("41")) {
         // ENCAMINHA PARA O ESPECIALISTA DE TEMPO REAL
-        Map<String, ObdReadResult> parsedData = ObdParser.parseRealTimeData(
-          cleanHex,
-        );
+        Map<String, ObdReadResult> parsedData = Mode01Parser.parse(cleanHex);
         if (parsedData.isEmpty) {
           _addLog("Aguardando pacote completo...");
         } else {

@@ -1,4 +1,4 @@
-import '../mode_09_registry.dart';
+import '../registries/mode_09_registry.dart';
 
 class Mode09Parser {
   static Map<String, String> parse(String cleanHex) {
