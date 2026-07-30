@@ -8,6 +8,7 @@ import '../parser/parsers/mode_09_parser.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../state/obd_providers.dart';
 import '../parser/parsers/dtc_parser.dart';
+import '../parser/parsers/mode_02_parser.dart';
 
 class ObdManager {
   final ObdConnection connection;
@@ -35,6 +36,13 @@ class ObdManager {
   ObdManager({required this.connection, required this.ref}) {
     // Fica escutando os dados puros que vêm do Bluetooth
     connection.dataStream.listen(_onDataReceived);
+  }
+
+  // Dispara a caçada completa do Freeze Frame (Frame 00)
+  void readFreezeFrame() {
+    ref.read(freezeFrameProvider.notifier).clear();
+    ref.read(freezeFrameProvider.notifier).setLoading(true);
+    queueCommand("020000"); // 02 (Modo) 00 (PIDs Suportados) 00 (Frame 00)
   }
 
   // Comandos fáceis para a interface chamar
@@ -265,6 +273,62 @@ class ObdManager {
           Map<String, ObdReadResult> parsedData = Mode01Parser.parse(cleanHex);
           if (parsedData.isNotEmpty) {
             ref.read(realTimeStateProvider.notifier).updateData(parsedData);
+          }
+        }
+      }
+      // MODO 02 - FREEZE FRAME (DADOS CONGELADOS)
+      else if (cleanHex.startsWith("42")) {
+        // Se a resposta for o mapeamento de PIDs suportados (00, 20, 40...)
+        if (cleanHex.contains("420000") ||
+            cleanHex.contains("422000") ||
+            cleanHex.contains("424000")) {
+          // O Regex procura: 42 + PID (00, 20...) + Frame (00) + 8 chars de dados
+          final RegExp supportRegex = RegExp(
+            r'42(00|20|40|60|80|A0|C0)00([0-9A-F]{8})',
+          );
+          final matches = supportRegex.allMatches(cleanHex);
+
+          for (final match in matches) {
+            String pidHex = match.group(1)!;
+            String dataHex = match.group(2)!;
+
+            int basePid = int.parse(pidHex, radix: 16);
+
+            // Reutilizamos a genialidade matemática do Modo 01!
+            List<int> supported = Mode01Parser.parseSupportedPids(
+              dataHex,
+              basePid,
+            );
+
+            // Coloca os pedidos de dados na fila de comandos
+            for (int pid in supported) {
+              // Pulamos os PIDs de paginação (0x20, 0x40) e o PID 02 (que é apenas o código da falha repetido)
+              if (pid % 0x20 != 0 && pid != 0x02) {
+                String hexReq = pid
+                    .toRadixString(16)
+                    .padLeft(2, '0')
+                    .toUpperCase();
+                queueCommand(
+                  "02${hexReq}00",
+                ); // Pede PID específico do Frame 00
+              }
+            }
+
+            // Tem mais páginas para descobrir?
+            if (supported.contains(basePid + 0x20)) {
+              String nextGroupHex = (basePid + 0x20)
+                  .toRadixString(16)
+                  .padLeft(2, '0')
+                  .toUpperCase();
+              queueCommand("02${nextGroupHex}00");
+            }
+          }
+        }
+        // Se for resposta de um sensor do Freeze Frame
+        else {
+          Map<String, ObdReadResult> parsedData = Mode02Parser.parse(cleanHex);
+          if (parsedData.isNotEmpty) {
+            ref.read(freezeFrameProvider.notifier).addData(parsedData);
           }
         }
       }

@@ -2,12 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../state/obd_providers.dart';
 
-class FaultDetailScreen extends ConsumerWidget {
+class FaultDetailScreen extends ConsumerStatefulWidget {
   final String faultCode;
   const FaultDetailScreen({super.key, required this.faultCode});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<FaultDetailScreen> createState() => _FaultDetailScreenState();
+}
+
+class _FaultDetailScreenState extends ConsumerState<FaultDetailScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Dispara a leitura do Freeze Frame ao abrir a tela
+      ref.read(obdManagerProvider).readFreezeFrame();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final freezeState = ref.watch(freezeFrameProvider);
+
     return Scaffold(
       backgroundColor: const Color(0xFF12151C),
       appBar: AppBar(
@@ -20,44 +36,100 @@ class FaultDetailScreen extends ConsumerWidget {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Icon(Icons.build, size: 80, color: Colors.redAccent),
-            const SizedBox(height: 24),
+            const Icon(Icons.build_rounded, size: 60, color: Colors.redAccent),
+            const SizedBox(height: 16),
             Text(
-              faultCode,
+              widget.faultCode,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                fontSize: 48,
+                fontSize: 40,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
                 fontFamily: 'Monospace',
               ),
             ),
-            const SizedBox(height: 16),
-            const Text(
-              "Pesquise este código na internet para descobrir o problema específico do seu carro. Falhas na injeção eletrônica podem afetar o desempenho e o consumo de combustível.",
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white70, fontSize: 16),
-            ),
-            const Spacer(),
+            const SizedBox(height: 24),
 
-            // O TÃO SONHADO BOTÃO DE APAGAR A LUZ
+            // SEÇÃO DO FREEZE FRAME
+            const Text(
+              "Dados Congelados no Momento da Falha:",
+              style: TextStyle(
+                color: Colors.blueAccent,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const Divider(color: Colors.white24),
+
+            Expanded(
+              child: freezeState.isLoading && freezeState.data.isEmpty
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        color: Colors.blueAccent,
+                      ),
+                    )
+                  : freezeState.data.isEmpty
+                  ? const Center(
+                      child: Text(
+                        "Nenhum dado congelado (Freeze Frame) disponível para este erro.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.white54),
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: freezeState.data.length,
+                      itemBuilder: (context, index) {
+                        String sensorName = freezeState.data.keys.elementAt(
+                          index,
+                        );
+                        final result = freezeState.data[sensorName]!;
+
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  sensorName,
+                                  style: const TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                "${result.value.toStringAsFixed(result.value == result.value.toInt() ? 0 : 1)} ${result.unit}",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // BOTÃO DE APAGAR
             ElevatedButton.icon(
-              onPressed: () {
-                _showClearConfirmation(context, ref);
-              },
+              onPressed: () => _showClearConfirmation(context, ref),
               icon: const Icon(Icons.delete_forever),
-              label: const Text("APAGAR FALHAS DA ECU"),
+              label: const Text("APAGAR FALHA (ECU)"),
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 24),
-                backgroundColor: Colors.redAccent.withValues(alpha: 0.2),
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                backgroundColor: Colors.redAccent.withOpacity(0.2),
                 foregroundColor: Colors.redAccent,
                 side: const BorderSide(color: Colors.redAccent, width: 2),
                 textStyle: const TextStyle(
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1,
                 ),
@@ -80,7 +152,7 @@ class FaultDetailScreen extends ConsumerWidget {
           style: TextStyle(color: Colors.white),
         ),
         content: const Text(
-          "Esta ação vai resetar a memória de falhas da injeção eletrônica. Certifique-se de estar com a CHAVE LIGADA e o MOTOR DESLIGADO.",
+          "Esta ação vai resetar a memória de falhas e o Freeze Frame da injeção eletrônica. Certifique-se de estar com a CHAVE LIGADA e o MOTOR DESLIGADO.",
           style: TextStyle(color: Colors.white70),
         ),
         actions: [
