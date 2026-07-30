@@ -8,6 +8,9 @@ class ObdPid {
   // NOVO: Função opcional que traduz um valor matemático para um texto (ex: 2.0 -> "Malha Fechada")
   final String Function(double value)? formatValue;
 
+  // NOVO: Define se o sensor exige atualização em tempo real (RPM, Vel)
+  final bool isFast;
+
   const ObdPid({
     required this.id,
     required this.name,
@@ -15,5 +18,7 @@ class ObdPid {
     required this.expectedBytes,
     required this.calculate,
     this.formatValue, // Pode ser nulo
+    this.isFast =
+        false, // Por padrão, os sensores são lentos (Temperatura, etc)
   });
 }

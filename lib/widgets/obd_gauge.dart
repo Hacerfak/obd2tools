@@ -74,35 +74,39 @@ class ObdGauge extends ConsumerWidget {
                         ),
                 ),
 
-                // O VALOR SUBIU PARA O CENTRO DO ARCO
+                // O VALOR SUBIU PARA O CENTRO DO ARCO COM ESCALA DINÂMICA
                 if (style != GaugeStyle.lineChart)
                   Positioned(
-                    bottom: 0, // Alinha os números na base do arco
-                    left: 0,
-                    right: 0,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          currentValue.toStringAsFixed(
-                            pid.unit == "RPM" ? 0 : 1,
+                    bottom: 12, // Subimos um pouco mais
+                    left:
+                        40, // Margens maiores para forçar o FittedBox a espremer os números
+                    right: 40,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            currentValue.toStringAsFixed(
+                              pid.unit == "RPM" ? 0 : 1,
+                            ),
+                            style: const TextStyle(
+                              fontSize: 24, // Reduzimos de 32 para 24
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                              fontFamily: 'Monospace',
+                            ),
                           ),
-                          style: const TextStyle(
-                            fontSize: 32, // Levemente maior para dar destaque
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white,
-                            fontFamily: 'Monospace',
+                          Text(
+                            pid.unit,
+                            style: const TextStyle(
+                              color: Colors.blueAccent,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        Text(
-                          pid.unit,
-                          style: const TextStyle(
-                            color: Colors.blueAccent,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
               ],

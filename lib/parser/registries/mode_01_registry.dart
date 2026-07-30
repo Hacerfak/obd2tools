@@ -33,6 +33,7 @@ final Map<int, ObdPid> pidRegistry = {
     unit: "%",
     expectedBytes: 1,
     calculate: (bytes) => (bytes[0] / 255.0) * 100.0,
+    isFast: true, // NOVO
   ),
   0x05: ObdPid(
     id: 0x05,
@@ -47,6 +48,7 @@ final Map<int, ObdPid> pidRegistry = {
     unit: "kPa",
     expectedBytes: 1,
     calculate: (bytes) => bytes[0].toDouble(),
+    isFast: true, // NOVO
   ),
   0x0C: ObdPid(
     id: 0x0C,
@@ -54,6 +56,7 @@ final Map<int, ObdPid> pidRegistry = {
     unit: "RPM",
     expectedBytes: 2,
     calculate: (bytes) => ((bytes[0] * 256) + bytes[1]) / 4.0,
+    isFast: true, // NOVO
   ),
   0x0D: ObdPid(
     id: 0x0D,
@@ -61,6 +64,7 @@ final Map<int, ObdPid> pidRegistry = {
     unit: "km/h",
     expectedBytes: 1,
     calculate: (bytes) => bytes[0].toDouble(),
+    isFast: true, // NOVO
   ),
   0x0E: ObdPid(
     id: 0x0E,
@@ -82,6 +86,7 @@ final Map<int, ObdPid> pidRegistry = {
     unit: "g/s",
     expectedBytes: 2,
     calculate: (bytes) => ((bytes[0] * 256) + bytes[1]) / 100.0,
+    isFast: true, // NOVO
   ),
   0x11: ObdPid(
     id: 0x11,
@@ -89,6 +94,7 @@ final Map<int, ObdPid> pidRegistry = {
     unit: "%",
     expectedBytes: 1,
     calculate: (bytes) => (bytes[0] / 255.0) * 100.0,
+    isFast: true, // NOVO
   ),
   0x13: ObdPid(
     id: 0x13,
@@ -184,6 +190,7 @@ final Map<int, ObdPid> pidRegistry = {
     unit: "%",
     expectedBytes: 2,
     calculate: (bytes) => (((bytes[0] * 256) + bytes[1]) / 255.0) * 100.0,
+    isFast: true, // NOVO
   ),
   0x44: ObdPid(
     id: 0x44,
@@ -198,6 +205,7 @@ final Map<int, ObdPid> pidRegistry = {
     unit: "%",
     expectedBytes: 1,
     calculate: (bytes) => (bytes[0] / 255.0) * 100.0,
+    isFast: true, // NOVO
   ),
   0x46: ObdPid(
     id: 0x46,
