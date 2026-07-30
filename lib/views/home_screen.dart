@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../state/obd_providers.dart';
 import 'sensors_dashboard_screen.dart';
+import 'hud_screen.dart';
 import 'connection_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -17,12 +18,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   // Lista de Painéis dos Serviços
   final List<Widget> _pages = [
     const SensorsDashboardScreen(), // Painel 1: Lista/Tiles de Sensores
-    const Center(
-      child: Text(
-        "HUD / Gauges em breve",
-        style: TextStyle(color: Colors.white),
-      ),
-    ), // Painel 2
+    const HudScreen(), // Painel 2
     const Center(
       child: Text(
         "Diagnóstico DTC (Luz Injeção) em breve",
