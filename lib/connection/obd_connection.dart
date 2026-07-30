@@ -1,17 +1,77 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter_classic_bluetooth/flutter_classic_bluetooth.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class ObdConnection {
   final _bluetooth = FlutterClassicBluetooth();
-
-  // Classe correta fornecida pelo pacote
   BtcConnection? _activeConnection;
 
   final _dataStreamController = StreamController<String>.broadcast();
   Stream<String> get dataStream => _dataStreamController.stream;
 
   StreamSubscription? _dataSubscription;
+
+  // --- BUSCA DE PAREADOS ---
+  Future<List<Map<String, String>>> getPairedDevices() async {
+    List<Map<String, String>> deviceList = [];
+    bool hasPermission = true;
+
+    // Só pede permissão de tela se for Android ou iOS
+    if (Platform.isAndroid || Platform.isIOS) {
+      hasPermission = await Permission.bluetoothConnect.request().isGranted;
+    }
+
+    if (hasPermission) {
+      try {
+        final paired = await _bluetooth.getPairedDevices();
+        for (var device in paired) {
+          deviceList.add({
+            "name": device.name ?? "Dispositivo Desconhecido",
+            "mac": device.address,
+          });
+        }
+      } catch (e) {
+        print("Erro ao buscar dispositivos pareados: $e");
+      }
+    }
+    return deviceList;
+  }
+
+  // --- BUSCA DE NÃO PAREADOS (DISCOVERY) ---
+  Stream<Map<String, String>> startDiscovery() async* {
+    bool hasPermission = true;
+
+    if (Platform.isAndroid || Platform.isIOS) {
+      Map<Permission, PermissionStatus> statuses = await [
+        Permission.bluetoothScan,
+        Permission.bluetoothConnect,
+        Permission.location,
+      ].request();
+
+      hasPermission =
+          statuses[Permission.bluetoothScan]!.isGranted &&
+          statuses[Permission.location]!.isGranted;
+    }
+
+    if (hasPermission) {
+      try {
+        await _bluetooth.startDiscovery();
+
+        await for (var device in _bluetooth.discoveryResults) {
+          yield {
+            "name": device.name ?? "Aparelho sem nome",
+            "mac": device.address,
+          };
+        }
+      } catch (e) {
+        print("Erro ao escanear novos dispositivos: $e");
+      }
+    } else {
+      print("Permissões de localização/scan negadas pelo usuário no mobile.");
+    }
+  }
 
   /// Conecta ao scanner usando o endereço MAC
   Future<bool> connect(String macAddress) async {
@@ -48,16 +108,25 @@ class ObdConnection {
     }
   }
 
-  /// Encerra a comunicação
+  /// Encerra a comunicação de forma segura
   Future<void> disconnect() async {
-    await _dataSubscription?.cancel();
+    try {
+      await _dataSubscription?.cancel();
+      if (_activeConnection != null) {
+        await _activeConnection!.finish();
+        _activeConnection!.dispose();
+        _activeConnection = null;
+      }
+    } catch (e) {
+      print('Aviso ao desconectar (ignorado): $e');
+    }
+  }
 
-    if (_activeConnection != null) {
-      // O método finish() aguarda envios pendentes antes de desconectar
-      await _activeConnection!.finish();
-      // O método dispose() limpa a memória da conexão
-      _activeConnection!.dispose();
-      _activeConnection = null;
+  Future<void> stopScan() async {
+    try {
+      await _bluetooth.stopDiscovery();
+    } catch (e) {
+      print("Aviso ao parar scan: $e");
     }
   }
 }

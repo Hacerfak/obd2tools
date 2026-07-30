@@ -194,7 +194,7 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
                             dotData: const FlDotData(show: false),
                             belowBarData: BarAreaData(
                               show: true,
-                              color: Colors.blueAccent.withOpacity(0.2),
+                              color: Colors.blueAccent.withValues(alpha: 0.2),
                             ),
                           ),
                         ],

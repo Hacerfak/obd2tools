@@ -114,3 +114,28 @@ final obdManagerProvider = Provider<ObdManager>((ref) {
   final connection = ObdConnection();
   return ObdManager(connection: connection, ref: ref);
 });
+
+// ============================================================================
+// TÚNEL 5: ESTADO DA CONEXÃO E ECU
+// ============================================================================
+
+enum AppConnectionState {
+  disconnected,
+  connectingBluetooth,
+  waitingForEcu, // Bluetooth conectou, mas a chave está desligada!
+  connected, // Tudo pronto, lendo dados!
+}
+
+class ConnectionStateNotifier extends Notifier<AppConnectionState> {
+  @override
+  AppConnectionState build() => AppConnectionState.disconnected;
+
+  void updateState(AppConnectionState newState) {
+    state = newState;
+  }
+}
+
+final connectionStateProvider =
+    NotifierProvider<ConnectionStateNotifier, AppConnectionState>(() {
+      return ConnectionStateNotifier();
+    });

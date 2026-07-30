@@ -12,8 +12,9 @@ class ObdParser {
       if (token.isEmpty) continue;
 
       if (RegExp(r'^[0-9A-Fa-f]:$').hasMatch(token)) continue;
-      if (token.length == 3 && RegExp(r'^[0-9A-Fa-f]{3}$').hasMatch(token))
+      if (token.length == 3 && RegExp(r'^[0-9A-Fa-f]{3}$').hasMatch(token)) {
         continue;
+      }
 
       if (!foundStart) {
         if (token == "41" || token == "49" || token == "43") {

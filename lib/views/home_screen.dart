@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../state/obd_providers.dart';
 import 'sensors_dashboard_screen.dart';
+import 'connection_screen.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _selectedIndex = 0;
 
   // Lista de Painéis dos Serviços
@@ -34,6 +37,28 @@ class _HomeScreenState extends State<HomeScreen> {
     ), // Modo 09
   ];
 
+  // Função para limpar tudo e voltar
+  void _disconnectAndExit() async {
+    final manager = ref.read(obdManagerProvider);
+    manager.reset();
+    await manager.connection.disconnect();
+
+    ref
+        .read(connectionStateProvider.notifier)
+        .updateState(AppConnectionState.disconnected);
+
+    if (mounted) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              const ConnectionScreen(attemptAutoConnect: false),
+        ),
+        (route) => false,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -41,6 +66,24 @@ class _HomeScreenState extends State<HomeScreen> {
         bool isDesktop = constraints.maxWidth > 600;
 
         return Scaffold(
+          // NOVO APPBAR COM BOTÃO DE DESCONECTAR
+          appBar: AppBar(
+            backgroundColor: const Color(0xFF1A1D24),
+            title: const Text(
+              "Montana OBD",
+              style: TextStyle(color: Colors.white),
+            ),
+            actions: [
+              IconButton(
+                icon: const Icon(
+                  Icons.bluetooth_disabled,
+                  color: Colors.redAccent,
+                ),
+                tooltip: 'Desconectar',
+                onPressed: _disconnectAndExit,
+              ),
+            ],
+          ),
           body: Row(
             children: [
               // Se for Desktop/PC, coloca a barra lateral

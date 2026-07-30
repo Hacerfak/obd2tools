@@ -17,6 +17,8 @@ class ObdManager {
   // Buffer para juntar os pedaços de texto que chegam do scanner
   String _buffer = "";
 
+  Timer? _ecuRetryTimer;
+
   // Controle de estado para saber se o scanner está ocupado processando algo
   bool _isWaitingForResponse = false;
 
@@ -205,6 +207,16 @@ class ObdManager {
     // Joga a lista limpa e bonita na tela do app
     _addLog(supportedSensors.join('\n'));
   } */
+  void reset() {
+    _commandQueue.clear(); // Limpa comandos velhos presos na fila
+    _buffer = ""; // Limpa lixos de texto recebidos pela metade
+    _isWaitingForResponse = false; // Destrava o envio de novos comandos!
+    _ecuRetryTimer?.cancel(); // Para qualquer tentativa de reconexão zumbi
+
+    // Opcional, mas recomendado: limpa os dados antigos da tela
+    ref.read(realTimeStateProvider.notifier).clearData();
+  }
+
   void discoverSupportedSensors() {
     ref.read(supportedPidsProvider.notifier).clear();
     queueCommand("0100"); // A faísca que inicia a auto-descoberta
@@ -217,6 +229,34 @@ class ObdManager {
     }
 
     String rawResponse = response.replaceAll("SEARCHING...", "").trim();
+
+    // 1. DETECÇÃO DE CHAVE DESLIGADA / ECU OFFLINE
+    if (rawResponse.contains("UNABLE TO CONNECT") ||
+        rawResponse.contains("CAN ERROR") ||
+        rawResponse.contains("ERROR")) {
+      _addLog("ECU não responde. A chave está na ignição?");
+
+      // Muda o status visual para "Aguardando ECU"
+      ref
+          .read(connectionStateProvider.notifier)
+          .updateState(AppConnectionState.waitingForEcu);
+
+      // Tenta de novo em 3 segundos
+      _ecuRetryTimer?.cancel();
+      _ecuRetryTimer = Timer(const Duration(seconds: 3), () {
+        _addLog("Tentando reconectar à ECU...");
+        discoverSupportedSensors(); // Refaz a pergunta 0100
+      });
+      return;
+    }
+
+    // 2. SE SUCESSO E AINDA NÃO ESTÁ MARCADO COMO CONECTADO
+    if (rawResponse.startsWith("41 00") || rawResponse.startsWith("4100")) {
+      _ecuRetryTimer?.cancel();
+      ref
+          .read(connectionStateProvider.notifier)
+          .updateState(AppConnectionState.connected);
+    }
 
     // Log para debug com o retorno bruto do ELM327
     //_addLog("ELM327: $rawResponse");
