@@ -139,3 +139,67 @@ final connectionStateProvider =
     NotifierProvider<ConnectionStateNotifier, AppConnectionState>(() {
       return ConnectionStateNotifier();
     });
+
+// ============================================================================
+// TÚNEL 6: DIAGNÓSTICO DE FALHAS (DTC)
+// ============================================================================
+class DtcState {
+  final bool isLoading;
+  final List<String> codes;
+  DtcState({required this.isLoading, required this.codes});
+}
+
+class DtcNotifier extends Notifier<DtcState> {
+  @override
+  DtcState build() => DtcState(isLoading: false, codes: []);
+
+  void setLoading(bool loading) {
+    state = DtcState(isLoading: loading, codes: state.codes);
+  }
+
+  void setCodes(List<String> newCodes) {
+    state = DtcState(isLoading: false, codes: newCodes);
+  }
+
+  void clearCodes() {
+    state = DtcState(isLoading: false, codes: []);
+  }
+}
+
+final dtcStateProvider = NotifierProvider<DtcNotifier, DtcState>(() {
+  return DtcNotifier();
+});
+
+// ============================================================================
+// TÚNEL 7: FREEZE FRAME (MODO 02)
+// ============================================================================
+class FreezeFrameState {
+  final bool isLoading;
+  final Map<String, ObdReadResult> data;
+
+  FreezeFrameState({required this.isLoading, required this.data});
+}
+
+class FreezeFrameNotifier extends Notifier<FreezeFrameState> {
+  @override
+  FreezeFrameState build() => FreezeFrameState(isLoading: false, data: {});
+
+  void setLoading(bool loading) {
+    state = FreezeFrameState(isLoading: loading, data: state.data);
+  }
+
+  void addData(Map<String, ObdReadResult> newData) {
+    final updatedData = Map<String, ObdReadResult>.from(state.data)
+      ..addAll(newData);
+    state = FreezeFrameState(isLoading: false, data: updatedData);
+  }
+
+  void clear() {
+    state = FreezeFrameState(isLoading: false, data: {});
+  }
+}
+
+final freezeFrameProvider =
+    NotifierProvider<FreezeFrameNotifier, FreezeFrameState>(() {
+      return FreezeFrameNotifier();
+    });

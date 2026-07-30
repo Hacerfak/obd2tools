@@ -7,6 +7,7 @@ import '../parser/registries/mode_01_registry.dart';
 import '../parser/parsers/mode_09_parser.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../state/obd_providers.dart';
+import '../parser/parsers/dtc_parser.dart';
 
 class ObdManager {
   final ObdConnection connection;
@@ -34,6 +35,16 @@ class ObdManager {
   ObdManager({required this.connection, required this.ref}) {
     // Fica escutando os dados puros que vêm do Bluetooth
     connection.dataStream.listen(_onDataReceived);
+  }
+
+  // Comandos fáceis para a interface chamar
+  void readDTCs() {
+    ref.read(dtcStateProvider.notifier).setLoading(true);
+    queueCommand("03");
+  }
+
+  void clearDTCs() {
+    queueCommand("04");
   }
 
   void _addLog(String message) {
@@ -95,17 +106,33 @@ class ObdManager {
 
   /// Rotina de inicialização baseada nos comandos AT
   void initializeScanner() {
-    // 1. Reseta o chip
+    // 1. Reseta o chip (Zera tudo)
     queueCommand("AT Z");
-    // 2. Desliga o eco (para economizar banda)
+
+    // 2. Desliga o eco (O ELM para de repetir o que nós digitamos)
     queueCommand("AT E0");
-    // 3. Desliga quebras de linha
+
+    // 3. Desliga quebras de linha inúteis
     queueCommand("AT L0");
-    // 4. Protocolo OBD automático (descobre a Montana sozinho)
+
+    // --- O PACOTE DE OTIMIZAÇÃO EXTREMA ---
+    // 4. Desliga os espaços em branco (Economiza ~30% de banda Bluetooth)
+    queueCommand("AT S0");
+
+    // 5. Desliga os cabeçalhos de rede CAN (Remove lixo inútil da ECU)
+    queueCommand("AT H0");
+
+    // 6. Adaptive Timing Nível 2 (Para de esperar atoa pelas outras ECUs)
+    queueCommand("AT AT2");
+    // --------------------------------------
+
+    // 7. Protocolo OBD automático (descobre a Montana sozinho)
     queueCommand("AT SP 0");
-    // 5. Verificar a voltagem da bateria do carro
+
+    // 8. Verificar a voltagem da bateria do carro
     queueCommand("AT RV");
-    // 6. Descrição do protocolo selecionado automaticamente
+
+    // 9. Descrição do protocolo selecionado automaticamente
     queueCommand("AT DP");
   }
 
@@ -156,15 +183,20 @@ class ObdManager {
   }
 
   void _handleCompleteResponse(String response) {
+    print("=== RAW DO ELM: '$response' ===");
+
     try {
       if (response.contains("NO DATA") || response.contains("ERROR")) {
         _addLog("ALERTA: Erro ou dado inexistente.");
-        return; // Retorna cedo, mas o "finally" vai garantir o próximo tiro!
+        if (ref.read(dtcStateProvider).isLoading) {
+          ref.read(dtcStateProvider.notifier).setCodes([]);
+        }
+        return;
       }
 
       String rawResponse = response.replaceAll("SEARCHING...", "").trim();
 
-      // 1. DETECÇÃO DE CHAVE DESLIGADA / ECU OFFLINE
+      // --- 1. RESTAURADO: DETECÇÃO DE CHAVE DESLIGADA / ECU OFFLINE ---
       if (rawResponse.contains("UNABLE TO CONNECT") ||
           rawResponse.contains("CAN ERROR")) {
         _addLog("ECU não responde. A chave está na ignição?");
@@ -175,38 +207,50 @@ class ObdManager {
         _ecuRetryTimer?.cancel();
         _ecuRetryTimer = Timer(const Duration(seconds: 3), () {
           _addLog("Tentando reconectar à ECU...");
-          discoverSupportedSensors();
+          // Aqui re-enviamos o comando inicial para tentar acordar a injeção
+          queueCommand("0100");
         });
         return;
       }
 
-      // 2. SE SUCESSO E AINDA NÃO ESTÁ MARCADO COMO CONECTADO
-      if (rawResponse.startsWith("41 00") || rawResponse.startsWith("4100")) {
-        _ecuRetryTimer?.cancel();
-        ref
-            .read(connectionStateProvider.notifier)
-            .updateState(AppConnectionState.connected);
+      String cleanHex = ObdParser.cleanRawResponse(rawResponse);
+      print("=== CLEAN HEX: '$cleanHex' ===");
+
+      // --- 2. RESTAURADO: AVISA A TELA QUE O CARRO ESTÁ ONLINE ---
+      // Se a ECU respondeu com 41, 43, 44 ou 49, é porque o carro está 100% conectado!
+      if (cleanHex.startsWith("41") ||
+          cleanHex.startsWith("43") ||
+          cleanHex.startsWith("49") ||
+          cleanHex.startsWith("44")) {
+        final currentState = ref.read(connectionStateProvider);
+        if (currentState != AppConnectionState.connected) {
+          _ecuRetryTimer?.cancel();
+          ref
+              .read(connectionStateProvider.notifier)
+              .updateState(AppConnectionState.connected);
+          _addLog("Conexão estabelecida com sucesso!");
+        }
       }
 
-      // 3. PARSER DOS DADOS
-      if (rawResponse.startsWith("0") ||
-          rawResponse.startsWith("41") ||
-          rawResponse.startsWith("49")) {
-        String cleanHex = ObdParser.cleanRawResponse(rawResponse);
+      // 3. ROTEAMENTO DE DADOS (Modo 01, 03, 04, 09)
+      if (cleanHex.startsWith("41")) {
+        if (cleanHex.contains("4100") ||
+            cleanHex.contains("4120") ||
+            cleanHex.contains("4140")) {
+          final RegExp supportRegex = RegExp(
+            r'41(00|20|40|60|80|A0|C0)([0-9A-F]{8})',
+          );
+          final matches = supportRegex.allMatches(cleanHex);
 
-        if (cleanHex.startsWith("41")) {
-          String pidHex = cleanHex.substring(2, 4);
+          for (final match in matches) {
+            String pidHex = match.group(1)!;
+            String dataHex = match.group(2)!;
 
-          if (["00", "20", "40", "60", "80", "A0", "C0"].contains(pidHex)) {
             int basePid = int.parse(pidHex, radix: 16);
-            String dataHex = cleanHex.length >= 12
-                ? cleanHex.substring(4, 12)
-                : cleanHex.substring(4);
             List<int> supported = Mode01Parser.parseSupportedPids(
               dataHex,
               basePid,
             );
-
             ref.read(supportedPidsProvider.notifier).addPids(supported);
 
             if (supported.contains(basePid + 0x20)) {
@@ -216,24 +260,35 @@ class ObdManager {
                   .toUpperCase();
               queueCommand("01$nextHex");
             }
-          } else {
-            Map<String, ObdReadResult> parsedData = Mode01Parser.parse(
-              cleanHex,
-            );
-            if (parsedData.isNotEmpty) {
-              ref.read(realTimeStateProvider.notifier).updateData(parsedData);
-            }
           }
-        } else if (cleanHex.startsWith("49")) {
-          Map<String, String> parsedInfo = Mode09Parser.parse(cleanHex);
-          if (parsedInfo.isNotEmpty) {
-            ref.read(vehicleInfoStateProvider.notifier).updateInfo(parsedInfo);
+        } else {
+          Map<String, ObdReadResult> parsedData = Mode01Parser.parse(cleanHex);
+          if (parsedData.isNotEmpty) {
+            ref.read(realTimeStateProvider.notifier).updateData(parsedData);
           }
         }
       }
+      // MODO 09 - Info do Veículo
+      else if (cleanHex.startsWith("49")) {
+        Map<String, String> parsedInfo = Mode09Parser.parse(cleanHex);
+        if (parsedInfo.isNotEmpty) {
+          ref.read(vehicleInfoStateProvider.notifier).updateInfo(parsedInfo);
+        }
+      }
+      // MODO 03 - Lê as Falhas
+      else if (cleanHex.startsWith("43")) {
+        List<String> dtcs = DtcParser.parse(cleanHex);
+        ref.read(dtcStateProvider.notifier).setCodes(dtcs);
+      }
+      // MODO 04 - Apaga as Falhas
+      else if (cleanHex.startsWith("44") || rawResponse == "OK") {
+        _addLog("Memória da ECU apagada com sucesso!");
+        ref.read(dtcStateProvider.notifier).clearCodes();
+
+        Timer(const Duration(seconds: 2), () => readDTCs());
+      }
     } finally {
-      // O SEGREDO MÁXIMO: Aconteça o que acontecer (erro, sucesso, dados falsos),
-      // se o usuário estiver na tela do HUD e a fila zerar, nós atiramos de novo imediatamente!
+      // Metralhadora do HUD
       if (_hudModeEnabled && _commandQueue.isEmpty) {
         _triggerNextHudRequest();
       }

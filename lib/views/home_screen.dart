@@ -4,6 +4,7 @@ import '../state/obd_providers.dart';
 import 'sensors_dashboard_screen.dart';
 import 'hud_screen.dart';
 import 'connection_screen.dart';
+import 'faults_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -19,12 +20,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final List<Widget> _pages = [
     const SensorsDashboardScreen(), // Painel 1: Lista/Tiles de Sensores
     const HudScreen(), // Painel 2
-    const Center(
-      child: Text(
-        "Diagnóstico DTC (Luz Injeção) em breve",
-        style: TextStyle(color: Colors.white),
-      ),
-    ), // Modo 03
+    const FaultsScreen(), // Modo 03 e 04
     const Center(
       child: Text(
         "Informações do Veículo em breve",

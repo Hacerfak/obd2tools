@@ -1,6 +1,6 @@
 import '../registries/mode_01_registry.dart';
 
-// Classe que empacota o valor e a unidade
+// Classe que empacota o valor e a unidade original mantida intacta
 class ObdReadResult {
   final double value;
   final String unit;
@@ -34,39 +34,45 @@ class Mode01Parser {
     return supported;
   }
 
+  /// Lê uma string hexadecimal contínua sem espaços (ex: "410C1AF8410D00")
   static Map<String, ObdReadResult> parse(String cleanHex) {
     Map<String, ObdReadResult> results = {};
 
-    // Confirma se é Modo 01 (Sempre começa com 41)
-    if (!cleanHex.startsWith("41") || cleanHex.length < 6) return results;
+    // Acha onde a resposta de dados (41) realmente começa
+    int cursor = cleanHex.indexOf("41");
+    if (cursor == -1) return results; // Não é uma resposta válida
 
-    int cursor = 2; // Pula o "41"
+    cursor += 2; // Pula o "41" inicial
 
-    while (cursor < cleanHex.length) {
+    // Continua lendo os sensores engatados um no outro até o texto acabar
+    while (cursor + 2 <= cleanHex.length) {
       String pidHex = cleanHex.substring(cursor, cursor + 2);
-      int pidCode = int.parse(pidHex, radix: 16);
-      cursor += 2;
+      int pidId = int.parse(pidHex, radix: 16);
+      cursor += 2; // Pula o byte do PID
 
-      if (pidRegistry.containsKey(pidCode)) {
-        final pidConfig = pidRegistry[pidCode]!;
-        int charsToRead = pidConfig.expectedBytes * 2;
+      // Conhecemos esse sensor?
+      if (pidRegistry.containsKey(pidId)) {
+        final pid = pidRegistry[pidId]!;
+        int dataChars =
+            pid.expectedBytes *
+            2; // Quantos caracteres hexadecimais tem a resposta?
 
-        if (cursor + charsToRead <= cleanHex.length) {
-          String dataHex = cleanHex.substring(cursor, cursor + charsToRead);
+        if (cursor + dataChars <= cleanHex.length) {
+          String dataHex = cleanHex.substring(cursor, cursor + dataChars);
 
           List<int> bytes = [];
-          for (int i = 0; i < dataHex.length; i += 2) {
-            bytes.add(int.parse(dataHex.substring(i, i + 2), radix: 16));
+          for (int j = 0; j < dataChars; j += 2) {
+            bytes.add(int.parse(dataHex.substring(j, j + 2), radix: 16));
           }
 
-          double finalValue = pidConfig.calculate(bytes);
-          results[pidConfig.name] = ObdReadResult(finalValue, pidConfig.unit);
-
-          cursor += charsToRead;
+          results[pid.name] = ObdReadResult(pid.calculate(bytes), pid.unit);
+          cursor += dataChars; // Avança o cursor pulando os dados lidos
         } else {
-          break;
+          break; // Os dados foram cortados pelo Bluetooth, encerra a leitura.
         }
       } else {
+        // Se batermos de frente com um PID desconhecido ou lixo/padding da ECU (00, AA)
+        // abortamos para não ler as coisas fora de sincronia.
         break;
       }
     }

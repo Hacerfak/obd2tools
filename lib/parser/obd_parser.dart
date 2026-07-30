@@ -1,39 +1,25 @@
 class ObdParser {
-  /// Limpa a string bruta retornada pelo ELM327 usando Tokenização
   static String cleanRawResponse(String rawData) {
-    String normalized = rawData.replaceAll(RegExp(r'\s+'), ' ');
-    List<String> tokens = normalized.split(' ');
-    List<String> hexBytes = [];
+    String clean = rawData.replaceAll("SEARCHING...", "").trim();
 
-    bool foundStart = false;
+    // 1. RECONSTRUTOR DE PACOTES CAN MULTI-FRAME
+    // Se o texto tiver pacotes enumerados (ex: "0:410C... 1:0D... 2:05...")
+    if (clean.contains("0:")) {
+      // Remove o prefixo de tamanho total (ex: o "00E " no começo)
+      clean = clean.replaceAll(RegExp(r'^[0-9A-F]{3}\s'), '');
 
-    for (String token in tokens) {
-      token = token.trim();
-      if (token.isEmpty) continue;
-
-      if (RegExp(r'^[0-9A-Fa-f]:$').hasMatch(token)) continue;
-      if (token.length == 3 && RegExp(r'^[0-9A-Fa-f]{3}$').hasMatch(token)) {
-        continue;
-      }
-
-      if (!foundStart) {
-        if (token == "41" || token == "49" || token == "43") {
-          foundStart = true;
-          hexBytes.add(token);
-        }
-      } else {
-        if (token.length == 2) {
-          hexBytes.add(token);
-        }
-      }
+      // Remove os cabeçalhos de frame (ex: "0:", " 1:", " 2:")
+      clean = clean.replaceAll(RegExp(r'\s?[0-9A-F]:'), '');
     }
 
-    String cleanHex = hexBytes.join("");
+    // 2. Limpeza brutal: tira espaços, \n, e qualquer lixo não-hexadecimal
+    clean = clean.replaceAll(RegExp(r'[^0-9A-Fa-f]'), '');
 
-    while (cleanHex.endsWith("AA") && cleanHex.length > 2) {
-      cleanHex = cleanHex.substring(0, cleanHex.length - 2);
+    // 3. Remove os 'AA' ou '00' do final (Padding da rede CAN)
+    while (clean.endsWith("AA") && clean.length > 2) {
+      clean = clean.substring(0, clean.length - 2);
     }
 
-    return cleanHex;
+    return clean;
   }
 }
