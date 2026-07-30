@@ -39,7 +39,7 @@ class ObdGauge extends ConsumerWidget {
         border: Border.all(color: Colors.white10),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -170,7 +170,7 @@ class ObdGauge extends ConsumerWidget {
                   dotData: const FlDotData(show: false),
                   belowBarData: BarAreaData(
                     show: true,
-                    color: Colors.greenAccent.withOpacity(0.1),
+                    color: Colors.greenAccent.withValues(alpha: 0.1),
                   ),
                 ),
               ],
