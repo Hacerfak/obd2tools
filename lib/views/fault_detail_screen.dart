@@ -1,29 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/dtc_fault.dart';
 import '../state/obd_providers.dart';
 
-class FaultDetailScreen extends ConsumerStatefulWidget {
-  final String faultCode;
-  const FaultDetailScreen({super.key, required this.faultCode});
+class FaultDetailScreen extends ConsumerWidget {
+  final DtcFault fault;
+  const FaultDetailScreen({super.key, required this.fault});
 
   @override
-  ConsumerState<FaultDetailScreen> createState() => _FaultDetailScreenState();
-}
-
-class _FaultDetailScreenState extends ConsumerState<FaultDetailScreen> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Dispara a leitura do Freeze Frame ao abrir a tela
-      ref.read(obdManagerProvider).readFreezeFrame();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final freezeState = ref.watch(freezeFrameProvider);
-
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: const Color(0xFF12151C),
       appBar: AppBar(
@@ -40,10 +25,10 @@ class _FaultDetailScreenState extends ConsumerState<FaultDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Icon(Icons.build_rounded, size: 60, color: Colors.redAccent),
+            const Icon(Icons.build, size: 60, color: Colors.redAccent),
             const SizedBox(height: 16),
             Text(
-              widget.faultCode,
+              fault.code,
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 40,
@@ -52,11 +37,21 @@ class _FaultDetailScreenState extends ConsumerState<FaultDetailScreen> {
                 fontFamily: 'Monospace',
               ),
             ),
+            const SizedBox(height: 8),
+
+            // STATUS EXPLICATIVOS
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 8,
+              children: fault.statuses
+                  .map((s) => _buildExplanatoryBadge(s))
+                  .toList(),
+            ),
             const SizedBox(height: 24),
 
-            // SEÇÃO DO FREEZE FRAME
+            // SESSÃO DO FREEZE FRAME
             const Text(
-              "Dados Congelados no Momento da Falha:",
+              "Dados Congelados (Freeze Frame):",
               style: TextStyle(
                 color: Colors.blueAccent,
                 fontWeight: FontWeight.bold,
@@ -65,27 +60,21 @@ class _FaultDetailScreenState extends ConsumerState<FaultDetailScreen> {
             const Divider(color: Colors.white24),
 
             Expanded(
-              child: freezeState.isLoading && freezeState.data.isEmpty
-                  ? const Center(
-                      child: CircularProgressIndicator(
-                        color: Colors.blueAccent,
-                      ),
-                    )
-                  : freezeState.data.isEmpty
+              child: fault.freezeFrame.isEmpty
                   ? const Center(
                       child: Text(
-                        "Nenhum dado congelado (Freeze Frame) disponível para este erro.",
+                        "Nenhum dado congelado disponível para este erro.",
                         textAlign: TextAlign.center,
                         style: TextStyle(color: Colors.white54),
                       ),
                     )
                   : ListView.builder(
-                      itemCount: freezeState.data.length,
+                      itemCount: fault.freezeFrame.length,
                       itemBuilder: (context, index) {
-                        String sensorName = freezeState.data.keys.elementAt(
+                        String sensorName = fault.freezeFrame.keys.elementAt(
                           index,
                         );
-                        final result = freezeState.data[sensorName]!;
+                        final result = fault.freezeFrame[sensorName]!;
 
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12.0),
@@ -122,7 +111,7 @@ class _FaultDetailScreenState extends ConsumerState<FaultDetailScreen> {
             ElevatedButton.icon(
               onPressed: () => _showClearConfirmation(context, ref),
               icon: const Icon(Icons.delete_forever),
-              label: const Text("APAGAR FALHA (ECU)"),
+              label: const Text("APAGAR FALHAS DA ECU"),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 20),
                 backgroundColor: Colors.redAccent.withOpacity(0.2),
@@ -136,6 +125,60 @@ class _FaultDetailScreenState extends ConsumerState<FaultDetailScreen> {
               ),
             ),
             const SizedBox(height: 24),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExplanatoryBadge(DtcStatus status) {
+    Color color;
+    String text;
+    String description;
+
+    switch (status) {
+      case DtcStatus.confirmed:
+        color = Colors.redAccent;
+        text = "Confirmada";
+        description = "Acende a luz. O problema está ocorrendo agora.";
+        break;
+      case DtcStatus.pending:
+        color = Colors.orangeAccent;
+        text = "Pendente";
+        description =
+            "ECU detectou anomalia, mas precisa de mais ciclos para confirmar.";
+        break;
+      case DtcStatus.permanent:
+        color = Colors.purpleAccent;
+        text = "Permanente";
+        description =
+            "Falha grave. Só apaga após o conserto e rodagem do veículo.";
+        break;
+    }
+
+    return Tooltip(
+      message: description,
+      triggerMode: TooltipTriggerMode.tap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.15),
+          border: Border.all(color: color.withOpacity(0.5)),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.info_outline, size: 14, color: color),
+            const SizedBox(width: 4),
+            Text(
+              text,
+              style: TextStyle(
+                color: color,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
       ),

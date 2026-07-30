@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../state/obd_providers.dart';
 import '../parser/parsers/dtc_parser.dart';
 import '../parser/parsers/mode_02_parser.dart';
+import '../models/dtc_fault.dart';
 
 class ObdManager {
   final ObdConnection connection;
@@ -36,6 +37,17 @@ class ObdManager {
   ObdManager({required this.connection, required this.ref}) {
     // Fica escutando os dados puros que vêm do Bluetooth
     connection.dataStream.listen(_onDataReceived);
+  }
+
+  // --- NOVA VARREDURA COMPLETA ---
+  void scanAllFaults() {
+    ref.read(dtcStateProvider.notifier).clearCodes();
+    ref.read(dtcStateProvider.notifier).setLoading(true);
+
+    queueCommand("03"); // Pede Confirmadas
+    queueCommand("07"); // Pede Pendentes
+    queueCommand("0A"); // Pede Permanentes
+    queueCommand("020000"); // Pede Freeze Frame
   }
 
   // Dispara a caçada completa do Freeze Frame (Frame 00)
@@ -196,8 +208,11 @@ class ObdManager {
     try {
       if (response.contains("NO DATA") || response.contains("ERROR")) {
         _addLog("ALERTA: Erro ou dado inexistente.");
+
+        // CORREÇÃO: Em vez de setCodes([]), apenas desligamos o carregamento,
+        // mantendo intactas as falhas de outros modos que já possam ter sido lidas.
         if (ref.read(dtcStateProvider).isLoading) {
-          ref.read(dtcStateProvider.notifier).setCodes([]);
+          ref.read(dtcStateProvider.notifier).setLoading(false);
         }
         return;
       }
@@ -339,17 +354,41 @@ class ObdManager {
           ref.read(vehicleInfoStateProvider.notifier).updateInfo(parsedInfo);
         }
       }
-      // MODO 03 - Lê as Falhas
+      // LÊ FALHAS CONFIRMADAS (Modo 03)
       else if (cleanHex.startsWith("43")) {
-        List<String> dtcs = DtcParser.parse(cleanHex);
-        ref.read(dtcStateProvider.notifier).setCodes(dtcs);
+        List<String> dtcs = DtcParser.parse(cleanHex, "43");
+        ref.read(dtcStateProvider.notifier).addCodes(dtcs, DtcStatus.confirmed);
       }
-      // MODO 04 - Apaga as Falhas
+      // LÊ FALHAS PENDENTES (Modo 07)
+      else if (cleanHex.startsWith("47")) {
+        List<String> dtcs = DtcParser.parse(cleanHex, "47");
+        ref.read(dtcStateProvider.notifier).addCodes(dtcs, DtcStatus.pending);
+      }
+      // LÊ FALHAS PERMANENTES (Modo 0A)
+      else if (cleanHex.startsWith("4A")) {
+        List<String> dtcs = DtcParser.parse(cleanHex, "4A");
+        ref.read(dtcStateProvider.notifier).addCodes(dtcs, DtcStatus.permanent);
+      }
+      // FREEZE FRAME (Modo 02)
+      else if (cleanHex.startsWith("42")) {
+        // A lógica de PIDs suportados do Modo 02 que criamos antes continua aqui
+        if (cleanHex.contains("420000") ||
+            cleanHex.contains("422000") ||
+            cleanHex.contains("424000")) {
+          // ... (mantém a rotina do supportRegex que você já tem)
+        } else {
+          Map<String, ObdReadResult> parsedData = Mode02Parser.parse(cleanHex);
+          if (parsedData.isNotEmpty) {
+            // Agora salvamos direto dentro do DTC Confirmado!
+            ref.read(dtcStateProvider.notifier).attachFreezeFrame(parsedData);
+          }
+        }
+      }
+      // APAGA FALHAS (Modo 04)
       else if (cleanHex.startsWith("44") || rawResponse == "OK") {
         _addLog("Memória da ECU apagada com sucesso!");
         ref.read(dtcStateProvider.notifier).clearCodes();
-
-        Timer(const Duration(seconds: 2), () => readDTCs());
+        Timer(const Duration(seconds: 2), () => scanAllFaults());
       }
     } finally {
       // Metralhadora do HUD

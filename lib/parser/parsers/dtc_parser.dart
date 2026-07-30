@@ -1,18 +1,15 @@
 class DtcParser {
-  static List<String> parse(String cleanHex) {
+  // Agora recebe qual cabeçalho (header) procurar!
+  static List<String> parse(String cleanHex, String expectedHeader) {
     List<String> dtcs = [];
 
-    int cursor = cleanHex.indexOf("43");
+    int cursor = cleanHex.indexOf(expectedHeader);
     if (cursor == -1) return dtcs;
 
     String data = cleanHex.substring(cursor + 2);
 
     if (data == "00" || data.isEmpty) return dtcs;
 
-    // --- O PULO DO GATO PARA A MONTANA (E OUTROS ISO/KWP) ---
-    // Se a quantidade de caracteres que sobrou na string dividida por 4
-    // tiver resto 2 (ex: 6 caracteres -> 4 de erro + 2 de contador),
-    // nós pulamos o primeiro byte (2 caracteres) que é a contagem!
     if (data.length % 4 == 2) {
       data = data.substring(2);
     }

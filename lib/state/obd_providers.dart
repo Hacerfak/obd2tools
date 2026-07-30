@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../parser/parsers/mode_01_parser.dart';
 import '../connection/obd_connection.dart';
+import '../models/dtc_fault.dart';
 import '../connection/obd_manager.dart';
 
 // ============================================================================
@@ -141,28 +142,55 @@ final connectionStateProvider =
     });
 
 // ============================================================================
-// TÚNEL 6: DIAGNÓSTICO DE FALHAS (DTC)
+// TÚNEL 6: DIAGNÓSTICO DE FALHAS AVANÇADO (DTC)
 // ============================================================================
 class DtcState {
   final bool isLoading;
-  final List<String> codes;
-  DtcState({required this.isLoading, required this.codes});
+  final Map<String, DtcFault> faults; // Chave é o código (ex: P0118)
+
+  DtcState({required this.isLoading, required this.faults});
 }
 
 class DtcNotifier extends Notifier<DtcState> {
   @override
-  DtcState build() => DtcState(isLoading: false, codes: []);
+  DtcState build() => DtcState(isLoading: false, faults: {});
 
   void setLoading(bool loading) {
-    state = DtcState(isLoading: loading, codes: state.codes);
+    state = DtcState(isLoading: loading, faults: state.faults);
   }
 
-  void setCodes(List<String> newCodes) {
-    state = DtcState(isLoading: false, codes: newCodes);
+  // Adiciona códigos vindos de um modo específico
+  void addCodes(List<String> codes, DtcStatus status) {
+    final updatedFaults = Map<String, DtcFault>.from(state.faults);
+
+    for (String code in codes) {
+      if (updatedFaults.containsKey(code)) {
+        updatedFaults[code]!.addStatus(status);
+      } else {
+        updatedFaults[code] = DtcFault(code: code, statuses: {status});
+      }
+    }
+
+    state = DtcState(isLoading: false, faults: updatedFaults);
+  }
+
+  // Anexa o Freeze Frame ao primeiro erro Confirmado que encontrar
+  // (Pois o Frame 00 pertence à falha principal que acendeu a luz)
+  void attachFreezeFrame(Map<String, ObdReadResult> data) {
+    final updatedFaults = Map<String, DtcFault>.from(state.faults);
+
+    for (var fault in updatedFaults.values) {
+      if (fault.statuses.contains(DtcStatus.confirmed)) {
+        fault.freezeFrame = data;
+        break; // O Frame 00 geralmente se aplica ao principal
+      }
+    }
+
+    state = DtcState(isLoading: state.isLoading, faults: updatedFaults);
   }
 
   void clearCodes() {
-    state = DtcState(isLoading: false, codes: []);
+    state = DtcState(isLoading: false, faults: {});
   }
 }
 
