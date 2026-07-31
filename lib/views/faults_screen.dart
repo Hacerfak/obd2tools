@@ -12,8 +12,8 @@ class FaultsScreen extends ConsumerStatefulWidget {
 }
 
 class _FaultsScreenState extends ConsumerState<FaultsScreen> {
-  DtcStatus? _selectedFilter; // null = Todas
-  bool _isInitializing = true; // NOVA FLAG: Impede a piscadinha inicial!
+  DtcStatus? _selectedFilter;
+  bool _isInitializing = true;
 
   @override
   void initState() {
@@ -21,9 +21,7 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(obdManagerProvider).scanAllFaults();
       if (mounted) {
-        setState(
-          () => _isInitializing = false,
-        ); // Libera o controle para o Provider
+        setState(() => _isInitializing = false);
       }
     });
   }
@@ -31,33 +29,29 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
   @override
   Widget build(BuildContext context) {
     final dtcState = ref.watch(dtcStateProvider);
-
-    // VARIÁVEL DE CONTROLE: É carregamento se for a tela inicializando OU se o Manager estiver buscando
     final bool isScreenLoading = _isInitializing || dtcState.isLoading;
+    final onSurface = Theme.of(context).colorScheme.onSurface;
 
-    // Aplica o filtro selecionado
     List<DtcFault> filteredFaults = dtcState.faults.values.where((fault) {
       if (_selectedFilter == null) return true;
       return fault.statuses.contains(_selectedFilter);
     }).toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFF12151C),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // CABEÇALHO
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   "Diagnóstico (DTC)",
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: onSurface,
                   ),
                 ),
                 if (!isScreenLoading)
@@ -70,38 +64,45 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
               ],
             ),
             const SizedBox(height: 16),
-
-            // FILTROS (CHIPS)
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  _buildFilterChip("Todas", null),
+                  _buildFilterChip("Todas", null, onSurface),
                   const SizedBox(width: 8),
-                  _buildFilterChip("Confirmadas", DtcStatus.confirmed),
+                  _buildFilterChip(
+                    "Confirmadas",
+                    DtcStatus.confirmed,
+                    onSurface,
+                  ),
                   const SizedBox(width: 8),
-                  _buildFilterChip("Pendentes", DtcStatus.pending),
+                  _buildFilterChip("Pendentes", DtcStatus.pending, onSurface),
                   const SizedBox(width: 8),
-                  _buildFilterChip("Permanentes", DtcStatus.permanent),
+                  _buildFilterChip(
+                    "Permanentes",
+                    DtcStatus.permanent,
+                    onSurface,
+                  ),
                 ],
               ),
             ),
             const SizedBox(height: 24),
-
-            // LISTA DE FALHAS
             Expanded(
-              child:
-                  isScreenLoading // USA A NOVA VARIÁVEL DE CONTROLE AQUI
-                  ? const Center(
+              child: isScreenLoading
+                  ? Center(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          CircularProgressIndicator(color: Colors.blueAccent),
-                          SizedBox(height: 16),
+                          const CircularProgressIndicator(
+                            color: Colors.blueAccent,
+                          ),
+                          const SizedBox(height: 16),
                           Text(
                             "Lendo memória da ECU e dados congelados...\nPor favor, aguarde.",
                             textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.white70),
+                            style: TextStyle(
+                              color: onSurface.withValues(alpha: 0.7),
+                            ),
                           ),
                         ],
                       ),
@@ -131,7 +132,7 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
                       itemCount: filteredFaults.length,
                       itemBuilder: (context, index) {
                         final fault = filteredFaults[index];
-                        return _buildFaultCard(fault);
+                        return _buildFaultCard(fault, onSurface);
                       },
                     ),
             ),
@@ -141,7 +142,7 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
     );
   }
 
-  Widget _buildFilterChip(String label, DtcStatus? status) {
+  Widget _buildFilterChip(String label, DtcStatus? status, Color onSurface) {
     bool isSelected = _selectedFilter == status;
     return ChoiceChip(
       label: Text(label),
@@ -149,10 +150,12 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
       onSelected: (selected) {
         setState(() => _selectedFilter = selected ? status : null);
       },
-      backgroundColor: const Color(0xFF1A1D24),
+      backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
       selectedColor: Colors.blueAccent.withValues(alpha: 0.2),
       labelStyle: TextStyle(
-        color: isSelected ? Colors.blueAccent : Colors.white70,
+        color: isSelected
+            ? Colors.blueAccent
+            : onSurface.withValues(alpha: 0.7),
       ),
       side: BorderSide(
         color: isSelected ? Colors.blueAccent : Colors.transparent,
@@ -160,11 +163,9 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
     );
   }
 
-  Widget _buildFaultCard(DtcFault fault) {
+  Widget _buildFaultCard(DtcFault fault, Color onSurface) {
     return Card(
-      color: const Color(0xFF1A1D24),
       margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
@@ -189,8 +190,8 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
                   children: [
                     Text(
                       fault.code,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: onSurface,
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                         fontFamily: 'Monospace',
@@ -207,7 +208,10 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right, color: Colors.white54),
+              Icon(
+                Icons.chevron_right,
+                color: onSurface.withValues(alpha: 0.54),
+              ),
             ],
           ),
         ),
@@ -218,7 +222,6 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
   Widget _buildStatusBadge(DtcStatus status) {
     Color color;
     String text;
-
     switch (status) {
       case DtcStatus.confirmed:
         color = Colors.redAccent;
@@ -226,14 +229,13 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
         break;
       case DtcStatus.pending:
         color = Colors.orangeAccent;
-        text = "Pendente";
+        text = "Em avaliação";
         break;
       case DtcStatus.permanent:
         color = Colors.purpleAccent;
-        text = "Permanente";
+        text = "Monitorada pela ECU";
         break;
     }
-
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(

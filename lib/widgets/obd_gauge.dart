@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fl_chart/fl_chart.dart'; // Para o Gráfico de Linha
+import 'package:fl_chart/fl_chart.dart';
 import '../parser/obd_pid.dart';
 import '../state/obd_providers.dart';
 
@@ -27,6 +27,7 @@ class ObdGauge extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final liveData = ref.watch(realTimeStateProvider);
     final sensorData = liveData[pid.name];
+    final onSurface = Theme.of(context).colorScheme.onSurface;
 
     double currentValue = sensorData?.value ?? 0.0;
     double maxValue = _getMaxValue();
@@ -34,12 +35,12 @@ class ObdGauge extends ConsumerWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1D24),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white10),
+        border: Border.all(color: Theme.of(context).dividerColor),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -47,11 +48,9 @@ class ObdGauge extends ConsumerWidget {
       ),
       child: Column(
         children: [
-          // ÁREA DO GRÁFICO E VALORES NÚMERICOS
           Expanded(
             child: Stack(
               children: [
-                // O DESENHO DO RELÓGIO OU GRÁFICO
                 Padding(
                   padding: const EdgeInsets.only(
                     top: 16.0,
@@ -59,27 +58,30 @@ class ObdGauge extends ConsumerWidget {
                     right: 16.0,
                   ),
                   child: style == GaugeStyle.lineChart
-                      ? _buildLineChart(sensorData?.history ?? [], maxValue)
+                      ? _buildLineChart(
+                          sensorData?.history ?? [],
+                          maxValue,
+                          onSurface,
+                        )
                       : CustomPaint(
                           size: const Size.square(double.infinity),
                           painter: style == GaugeStyle.digital
                               ? DigitalGaugePainter(
                                   percent: percent,
                                   maxValue: maxValue,
+                                  baseColor: onSurface,
                                 )
                               : AnalogGaugePainter(
                                   percent: percent,
                                   maxValue: maxValue,
+                                  baseColor: onSurface,
                                 ),
                         ),
                 ),
-
-                // O VALOR SUBIU PARA O CENTRO DO ARCO COM ESCALA DINÂMICA
                 if (style != GaugeStyle.lineChart)
                   Positioned(
-                    bottom: 12, // Subimos um pouco mais
-                    left:
-                        40, // Margens maiores para forçar o FittedBox a espremer os números
+                    bottom: 12,
+                    left: 40,
                     right: 40,
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
@@ -90,10 +92,10 @@ class ObdGauge extends ConsumerWidget {
                             currentValue.toStringAsFixed(
                               pid.unit == "RPM" ? 0 : 1,
                             ),
-                            style: const TextStyle(
-                              fontSize: 24, // Reduzimos de 32 para 24
+                            style: TextStyle(
+                              fontSize: 24,
                               fontWeight: FontWeight.w900,
-                              color: Colors.white,
+                              color: onSurface,
                               fontFamily: 'Monospace',
                             ),
                           ),
@@ -112,8 +114,6 @@ class ObdGauge extends ConsumerWidget {
               ],
             ),
           ),
-
-          // NOME DO SENSOR NO RODAPÉ
           Padding(
             padding: const EdgeInsets.only(
               bottom: 12.0,
@@ -126,8 +126,8 @@ class ObdGauge extends ConsumerWidget {
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: Colors.white54,
+              style: TextStyle(
+                color: onSurface.withValues(alpha: 0.54),
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1,
@@ -139,14 +139,19 @@ class ObdGauge extends ConsumerWidget {
     );
   }
 
-  // --- O NOVO GRÁFICO DE LINHAS (SPARKLINE) ---
-  Widget _buildLineChart(List<double> history, double maxValue) {
+  Widget _buildLineChart(
+    List<double> history,
+    double maxValue,
+    Color onSurface,
+  ) {
     if (history.length < 2) {
-      return const Center(
-        child: Text("Coletando...", style: TextStyle(color: Colors.white24)),
+      return Center(
+        child: Text(
+          "Coletando...",
+          style: TextStyle(color: onSurface.withValues(alpha: 0.24)),
+        ),
       );
     }
-
     return Column(
       children: [
         Expanded(
@@ -178,13 +183,12 @@ class ObdGauge extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 4),
-        // Valor atual no rodapé do gráfico
         Text(
           "${history.last.toStringAsFixed(pid.unit == "RPM" ? 0 : 1)} ${pid.unit}",
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: onSurface,
           ),
         ),
       ],
@@ -193,39 +197,39 @@ class ObdGauge extends ConsumerWidget {
 }
 
 // ============================================================================
-// PINTOR 1: DIGITAL / RACING (Com mais detalhes)
+// PINTOR 1: DIGITAL / RACING
 // ============================================================================
 class DigitalGaugePainter extends CustomPainter {
   final double percent;
   final double maxValue;
-  DigitalGaugePainter({required this.percent, required this.maxValue});
+  final Color baseColor; // Recebe a cor do tema
+
+  DigitalGaugePainter({
+    required this.percent,
+    required this.maxValue,
+    required this.baseColor,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
-    final center = Offset(
-      size.width / 2,
-      size.height / 2 - 10,
-    ); // Sobe o arco um pouco
+    final center = Offset(size.width / 2, size.height / 2 - 10);
     final radius = min(size.width / 2, size.height / 2) - 8;
     final rect = Rect.fromCircle(center: center, radius: radius);
-
     const startAngle = 0.8 * pi;
     const sweepAngle = 1.4 * pi;
 
-    // Fundo
     canvas.drawArc(
       rect,
       startAngle,
       sweepAngle,
       false,
       Paint()
-        ..color = Colors.white10
+        ..color = baseColor.withValues(alpha: 0.1)
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke
         ..strokeWidth = 12,
     );
 
-    // Arco Colorido
     final gradient = const SweepGradient(
       startAngle: startAngle,
       endAngle: startAngle + sweepAngle,
@@ -249,23 +253,28 @@ class DigitalGaugePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant DigitalGaugePainter oldDelegate) =>
-      oldDelegate.percent != percent;
+      oldDelegate.percent != percent || oldDelegate.baseColor != baseColor;
 }
 
 // ============================================================================
-// PINTOR 2: ANALÓGICO / CLÁSSICO (Com marcações)
+// PINTOR 2: ANALÓGICO / CLÁSSICO
 // ============================================================================
 class AnalogGaugePainter extends CustomPainter {
   final double percent;
   final double maxValue;
-  AnalogGaugePainter({required this.percent, required this.maxValue});
+  final Color baseColor; // Recebe a cor do tema
+
+  AnalogGaugePainter({
+    required this.percent,
+    required this.maxValue,
+    required this.baseColor,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2 - 10);
     final radius = min(size.width / 2, size.height / 2) - 8;
     final rect = Rect.fromCircle(center: center, radius: radius);
-
     const startAngle = 0.8 * pi;
     const sweepAngle = 1.4 * pi;
 
@@ -275,11 +284,12 @@ class AnalogGaugePainter extends CustomPainter {
       sweepAngle,
       false,
       Paint()
-        ..color = Colors.white24
+        ..color = baseColor.withValues(alpha: 0.24)
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke
         ..strokeWidth = 3,
     );
+
     canvas.drawArc(
       rect,
       startAngle + (sweepAngle * 0.8),
@@ -292,9 +302,8 @@ class AnalogGaugePainter extends CustomPainter {
         ..strokeWidth = 3,
     );
 
-    // Desenha pequenos "Ticks" (Traces)
     final tickPaint = Paint()
-      ..color = Colors.white54
+      ..color = baseColor.withValues(alpha: 0.54)
       ..strokeWidth = 2;
     for (int i = 0; i <= 10; i++) {
       double angle = startAngle + (sweepAngle * (i / 10));
@@ -309,14 +318,13 @@ class AnalogGaugePainter extends CustomPainter {
       canvas.drawLine(inner, outer, tickPaint);
     }
 
-    // PONTEIRO
     final pointerAngle = startAngle + (sweepAngle * percent);
     final pointerLength = radius - 14;
-
     final pointerPaint = Paint()
       ..color = Colors.redAccent
       ..strokeCap = StrokeCap.round
       ..strokeWidth = 4;
+
     canvas.drawLine(
       center,
       Offset(
@@ -325,12 +333,15 @@ class AnalogGaugePainter extends CustomPainter {
       ),
       pointerPaint,
     );
-
-    canvas.drawCircle(center, 8, Paint()..color = Colors.white);
-    canvas.drawCircle(center, 4, Paint()..color = Colors.black);
+    canvas.drawCircle(center, 8, Paint()..color = baseColor);
+    canvas.drawCircle(
+      center,
+      4,
+      Paint()..color = baseColor.withValues(alpha: 0.1),
+    );
   }
 
   @override
   bool shouldRepaint(covariant AnalogGaugePainter oldDelegate) =>
-      oldDelegate.percent != percent;
+      oldDelegate.percent != percent || oldDelegate.baseColor != baseColor;
 }

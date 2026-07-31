@@ -5,19 +5,19 @@ import '../state/obd_providers.dart';
 
 class FaultDetailScreen extends ConsumerWidget {
   final DtcFault fault;
+
   const FaultDetailScreen({super.key, required this.fault});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text(
-          "Detalhes da Falha",
-          style: TextStyle(color: Colors.white),
-        ),
+        iconTheme: IconThemeData(color: onSurface),
+        title: Text("Detalhes da Falha", style: TextStyle(color: onSurface)),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -29,16 +29,14 @@ class FaultDetailScreen extends ConsumerWidget {
             Text(
               fault.code,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 40,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: onSurface,
                 fontFamily: 'Monospace',
               ),
             ),
             const SizedBox(height: 8),
-
-            // STATUS EXPLICATIVOS
             Wrap(
               alignment: WrapAlignment.center,
               spacing: 8,
@@ -47,8 +45,6 @@ class FaultDetailScreen extends ConsumerWidget {
                   .toList(),
             ),
             const SizedBox(height: 24),
-
-            // SESSÃO DO FREEZE FRAME
             const Text(
               "Dados Congelados (Freeze Frame):",
               style: TextStyle(
@@ -56,15 +52,16 @@ class FaultDetailScreen extends ConsumerWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const Divider(color: Colors.white24),
-
+            Divider(color: onSurface.withValues(alpha: 0.2)),
             Expanded(
               child: fault.freezeFrame.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Text(
                         "Nenhum dado congelado disponível para este erro.",
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.white54),
+                        style: TextStyle(
+                          color: onSurface.withValues(alpha: 0.54),
+                        ),
                       ),
                     )
                   : ListView.builder(
@@ -74,7 +71,6 @@ class FaultDetailScreen extends ConsumerWidget {
                           index,
                         );
                         final result = fault.freezeFrame[sensorName]!;
-
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12.0),
                           child: Row(
@@ -83,16 +79,16 @@ class FaultDetailScreen extends ConsumerWidget {
                               Expanded(
                                 child: Text(
                                   sensorName,
-                                  style: const TextStyle(
-                                    color: Colors.white70,
+                                  style: TextStyle(
+                                    color: onSurface.withValues(alpha: 0.7),
                                     fontSize: 16,
                                   ),
                                 ),
                               ),
                               Text(
                                 "${result.value.toStringAsFixed(result.value == result.value.toInt() ? 0 : 1)} ${result.unit}",
-                                style: const TextStyle(
-                                  color: Colors.white,
+                                style: TextStyle(
+                                  color: onSurface,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
                                 ),
@@ -103,12 +99,9 @@ class FaultDetailScreen extends ConsumerWidget {
                       },
                     ),
             ),
-
             const SizedBox(height: 16),
-
-            // BOTÃO DE APAGAR
             ElevatedButton.icon(
-              onPressed: () => _showClearConfirmation(context, ref),
+              onPressed: () => _showClearConfirmation(context, ref, onSurface),
               icon: const Icon(Icons.delete_forever),
               label: const Text("APAGAR FALHAS DA ECU"),
               style: ElevatedButton.styleFrom(
@@ -134,27 +127,26 @@ class FaultDetailScreen extends ConsumerWidget {
     Color color;
     String text;
     String description;
-
     switch (status) {
       case DtcStatus.confirmed:
         color = Colors.redAccent;
         text = "Confirmada";
-        description = "Acende a luz. O problema está ocorrendo agora.";
+        description =
+            "Acende a luz. O problema está ocorrendo ou ocorreu agora.";
         break;
       case DtcStatus.pending:
         color = Colors.orangeAccent;
-        text = "Pendente";
+        text = "Em avaliação";
         description =
             "ECU detectou anomalia, mas precisa de mais ciclos para confirmar.";
         break;
       case DtcStatus.permanent:
         color = Colors.purpleAccent;
-        text = "Permanente";
+        text = "Monitorada pela ECU";
         description =
             "Falha grave. Só apaga após o conserto e rodagem do veículo.";
         break;
     }
-
     return Tooltip(
       message: description,
       triggerMode: TooltipTriggerMode.tap,
@@ -184,35 +176,41 @@ class FaultDetailScreen extends ConsumerWidget {
     );
   }
 
-  void _showClearConfirmation(BuildContext context, WidgetRef ref) {
+  void _showClearConfirmation(
+    BuildContext context,
+    WidgetRef ref,
+    Color onSurface,
+  ) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1D24),
-        title: const Text(
+        title: Text(
           "Apagar Luz de Injeção?",
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: onSurface),
         ),
-        content: const Text(
+        content: Text(
           "Esta ação vai resetar a memória de falhas e o Freeze Frame da injeção eletrônica. Certifique-se de estar com a CHAVE LIGADA e o MOTOR DESLIGADO.",
-          style: TextStyle(color: Colors.white70),
+          style: TextStyle(color: onSurface.withValues(alpha: 0.7)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
+            child: Text(
               "Cancelar",
-              style: TextStyle(color: Colors.white54),
+              style: TextStyle(color: onSurface.withValues(alpha: 0.54)),
             ),
           ),
           FilledButton(
             onPressed: () {
               ref.read(obdManagerProvider).clearDTCs();
-              Navigator.pop(context); // Fecha Dialog
-              Navigator.pop(context); // Volta pra tela de falhas
+              Navigator.pop(context);
+              Navigator.pop(context);
             },
             style: FilledButton.styleFrom(backgroundColor: Colors.redAccent),
-            child: const Text("Sim, Apagar!"),
+            child: const Text(
+              "Sim, Apagar!",
+              style: TextStyle(color: Colors.white),
+            ), // Texto sempre branco no botão vermelho
           ),
         ],
       ),

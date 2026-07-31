@@ -22,10 +22,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     const HudScreen(),
     const FaultsScreen(),
     const Center(
-      child: Text(
-        "Informações do Veículo em breve",
-        style: TextStyle(color: Colors.white),
-      ),
+      child: Text("Informações do Veículo em breve"), // O tema já cuida da cor
     ),
   ];
 
@@ -50,7 +47,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
-  // --- NOVO: BOTÃO DE ALTERNAR TEMA ---
   Widget _buildThemeToggle() {
     final currentTheme = ref.watch(themeModeProvider);
     IconData icon;
@@ -70,28 +66,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return IconButton(
       icon: Icon(icon),
       tooltip: tooltip,
-      // Puxa a cor de ícone definida pelo tema atual
       color: Theme.of(context).iconTheme.color,
       onPressed: () {
-        // Cicla entre: Sistema -> Claro -> Escuro -> Sistema
         final newTheme = currentTheme == ThemeMode.system
             ? ThemeMode.light
             : currentTheme == ThemeMode.light
             ? ThemeMode.dark
             : ThemeMode.system;
 
-        // NOVA CHAMADA UTILIZANDO A FUNÇÃO QUE CRIAMOS
         ref.read(themeModeProvider.notifier).setTheme(newTheme);
       },
     );
   }
 
-  // --- WIDGET DO LED DE STATUS + BOTÃO DE DESCONECTAR ---
   Widget _buildStatusAndDisconnect(AppConnectionState state, bool isDesktop) {
     Color dotColor = Colors.grey;
     String tooltipText = "Desconectado";
 
-    // Lógica das Cores do LED
     if (state == AppConnectionState.ready) {
       dotColor = Colors.greenAccent;
       tooltipText = "ECU Online";
@@ -121,7 +112,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final powerButton = IconButton(
       icon: const Icon(Icons.power_settings_new_rounded),
-      color: Colors.white54,
+      color: Theme.of(context).iconTheme.color,
       hoverColor: Colors.redAccent.withValues(alpha: 0.2),
       tooltip: 'Desconectar',
       onPressed: _disconnectAndExit,
@@ -178,14 +169,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         bool isDesktop = constraints.maxWidth > 600;
 
         return Scaffold(
-          // REMOVEMOS O APPBAR TOTALMENTE!
           body: SafeArea(
             child: Row(
               children: [
-                // --- BARRA LATERAL CUSTOMIZADA (DESKTOP) ---
                 if (isDesktop)
                   Container(
-                    width: 80, // Largura padrão do NavigationRail
+                    width: 80,
                     color: Theme.of(context).appBarTheme.backgroundColor,
                     child: Column(
                       children: [
@@ -217,17 +206,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             ],
                           ),
                         ),
-                        // O NOSSO NOVO RODAPÉ DA BARRA LATERAL
                         _buildStatusAndDisconnect(connState, true),
                       ],
                     ),
                   ),
-
-                // --- ÁREA PRINCIPAL ---
                 Expanded(
                   child: Column(
                     children: [
-                      // --- CABEÇALHO MINIMALISTA (MOBILE) ---
                       if (!isDesktop)
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -253,8 +238,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             ],
                           ),
                         ),
-
-                      // AS PÁGINAS DO APP
                       Expanded(child: _pages[_selectedIndex]),
                     ],
                   ),
@@ -262,8 +245,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ],
             ),
           ),
-
-          // --- BARRA INFERIOR (MOBILE) ---
           bottomNavigationBar: isDesktop
               ? null
               : NavigationBar(

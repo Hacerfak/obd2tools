@@ -1,4 +1,4 @@
-import 'dart:math'; // NOVO: Para usar as funções min() e max()
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -21,19 +21,14 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
   @override
   void initState() {
     super.initState();
-
     _obdManager = ref.read(obdManagerProvider);
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Pede para o Manager focar 100% da banda neste único sensor
       _obdManager.setPollingPids([widget.pid.id]);
     });
   }
 
   @override
   void dispose() {
-    // Zera o foco ao voltar
-    //_obdManager.setPollingPids([]);
     super.dispose();
   }
 
@@ -41,67 +36,60 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
   Widget build(BuildContext context) {
     final liveData = ref.watch(realTimeStateProvider);
     final sensorData = liveData[widget.pid.name];
+    final onSurface = Theme.of(context).colorScheme.onSurface;
 
-    // --- LÓGICA DE ESTABILIZAÇÃO DO GRÁFICO ---
     double minY = 0;
     double maxY = 100;
-
     if (sensorData != null && sensorData.history.isNotEmpty) {
       double minVal = sensorData.history.reduce(min);
       double maxVal = sensorData.history.reduce(max);
       double range = maxVal - minVal;
 
-      // Se a variação for muito pequena (menos de 20 unidades),
-      // forçamos uma margem para a linha não estourar na tela.
       if (range < 20) {
         minY = minVal - 10;
         maxY = maxVal + 10;
       } else {
-        // Se a variação for grande (ex: RPM de 800 a 3000), damos 15% de margem no topo e fundo
         minY = minVal - (range * 0.15);
         maxY = maxVal + (range * 0.15);
       }
 
-      // Previne que gráficos como velocidade ou RPM fiquem com Y negativo no visual
       if (minY < 0 && minVal >= 0) {
         minY = 0;
       }
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF12151C),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
           widget.pid.name,
-          style: const TextStyle(fontSize: 18, color: Colors.white),
+          style: TextStyle(fontSize: 18, color: onSurface),
         ),
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: onSurface),
       ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- VALOR EM DESTAQUE ---
-            const Text(
+            Text(
               "Valor Instantâneo",
-              style: TextStyle(color: Colors.white54, fontSize: 16),
+              style: TextStyle(
+                color: onSurface.withValues(alpha: 0.54),
+                fontSize: 16,
+              ),
             ),
             const SizedBox(height: 8),
-
-            // SE O SENSOR TIVER TRADUTOR (Ex: Malha Fechada)
             if (sensorData != null && widget.pid.formatValue != null)
               Text(
                 widget.pid.formatValue!(sensorData.value),
                 style: const TextStyle(
-                  fontSize: 32, // Fonte um pouco menor para caber o texto
+                  fontSize: 32,
                   fontWeight: FontWeight.bold,
                   color: Colors.amberAccent,
                 ),
               )
-            // SE FOR UM SENSOR NUMÉRICO NORMAL (Ex: RPM, Temp)
             else
               Row(
                 crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -123,35 +111,42 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
                   const SizedBox(width: 8),
                   Text(
                     widget.pid.unit,
-                    style: const TextStyle(fontSize: 24, color: Colors.white70),
+                    style: TextStyle(
+                      fontSize: 24,
+                      color: onSurface.withValues(alpha: 0.7),
+                    ),
                   ),
                 ],
               ),
             const SizedBox(height: 48),
-            const Text(
+            Text(
               "Comportamento Recente",
-              style: TextStyle(color: Colors.white54, fontSize: 16),
+              style: TextStyle(
+                color: onSurface.withValues(alpha: 0.54),
+                fontSize: 16,
+              ),
             ),
             const SizedBox(height: 24),
             Expanded(
               child: (sensorData == null || sensorData.history.length < 2)
-                  ? const Center(
+                  ? Center(
                       child: Text(
                         "Lendo dados do CAN Bus...\n(Aguarde o preenchimento do gráfico)",
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.white38),
+                        style: TextStyle(
+                          color: onSurface.withValues(alpha: 0.38),
+                        ),
                       ),
                     )
                   : LineChart(
                       LineChartData(
-                        // NOVO: Aplica os limites dinâmicos calculados acima
                         minY: minY,
                         maxY: maxY,
                         gridData: FlGridData(
                           show: true,
                           drawVerticalLine: false,
-                          getDrawingHorizontalLine: (value) => const FlLine(
-                            color: Colors.white10,
+                          getDrawingHorizontalLine: (value) => FlLine(
+                            color: onSurface.withValues(alpha: 0.1),
                             strokeWidth: 1,
                           ),
                         ),
@@ -179,8 +174,7 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
                               return FlSpot(e.key.toDouble(), e.value);
                             }).toList(),
                             isCurved: true,
-                            preventCurveOverShooting:
-                                true, // NOVO: Impede a curva de ultrapassar os pontos reais
+                            preventCurveOverShooting: true,
                             color: Colors.blueAccent,
                             barWidth: 3,
                             dotData: const FlDotData(show: false),

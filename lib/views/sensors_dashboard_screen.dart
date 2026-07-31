@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../parser/registries/mode_01_registry.dart';
 import '../state/obd_providers.dart';
 import '../widgets/sensor_tile.dart';
@@ -21,9 +22,7 @@ class _SensorsDashboardScreenState
   @override
   void initState() {
     super.initState();
-
     _obdManager = ref.read(obdManagerProvider);
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _startDashboardPolling();
     });
@@ -31,19 +30,17 @@ class _SensorsDashboardScreenState
 
   void _startDashboardPolling() {
     final supportedPids = ref.read(supportedPidsProvider);
-
     final pidsReais = pidRegistry.values
         .where((pid) => supportedPids.contains(pid.id))
         .map((pid) => pid.id)
         .toList();
 
-    // CHAMA COM COOLDOWN DE 3 SEGUNDOS ENTRE OS LOTES
     ref
         .read(obdManagerProvider)
         .setPollingPids(
           pidsReais,
-          cooldown: const Duration(seconds: 3), // Pausa entre os tiros
-          fastInitialPass: true, // Liga o turbo na primeira volta
+          cooldown: const Duration(seconds: 3),
+          fastInitialPass: true,
         );
   }
 
@@ -58,6 +55,7 @@ class _SensorsDashboardScreenState
     final availablePids = pidRegistry.values
         .where((pid) => supportedPids.contains(pid.id))
         .toList();
+    final onSurface = Theme.of(context).colorScheme.onSurface;
 
     return Scaffold(
       body: Padding(
@@ -70,7 +68,7 @@ class _SensorsDashboardScreenState
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onSurface,
+                color: onSurface,
               ),
             ),
             const SizedBox(height: 16),
@@ -80,9 +78,7 @@ class _SensorsDashboardScreenState
                       child: Text(
                         "Nenhum sensor encontrado.",
                         style: TextStyle(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onSurface.withValues(alpha: 0.54),
+                          color: onSurface.withValues(alpha: 0.54),
                         ),
                       ),
                     )
@@ -91,7 +87,6 @@ class _SensorsDashboardScreenState
                         int crossAxisCount = constraints.maxWidth > 900
                             ? 4
                             : (constraints.maxWidth > 600 ? 3 : 2);
-
                         return GridView.builder(
                           gridDelegate:
                               SliverGridDelegateWithFixedCrossAxisCount(
@@ -103,14 +98,10 @@ class _SensorsDashboardScreenState
                           itemCount: availablePids.length,
                           itemBuilder: (context, index) {
                             final pid = availablePids[index];
-
                             return SensorTile(
                               pid: pid,
                               onTap: () async {
-                                // 1. PAUSA A VARREDURA GERAL DA TELA
                                 _obdManager.setPollingPids([]);
-
-                                // 2. NAVEGA PARA OS DETALHES
                                 await Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -118,8 +109,6 @@ class _SensorsDashboardScreenState
                                         SensorDetailScreen(pid: pid),
                                   ),
                                 );
-
-                                // 3. RETORNOU DA TELA! RETOMA A VARREDURA
                                 if (mounted) {
                                   _startDashboardPolling();
                                 }

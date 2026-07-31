@@ -24,7 +24,6 @@ class _HudSensorSelectorState extends ConsumerState<HudSensorSelector> {
   @override
   void initState() {
     super.initState();
-    // Fazemos uma cópia para o usuário poder cancelar sem estragar o HUD atual
     _selectedPids = List.from(widget.initialSelection);
   }
 
@@ -43,14 +42,13 @@ class _HudSensorSelectorState extends ConsumerState<HudSensorSelector> {
   @override
   Widget build(BuildContext context) {
     final supportedPids = ref.watch(supportedPidsProvider);
+    final onSurface = Theme.of(context).colorScheme.onSurface;
 
-    // CORREÇÃO 1: Protege contra IDs fantasmas que possam estar no SharedPreferences
     final selectedPidsFull = _selectedPids
         .where((id) => pidRegistry.containsKey(id))
         .map((id) => pidRegistry[id]!)
         .toList();
 
-    // Pega o resto e aplica o filtro de pesquisa
     final unselectedPidsFull = pidRegistry.values.where((pid) {
       bool isSupported = supportedPids.contains(pid.id);
       bool isNotSelected = !_selectedPids.contains(pid.id);
@@ -63,24 +61,21 @@ class _HudSensorSelectorState extends ConsumerState<HudSensorSelector> {
     bool isMaxReached = _selectedPids.length >= 12;
 
     return Material(
-      color: const Color(0xFF1A1D24),
+      color: Theme.of(context).scaffoldBackgroundColor, // Agora segue o tema!
       borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       child: Column(
         children: [
-          // BARRA DE ARRASTAR
           Center(
             child: Container(
               margin: const EdgeInsets.only(top: 12, bottom: 12),
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.white24,
+                color: onSurface.withValues(alpha: 0.24),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
-
-          // CABEÇALHO
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(
@@ -89,12 +84,12 @@ class _HudSensorSelectorState extends ConsumerState<HudSensorSelector> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       "Configurar HUD",
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: onSurface,
                       ),
                     ),
                     Text(
@@ -116,25 +111,31 @@ class _HudSensorSelectorState extends ConsumerState<HudSensorSelector> {
                   style: FilledButton.styleFrom(
                     backgroundColor: Colors.blueAccent,
                   ),
-                  child: const Text("Salvar"),
+                  child: const Text(
+                    "Salvar",
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 16),
-
-          // BARRA DE PESQUISA
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: TextField(
               onChanged: (value) => setState(() => _searchQuery = value),
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: onSurface),
               decoration: InputDecoration(
                 hintText: "Pesquisar sensor...",
-                hintStyle: const TextStyle(color: Colors.white38),
-                prefixIcon: const Icon(Icons.search, color: Colors.white38),
+                hintStyle: TextStyle(color: onSurface.withValues(alpha: 0.38)),
+                prefixIcon: Icon(
+                  Icons.search,
+                  color: onSurface.withValues(alpha: 0.38),
+                ),
                 filled: true,
-                fillColor: Colors.black26,
+                fillColor: onSurface.withValues(
+                  alpha: 0.05,
+                ), // Input field amigável ao tema
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -143,13 +144,10 @@ class _HudSensorSelectorState extends ConsumerState<HudSensorSelector> {
             ),
           ),
           const SizedBox(height: 8),
-
-          // CORREÇÃO 2: Estrutura de Listas Independentes (Acaba com o Crash de Layout)
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // --- SEÇÃO REORDENÁVEL (ITENS SELECIONADOS) ---
                 if (selectedPidsFull.isNotEmpty) ...[
                   const Padding(
                     padding: EdgeInsets.all(16.0),
@@ -163,7 +161,6 @@ class _HudSensorSelectorState extends ConsumerState<HudSensorSelector> {
                     ),
                   ),
                   Flexible(
-                    // Flexible avisa o Flutter: "Se a lista for pequena, use pouco espaço. Se for grande, crie rolagem aqui mesmo."
                     child: ReorderableListView.builder(
                       shrinkWrap: true,
                       itemCount: selectedPidsFull.length,
@@ -177,20 +174,20 @@ class _HudSensorSelectorState extends ConsumerState<HudSensorSelector> {
                       itemBuilder: (context, index) {
                         final pid = selectedPidsFull[index];
                         return ListTile(
-                          key: ValueKey(
-                            "sel_${pid.id}",
-                          ), // Key única garante estabilidade
-                          leading: const Icon(
+                          key: ValueKey("sel_${pid.id}"),
+                          leading: Icon(
                             Icons.drag_handle,
-                            color: Colors.white54,
+                            color: onSurface.withValues(alpha: 0.54),
                           ),
                           title: Text(
                             pid.name,
-                            style: const TextStyle(color: Colors.white),
+                            style: TextStyle(color: onSurface),
                           ),
                           subtitle: Text(
                             pid.unit.isEmpty ? "Status" : pid.unit,
-                            style: const TextStyle(color: Colors.white38),
+                            style: TextStyle(
+                              color: onSurface.withValues(alpha: 0.38),
+                            ),
                           ),
                           trailing: IconButton(
                             icon: const Icon(
@@ -203,17 +200,15 @@ class _HudSensorSelectorState extends ConsumerState<HudSensorSelector> {
                       },
                     ),
                   ),
-                  const Divider(color: Colors.white10),
+                  Divider(color: onSurface.withValues(alpha: 0.1)),
                 ],
-
-                // --- SEÇÃO DE PESQUISA (ITENS DISPONÍVEIS) ---
                 if (unselectedPidsFull.isNotEmpty) ...[
-                  const Padding(
-                    padding: EdgeInsets.all(16.0),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
                     child: Text(
                       "DISPONÍVEIS",
                       style: TextStyle(
-                        color: Colors.white38,
+                        color: onSurface.withValues(alpha: 0.38),
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                       ),
@@ -225,33 +220,36 @@ class _HudSensorSelectorState extends ConsumerState<HudSensorSelector> {
                       itemBuilder: (context, index) {
                         final pid = unselectedPidsFull[index];
                         final isDisabled = isMaxReached;
-
                         return ListTile(
                           key: ValueKey("avail_${pid.id}"),
                           enabled: !isDisabled,
                           leading: Icon(
                             pid.isFast ? Icons.speed : Icons.thermostat,
-                            color: isDisabled ? Colors.white12 : Colors.white54,
+                            color: isDisabled
+                                ? onSurface.withValues(alpha: 0.12)
+                                : onSurface.withValues(alpha: 0.54),
                           ),
                           title: Text(
                             pid.name,
                             style: TextStyle(
-                              color: isDisabled ? Colors.white24 : Colors.white,
+                              color: isDisabled
+                                  ? onSurface.withValues(alpha: 0.24)
+                                  : onSurface,
                             ),
                           ),
                           subtitle: Text(
                             pid.unit.isEmpty ? "Status" : pid.unit,
                             style: TextStyle(
                               color: isDisabled
-                                  ? Colors.white12
-                                  : Colors.white38,
+                                  ? onSurface.withValues(alpha: 0.12)
+                                  : onSurface.withValues(alpha: 0.38),
                             ),
                           ),
                           trailing: IconButton(
                             icon: Icon(
                               Icons.add_circle,
                               color: isDisabled
-                                  ? Colors.white12
+                                  ? onSurface.withValues(alpha: 0.12)
                                   : Colors.blueAccent,
                             ),
                             onPressed: isDisabled

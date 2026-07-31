@@ -13,12 +13,9 @@ class SensorTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final liveData = ref.watch(realTimeStateProvider);
     final sensorData = liveData[pid.name];
-
-    // Pegamos a cor de texto base do tema para aplicar opacidades
     final onSurfaceColor = Theme.of(context).colorScheme.onSurface;
 
     return Card(
-      // A COR E O SHAPE AGORA VÊM AUTOMATICAMENTE DO THEMEDATA (main.dart)
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: onTap,
@@ -33,9 +30,7 @@ class SensorTile extends ConsumerWidget {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: onSurfaceColor.withValues(
-                    alpha: 0.7,
-                  ), // Substitui o Colors.white70
+                  color: onSurfaceColor.withValues(alpha: 0.7),
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -47,7 +42,7 @@ class SensorTile extends ConsumerWidget {
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.amberAccent, // Cor semântica (mantém)
+                    color: Colors.amberAccent,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -62,7 +57,7 @@ class SensorTile extends ConsumerWidget {
                   style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: Colors.greenAccent, // Cor semântica (mantém)
+                    color: Colors.greenAccent,
                     fontFamily: 'Monospace',
                   ),
                 ),
