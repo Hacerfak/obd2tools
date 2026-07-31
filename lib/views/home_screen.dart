@@ -53,6 +53,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // ESCUTA GLOBAL: Joga para fora se a ECU dormir ou Bluetooth cair
+    ref.listen(connectionStateProvider, (previous, next) {
+      if (next == AppConnectionState.waitingForEcu ||
+          next == AppConnectionState.disconnected) {
+        if (mounted) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  const ConnectionScreen(attemptAutoConnect: false),
+            ),
+            (route) => false,
+          );
+        }
+      }
+    });
     return LayoutBuilder(
       builder: (context, constraints) {
         bool isDesktop = constraints.maxWidth > 600;
