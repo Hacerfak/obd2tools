@@ -124,7 +124,8 @@ enum AppConnectionState {
   disconnected,
   connectingBluetooth,
   waitingForEcu, // Bluetooth conectou, mas a chave está desligada!
-  connected, // Tudo pronto, lendo dados!
+  discoveringSensors, // NOVO: ECU respondeu, mapeando PIDs...
+  ready, // NOVO: Tudo pronto, partiu Dashboard!
 }
 
 class ConnectionStateNotifier extends Notifier<AppConnectionState> {

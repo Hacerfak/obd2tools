@@ -93,7 +93,7 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
                           Icon(
                             Icons.check_circle_outline,
                             size: 80,
-                            color: Colors.greenAccent.withOpacity(0.5),
+                            color: Colors.greenAccent.withValues(alpha: 0.5),
                           ),
                           const SizedBox(height: 16),
                           const Text(
@@ -129,7 +129,7 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
         setState(() => _selectedFilter = selected ? status : null);
       },
       backgroundColor: const Color(0xFF1A1D24),
-      selectedColor: Colors.blueAccent.withOpacity(0.2),
+      selectedColor: Colors.blueAccent.withValues(alpha: 0.2),
       labelStyle: TextStyle(
         color: isSelected ? Colors.blueAccent : Colors.white70,
       ),
@@ -216,8 +216,8 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
-        border: Border.all(color: color.withOpacity(0.5)),
+        color: color.withValues(alpha: 0.15),
+        border: Border.all(color: color.withValues(alpha: 0.5)),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(

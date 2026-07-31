@@ -114,7 +114,7 @@ class FaultDetailScreen extends ConsumerWidget {
               label: const Text("APAGAR FALHAS DA ECU"),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 20),
-                backgroundColor: Colors.redAccent.withOpacity(0.2),
+                backgroundColor: Colors.redAccent.withValues(alpha: 0.2),
                 foregroundColor: Colors.redAccent,
                 side: const BorderSide(color: Colors.redAccent, width: 2),
                 textStyle: const TextStyle(
@@ -162,8 +162,8 @@ class FaultDetailScreen extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.15),
-          border: Border.all(color: color.withOpacity(0.5)),
+          color: color.withValues(alpha: 0.15),
+          border: Border.all(color: color.withValues(alpha: 0.5)),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(

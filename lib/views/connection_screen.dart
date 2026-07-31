@@ -214,12 +214,18 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
   Widget build(BuildContext context) {
     final connState = ref.watch(connectionStateProvider);
 
+    // ATUALIZAÇÃO 1: Só muda de tela quando estiver READY
     ref.listen(connectionStateProvider, (previous, next) {
-      if (next == AppConnectionState.connected) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
-        );
+      if (next == AppConnectionState.ready) {
+        // Dá 1.5 segundos para o usuário ver o "check" verde antes de ir pro Dash
+        Future.delayed(const Duration(milliseconds: 1500), () {
+          if (mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const HomeScreen()),
+            );
+          }
+        });
       }
     });
 
@@ -336,7 +342,7 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                 ),
                 const SizedBox(height: 24),
                 const Text(
-                  "Conectando e pareando com o adaptador...",
+                  "Conectando com o adaptador bluetooth...",
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.white70),
                 ),
@@ -372,6 +378,48 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                     style: TextStyle(color: Colors.redAccent),
                   ),
                 ),
+              ]
+              // FASE 4: DESCOBRINDO SENSORES
+              else if (connState == AppConnectionState.discoveringSensors) ...[
+                const Spacer(),
+                const Center(
+                  child: CircularProgressIndicator(color: Colors.blueAccent),
+                ),
+                const SizedBox(height: 24),
+                const Text(
+                  "Mapeando sensores suportados pela ECU...",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white70, fontSize: 16),
+                ),
+                const Spacer(),
+              ]
+              // FASE 5: SUCESSO!
+              else if (connState == AppConnectionState.ready) ...[
+                const Spacer(),
+                const Center(
+                  child: Icon(
+                    Icons.check_circle_outline,
+                    size: 80,
+                    color: Colors.greenAccent,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                const Text(
+                  "Conexão Bem-Sucedida!",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.greenAccent,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "${ref.read(supportedPidsProvider).length} sensores mapeados",
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.white54),
+                ),
+                const Spacer(),
               ],
             ],
           ),

@@ -50,7 +50,7 @@ class _HudScreenState extends ConsumerState<HudScreen> {
     });
 
     // Avisa o Manager para ligar a metralhadora
-    _obdManager.setHudMode(_activeGaugesPids);
+    _obdManager.setPollingPids(_activeGaugesPids);
   }
 
   Future<void> _savePreferences(List<int> newSelection) async {
@@ -64,8 +64,6 @@ class _HudScreenState extends ConsumerState<HudScreen> {
 
   @override
   void dispose() {
-    // Usa a referência salva para desligar a metralhadora, sem precisar do 'ref'!
-    _obdManager.setHudMode([]);
     super.dispose();
   }
 
@@ -121,7 +119,7 @@ class _HudScreenState extends ConsumerState<HudScreen> {
                                 _savePreferences(
                                   newSelection,
                                 ); // Salva no aparelho!
-                                _obdManager.setHudMode(_activeGaugesPids);
+                                _obdManager.setPollingPids(_activeGaugesPids);
                               },
                             ),
                           ),

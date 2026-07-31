@@ -97,6 +97,8 @@ class ObdConnection {
   void sendCommand(String command) async {
     if (_activeConnection == null) return;
 
+    //print("=== Command: '$command' ===");
+
     try {
       // O ELM327 exige que todo comando termine com Carriage Return (\r)
       String fullCommand = "$command\r";

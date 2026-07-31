@@ -3,7 +3,6 @@ import 'dart:collection';
 import 'obd_connection.dart';
 import '/parser/obd_parser.dart';
 import '../parser/parsers/mode_01_parser.dart';
-import '../parser/registries/mode_01_registry.dart';
 import '../parser/parsers/mode_09_parser.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../state/obd_providers.dart';
@@ -26,13 +25,21 @@ class ObdManager {
   // Controle de estado para saber se o scanner está ocupado processando algo
   bool _isWaitingForResponse = false;
 
+  bool _isClearingDTCs = false;
+
   // Novo Stream para a interface escutar os logs
   final _logStreamController = StreamController<String>.broadcast();
   Stream<String> get logStream => _logStreamController.stream;
 
-  bool _hudModeEnabled = false;
-  List<int> _hudActivePids = [];
-  int _slowPidIndex = 0;
+  bool _isPollingEnabled = false;
+  List<int> _activePollingPids = [];
+
+  int _pollingIndex = 0;
+
+  // --- CONTROLES DE COOLDOWN ---
+  Duration _pollingCooldown = Duration.zero;
+  bool _isFastInitialPass = false;
+  Timer? _cooldownTimer;
 
   ObdManager({required this.connection, required this.ref}) {
     // Fica escutando os dados puros que vêm do Bluetooth
@@ -41,6 +48,8 @@ class ObdManager {
 
   // --- NOVA VARREDURA COMPLETA ---
   void scanAllFaults() {
+    _isPollingEnabled = false;
+    _commandQueue.clear();
     ref.read(dtcStateProvider.notifier).clearCodes();
     ref.read(dtcStateProvider.notifier).setLoading(true);
 
@@ -64,6 +73,7 @@ class ObdManager {
   }
 
   void clearDTCs() {
+    _isClearingDTCs = true; // Avisa que o próximo "OK" é nosso!
     queueCommand("04");
   }
 
@@ -81,39 +91,42 @@ class ObdManager {
   // Nova lista para guardar o que o carro suporta
   final List<int> supportedPids = [];
 
-  // --- INTELIGÊNCIA DO HUD ---
-  void setHudMode(List<int> pids) {
-    _hudActivePids = pids;
-    _hudModeEnabled = pids.isNotEmpty;
+  // --- INTELIGÊNCIA DE VARREDURA (POLLING) CENTRALIZADA ---
+  void setPollingPids(
+    List<int> pids, {
+    Duration cooldown = Duration.zero,
+    bool fastInitialPass = false,
+  }) {
+    _activePollingPids = pids;
+    _isPollingEnabled = pids.isNotEmpty;
+    _pollingIndex = 0;
 
-    // Se ativou e a fila está livre, dá o primeiro tiro!
-    if (_hudModeEnabled && _commandQueue.isEmpty && !_isWaitingForResponse) {
-      _triggerNextHudRequest();
+    // Atualiza as regras de tempo e cancela timers antigos
+    _pollingCooldown = cooldown;
+    _isFastInitialPass = fastInitialPass;
+    _cooldownTimer?.cancel();
+
+    _commandQueue.clear();
+
+    if (_isPollingEnabled && !_isWaitingForResponse) {
+      _triggerNextPollingRequest();
     }
   }
 
-  void _triggerNextHudRequest() {
-    if (!_hudModeEnabled || _hudActivePids.isEmpty) return;
+  void _triggerNextPollingRequest() {
+    if (!_isPollingEnabled || _activePollingPids.isEmpty) return;
 
-    // NOVO: Busca dinamicamente no registro quem é rápido e quem é lento!
-    List<int> currentFast = _hudActivePids
-        .where((pid) => pidRegistry[pid]?.isFast == true)
-        .toList();
-    List<int> currentSlow = _hudActivePids
-        .where((pid) => pidRegistry[pid]?.isFast != true)
-        .toList();
+    List<int> pidsToRequest = [];
+    int count = 0;
 
-    // Sempre pede os valores rápidos!
-    List<int> pidsToRequest = List.from(currentFast);
-
-    // Revezamento: Pede APENAS 1 valor lento por ciclo
-    if (currentSlow.isNotEmpty) {
-      pidsToRequest.add(currentSlow[_slowPidIndex]);
-      _slowPidIndex = (_slowPidIndex + 1) % currentSlow.length;
-    }
-
-    if (pidsToRequest.length > 6) {
-      pidsToRequest = pidsToRequest.sublist(0, 6);
+    while (count < 6 && count < _activePollingPids.length) {
+      if (_pollingIndex >= _activePollingPids.length) {
+        _pollingIndex = 0; // Volta pro início
+        _isFastInitialPass = false; // FIM DA VOLTA RÁPIDA! Desliga o turbo.
+      }
+      pidsToRequest.add(_activePollingPids[_pollingIndex]);
+      _pollingIndex++;
+      count++;
     }
 
     String multiCommand = "01";
@@ -166,6 +179,7 @@ class ObdManager {
     String nextCommand = _commandQueue.removeFirst();
 
     // Envia o comando para o scanner via Bluetooth
+    print("=== Command: '$nextCommand' ===");
     connection.sendCommand(nextCommand);
   }
 
@@ -192,7 +206,8 @@ class ObdManager {
     _buffer = ""; // Limpa lixos de texto recebidos pela metade
     _isWaitingForResponse = false; // Destrava o envio de novos comandos!
     _ecuRetryTimer?.cancel(); // Para qualquer tentativa de reconexão zumbi
-    _hudModeEnabled = false;
+    _isPollingEnabled = false;
+    _cooldownTimer?.cancel();
     // Opcional, mas recomendado: limpa os dados antigos da tela
     ref.read(realTimeStateProvider.notifier).clearData();
   }
@@ -246,34 +261,36 @@ class ObdManager {
           cleanHex.startsWith("49") ||
           cleanHex.startsWith("44")) {
         final currentState = ref.read(connectionStateProvider);
-        if (currentState != AppConnectionState.connected) {
+        // Se estava esperando, muda para descobrindo sensores!
+        if (currentState == AppConnectionState.waitingForEcu ||
+            currentState == AppConnectionState.connectingBluetooth) {
           _ecuRetryTimer?.cancel();
           ref
               .read(connectionStateProvider.notifier)
-              .updateState(AppConnectionState.connected);
-          _addLog("Conexão estabelecida com sucesso!");
+              .updateState(AppConnectionState.discoveringSensors);
+          _addLog("Conexão estabelecida! Mapeando sensores...");
         }
       }
 
       // 3. ROTEAMENTO DE DADOS (Modo 01, 03, 04, 09)
       if (cleanHex.startsWith("41")) {
-        if (cleanHex.contains("4100") ||
-            cleanHex.contains("4120") ||
-            cleanHex.contains("4140")) {
+        // CORREÇÃO: Usar startsWith no lugar de contains para evitar falsos positivos!
+        if (cleanHex.startsWith("4100") ||
+            cleanHex.startsWith("4120") ||
+            cleanHex.startsWith("4140")) {
           final RegExp supportRegex = RegExp(
             r'41(00|20|40|60|80|A0|C0)([0-9A-F]{8})',
           );
           final matches = supportRegex.allMatches(cleanHex);
-
           for (final match in matches) {
             String pidHex = match.group(1)!;
             String dataHex = match.group(2)!;
-
             int basePid = int.parse(pidHex, radix: 16);
             List<int> supported = Mode01Parser.parseSupportedPids(
               dataHex,
               basePid,
             );
+
             ref.read(supportedPidsProvider.notifier).addPids(supported);
 
             if (supported.contains(basePid + 0x20)) {
@@ -282,11 +299,23 @@ class ObdManager {
                   .padLeft(2, '0')
                   .toUpperCase();
               queueCommand("01$nextHex");
+            } else {
+              // Mapeamento Acabou!
+              final currentState = ref.read(connectionStateProvider);
+              if (currentState == AppConnectionState.discoveringSensors) {
+                ref
+                    .read(connectionStateProvider.notifier)
+                    .updateState(AppConnectionState.ready);
+              }
             }
           }
         } else {
+          // SE NÃO É MAPEAMENTO, ENTÃO É DADO REAL PARA OS GRÁFICOS!
           Map<String, ObdReadResult> parsedData = Mode01Parser.parse(cleanHex);
+
           if (parsedData.isNotEmpty) {
+            // Se quiser ver no console os sensores atualizando, descomente a linha abaixo:
+            // print("ATUALIZANDO TELA: ${parsedData.keys}");
             ref.read(realTimeStateProvider.notifier).updateData(parsedData);
           }
         }
@@ -385,15 +414,27 @@ class ObdManager {
         }
       }
       // APAGA FALHAS (Modo 04)
-      else if (cleanHex.startsWith("44") || rawResponse == "OK") {
+      else if (cleanHex.startsWith("44") ||
+          (_isClearingDTCs && rawResponse == "OK")) {
+        _isClearingDTCs = false; // Desliga a flag
         _addLog("Memória da ECU apagada com sucesso!");
         ref.read(dtcStateProvider.notifier).clearCodes();
         Timer(const Duration(seconds: 2), () => scanAllFaults());
       }
     } finally {
-      // Metralhadora do HUD
-      if (_hudModeEnabled && _commandQueue.isEmpty) {
-        _triggerNextHudRequest();
+      if (_isPollingEnabled && _commandQueue.isEmpty) {
+        // Se estamos no turbo inicial OU não há cooldown (HUD/Detalhes), pede já!
+        if (_isFastInitialPass || _pollingCooldown == Duration.zero) {
+          _triggerNextPollingRequest();
+        } else {
+          // Senão, dá um respiro para a CPU e pro carro
+          _cooldownTimer?.cancel();
+          _cooldownTimer = Timer(_pollingCooldown, () {
+            if (_isPollingEnabled && _commandQueue.isEmpty) {
+              _triggerNextPollingRequest();
+            }
+          });
+        }
       }
     }
   }

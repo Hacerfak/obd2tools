@@ -1,10 +1,10 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../parser/registries/mode_01_registry.dart';
 import '../state/obd_providers.dart';
 import '../widgets/sensor_tile.dart';
 import '../views/sensor_detail_screen.dart';
+import '../connection/obd_manager.dart';
 
 class SensorsDashboardScreen extends ConsumerStatefulWidget {
   const SensorsDashboardScreen({super.key});
@@ -16,51 +16,39 @@ class SensorsDashboardScreen extends ConsumerStatefulWidget {
 
 class _SensorsDashboardScreenState
     extends ConsumerState<SensorsDashboardScreen> {
-  Timer? _backgroundTimer;
+  late final ObdManager _obdManager;
 
   @override
   void initState() {
     super.initState();
-    // Começa a varrer os dados logo após a tela terminar de montar a primeira vez
+
+    _obdManager = ref.read(obdManagerProvider);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _startBackgroundPolling();
+      _startDashboardPolling();
     });
   }
 
-  void _startBackgroundPolling() {
-    // A cada 1 segundo (1000ms), varre a lista inteira de sensores mapeados
-    _backgroundTimer = Timer.periodic(const Duration(milliseconds: 1000), (
-      timer,
-    ) {
-      final supportedPids = ref.read(supportedPidsProvider);
-      if (supportedPids.isEmpty) return;
+  void _startDashboardPolling() {
+    final supportedPids = ref.read(supportedPidsProvider);
 
-      final availablePids = pidRegistry.values
-          .where((pid) => supportedPids.contains(pid.id))
-          .toList();
+    final pidsReais = pidRegistry.values
+        .where((pid) => supportedPids.contains(pid.id))
+        .map((pid) => pid.id)
+        .toList();
 
-      // Divide a lista em grupos de até 6 sensores (Multi-PID)
-      for (int i = 0; i < availablePids.length; i += 6) {
-        final chunk = availablePids.skip(i).take(6);
-
-        String multiCommand = "01"; // Modo 01
-        for (var pid in chunk) {
-          multiCommand += pid.id
-              .toRadixString(16)
-              .padLeft(2, '0')
-              .toUpperCase();
-        }
-
-        // Envia o comando agrupado (ex: "010C050D110F04")
-        ref.read(obdManagerProvider).queueCommand(multiCommand);
-      }
-    });
+    // CHAMA COM COOLDOWN DE 3 SEGUNDOS ENTRE OS LOTES
+    ref
+        .read(obdManagerProvider)
+        .setPollingPids(
+          pidsReais,
+          cooldown: const Duration(seconds: 3), // Pausa entre os tiros
+          fastInitialPass: true, // Liga o turbo na primeira volta
+        );
   }
 
   @override
   void dispose() {
-    _backgroundTimer
-        ?.cancel(); // Mata o loop se trocar de aba para não travar o scanner
     super.dispose();
   }
 
@@ -116,10 +104,10 @@ class _SensorsDashboardScreenState
                             return SensorTile(
                               pid: pid,
                               onTap: () async {
-                                // 1. PAUSA A VARREDURA GERAL
-                                _backgroundTimer?.cancel();
+                                // 1. PAUSA A VARREDURA GERAL DA TELA
+                                _obdManager.setPollingPids([]);
 
-                                // 2. NAVEGA PARA OS DETALHES E ESPERA
+                                // 2. NAVEGA PARA OS DETALHES
                                 await Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -128,9 +116,9 @@ class _SensorsDashboardScreenState
                                   ),
                                 );
 
-                                // 3. O USUÁRIO APERTOU "VOLTAR"! RETOMA A VARREDURA GERAL
+                                // 3. RETORNOU DA TELA! RETOMA A VARREDURA
                                 if (mounted) {
-                                  _startBackgroundPolling();
+                                  _startDashboardPolling();
                                 }
                               },
                             );

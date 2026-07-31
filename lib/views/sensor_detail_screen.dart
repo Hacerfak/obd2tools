@@ -1,10 +1,10 @@
-import 'dart:async';
 import 'dart:math'; // NOVO: Para usar as funções min() e max()
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../parser/obd_pid.dart';
 import '../state/obd_providers.dart';
+import '../connection/obd_manager.dart';
 
 class SensorDetailScreen extends ConsumerStatefulWidget {
   final ObdPid pid;
@@ -16,32 +16,24 @@ class SensorDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
-  Timer? _pollingTimer;
+  late final ObdManager _obdManager;
 
   @override
   void initState() {
     super.initState();
-    _startPolling();
-  }
 
-  void _startPolling() {
-    _requestData();
-    _pollingTimer = Timer.periodic(const Duration(milliseconds: 300), (timer) {
-      _requestData();
+    _obdManager = ref.read(obdManagerProvider);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Pede para o Manager focar 100% da banda neste único sensor
+      _obdManager.setPollingPids([widget.pid.id]);
     });
-  }
-
-  void _requestData() {
-    String hexPid = widget.pid.id
-        .toRadixString(16)
-        .padLeft(2, '0')
-        .toUpperCase();
-    ref.read(obdManagerProvider).queueCommand("01$hexPid");
   }
 
   @override
   void dispose() {
-    _pollingTimer?.cancel();
+    // Zera o foco ao voltar
+    //_obdManager.setPollingPids([]);
     super.dispose();
   }
 
