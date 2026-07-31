@@ -10,7 +10,6 @@ class FaultDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      backgroundColor: const Color(0xFF12151C),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,

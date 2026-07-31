@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // NOVO IMPORT
 import '../state/obd_providers.dart';
 import 'home_screen.dart';
+import 'package:flutter/foundation.dart';
 
 class ConnectionScreen extends ConsumerStatefulWidget {
   // NOVO: Flag para saber se devemos tentar conectar sozinho ao abrir
@@ -60,7 +61,7 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
     final manager = ref.read(obdManagerProvider);
     final devices = await manager.connection.getPairedDevices();
 
-    if (mounted) {
+    if (context.mounted) {
       setState(() {
         _pairedDevices = devices;
         _isLoadingPaired = false;
@@ -79,7 +80,7 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
     _discoverySubscription?.cancel();
     _discoverySubscription = manager.connection.startDiscovery().listen(
       (device) {
-        if (mounted) {
+        if (context.mounted) {
           setState(() {
             bool isAlreadyPaired = _pairedDevices.any(
               (d) => d["mac"] == device["mac"],
@@ -95,10 +96,10 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
         }
       },
       onDone: () {
-        if (mounted) setState(() => _isDiscovering = false);
+        if (context.mounted) setState(() => _isDiscovering = false);
       },
       onError: (error) {
-        if (mounted) setState(() => _isDiscovering = false);
+        if (context.mounted) setState(() => _isDiscovering = false);
       },
     );
   }
@@ -132,7 +133,9 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
           .connect(macAddress.trim())
           .timeout(const Duration(seconds: 10));
     } catch (e) {
-      print("Erro ou tempo esgotado na conexão: $e");
+      if (kDebugMode) {
+        debugPrint("Erro ou tempo esgotado na conexão: $e");
+      }
       success = false;
     }
 
@@ -219,7 +222,7 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
       if (next == AppConnectionState.ready) {
         // Dá 1.5 segundos para o usuário ver o "check" verde antes de ir pro Dash
         Future.delayed(const Duration(milliseconds: 1500), () {
-          if (mounted) {
+          if (context.mounted) {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (_) => const HomeScreen()),
@@ -230,7 +233,6 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
     });
 
     return Scaffold(
-      backgroundColor: const Color(0xFF12151C),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),

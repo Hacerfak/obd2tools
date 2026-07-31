@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_classic_bluetooth/flutter_classic_bluetooth.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter/foundation.dart';
 
 class ObdConnection {
   final _bluetooth = FlutterClassicBluetooth();
@@ -33,7 +34,9 @@ class ObdConnection {
           });
         }
       } catch (e) {
-        print("Erro ao buscar dispositivos pareados: $e");
+        if (kDebugMode) {
+          debugPrint("Erro ao buscar dispositivos pareados: $e");
+        }
       }
     }
     return deviceList;
@@ -66,10 +69,16 @@ class ObdConnection {
           };
         }
       } catch (e) {
-        print("Erro ao escanear novos dispositivos: $e");
+        if (kDebugMode) {
+          debugPrint("Erro ao escanear novos dispositivos: $e");
+        }
       }
     } else {
-      print("Permissões de localização/scan negadas pelo usuário no mobile.");
+      if (kDebugMode) {
+        debugPrint(
+          "Permissões de localização/scan negadas pelo usuário no mobile.",
+        );
+      }
     }
   }
 
@@ -88,7 +97,9 @@ class ObdConnection {
 
       return true;
     } catch (e) {
-      print('Erro ao conectar na Montana: $e');
+      if (kDebugMode) {
+        debugPrint('Erro ao conectar ao veículo: $e');
+      }
       return false;
     }
   }
@@ -106,7 +117,9 @@ class ObdConnection {
       // Usamos a propriedade 'output' e o método facilitador 'writeString'
       await _activeConnection!.output.writeString(fullCommand);
     } catch (e) {
-      print('Erro ao enviar comando: $e');
+      if (kDebugMode) {
+        debugPrint('Erro ao enviar comando: $e');
+      }
     }
   }
 
@@ -120,7 +133,9 @@ class ObdConnection {
         _activeConnection = null;
       }
     } catch (e) {
-      print('Aviso ao desconectar (ignorado): $e');
+      if (kDebugMode) {
+        debugPrint('Aviso ao desconectar (ignorado): $e');
+      }
     }
   }
 
@@ -128,7 +143,9 @@ class ObdConnection {
     try {
       await _bluetooth.stopDiscovery();
     } catch (e) {
-      print("Aviso ao parar scan: $e");
+      if (kDebugMode) {
+        debugPrint("Aviso ao parar scan: $e");
+      }
     }
   }
 }

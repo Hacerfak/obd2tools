@@ -3,6 +3,23 @@ import '../parser/parsers/mode_01_parser.dart';
 import '../connection/obd_connection.dart';
 import '../models/dtc_fault.dart';
 import '../connection/obd_manager.dart';
+import 'package:flutter/material.dart';
+
+// ============================================================================
+// CONTROLE DE TEMA (CLARO/ESCURO/SISTEMA)
+// ============================================================================
+class ThemeModeNotifier extends Notifier<ThemeMode> {
+  @override
+  ThemeMode build() => ThemeMode.system;
+
+  void setTheme(ThemeMode mode) {
+    state = mode;
+  }
+}
+
+final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(() {
+  return ThemeModeNotifier();
+});
 
 // ============================================================================
 // TÚNEL 1: DADOS EM TEMPO REAL COM HISTÓRICO (Modo 01)

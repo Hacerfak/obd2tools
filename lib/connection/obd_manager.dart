@@ -9,6 +9,7 @@ import '../state/obd_providers.dart';
 import '../parser/parsers/dtc_parser.dart';
 import '../parser/parsers/mode_02_parser.dart';
 import '../models/dtc_fault.dart';
+import 'package:flutter/foundation.dart';
 
 class ObdManager {
   final ObdConnection connection;
@@ -42,7 +43,9 @@ class ObdManager {
 
   void _addLog(String message) {
     _logStreamController.add(message);
-    print(message);
+    if (kDebugMode) {
+      debugPrint(message);
+    }
   }
 
   void queueCommand(String command) {

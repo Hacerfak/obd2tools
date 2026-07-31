@@ -167,7 +167,7 @@ class _HudSensorSelectorState extends ConsumerState<HudSensorSelector> {
                     child: ReorderableListView.builder(
                       shrinkWrap: true,
                       itemCount: selectedPidsFull.length,
-                      onReorder: (oldIndex, newIndex) {
+                      onReorderItem: (oldIndex, newIndex) {
                         setState(() {
                           if (newIndex > oldIndex) newIndex -= 1;
                           final item = _selectedPids.removeAt(oldIndex);

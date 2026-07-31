@@ -50,6 +50,42 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
+  // --- NOVO: BOTÃO DE ALTERNAR TEMA ---
+  Widget _buildThemeToggle() {
+    final currentTheme = ref.watch(themeModeProvider);
+    IconData icon;
+    String tooltip;
+
+    if (currentTheme == ThemeMode.system) {
+      icon = Icons.brightness_auto;
+      tooltip = "Tema: Sistema";
+    } else if (currentTheme == ThemeMode.light) {
+      icon = Icons.light_mode;
+      tooltip = "Tema: Claro";
+    } else {
+      icon = Icons.dark_mode;
+      tooltip = "Tema: Escuro";
+    }
+
+    return IconButton(
+      icon: Icon(icon),
+      tooltip: tooltip,
+      // Puxa a cor de ícone definida pelo tema atual
+      color: Theme.of(context).iconTheme.color,
+      onPressed: () {
+        // Cicla entre: Sistema -> Claro -> Escuro -> Sistema
+        final newTheme = currentTheme == ThemeMode.system
+            ? ThemeMode.light
+            : currentTheme == ThemeMode.light
+            ? ThemeMode.dark
+            : ThemeMode.system;
+
+        // NOVA CHAMADA UTILIZANDO A FUNÇÃO QUE CRIAMOS
+        ref.read(themeModeProvider.notifier).setTheme(newTheme);
+      },
+    );
+  }
+
   // --- WIDGET DO LED DE STATUS + BOTÃO DE DESCONECTAR ---
   Widget _buildStatusAndDisconnect(AppConnectionState state, bool isDesktop) {
     Color dotColor = Colors.grey;
@@ -95,6 +131,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          _buildThemeToggle(),
+          const SizedBox(height: 8),
           ledDot,
           const SizedBox(height: 16),
           powerButton,
@@ -104,7 +142,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     } else {
       return Row(
         mainAxisSize: MainAxisSize.min,
-        children: [ledDot, const SizedBox(width: 16), powerButton],
+        children: [
+          _buildThemeToggle(),
+          const SizedBox(width: 8),
+          ledDot,
+          const SizedBox(width: 16),
+          powerButton,
+        ],
       );
     }
   }
@@ -134,8 +178,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         bool isDesktop = constraints.maxWidth > 600;
 
         return Scaffold(
-          backgroundColor: const Color(0xFF12151C),
-
           // REMOVEMOS O APPBAR TOTALMENTE!
           body: SafeArea(
             child: Row(
@@ -144,7 +186,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 if (isDesktop)
                   Container(
                     width: 80, // Largura padrão do NavigationRail
-                    color: const Color(0xFF1A1D24),
+                    color: Theme.of(context).appBarTheme.backgroundColor,
                     child: Column(
                       children: [
                         Expanded(
@@ -192,14 +234,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             horizontal: 16,
                             vertical: 8,
                           ),
-                          color: const Color(0xFF1A1D24),
+                          color: Theme.of(context).appBarTheme.backgroundColor,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
-                                "Montana OBD",
+                              Text(
+                                "OBD2 Tools",
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
                                   letterSpacing: 1,
@@ -227,7 +271,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   onDestinationSelected: (int index) {
                     setState(() => _selectedIndex = index);
                   },
-                  backgroundColor: const Color(0xFF1A1D24),
+                  backgroundColor: Theme.of(
+                    context,
+                  ).appBarTheme.backgroundColor,
                   destinations: const [
                     NavigationDestination(
                       icon: Icon(Icons.grid_view),

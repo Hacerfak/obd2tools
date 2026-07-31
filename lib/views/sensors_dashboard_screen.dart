@@ -60,7 +60,6 @@ class _SensorsDashboardScreenState
         .toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFF12151C),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -68,19 +67,23 @@ class _SensorsDashboardScreenState
           children: [
             Text(
               "Sensores Mapeados (${availablePids.length})",
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 16),
             Expanded(
               child: availablePids.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Text(
                         "Nenhum sensor encontrado.",
-                        style: TextStyle(color: Colors.white54),
+                        style: TextStyle(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.54),
+                        ),
                       ),
                     )
                   : LayoutBuilder(

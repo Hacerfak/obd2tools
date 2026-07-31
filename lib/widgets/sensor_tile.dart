@@ -5,7 +5,7 @@ import '../state/obd_providers.dart';
 
 class SensorTile extends ConsumerWidget {
   final ObdPid pid;
-  final VoidCallback onTap; // NOVO: Ação passada pelo painel pai
+  final VoidCallback onTap;
 
   const SensorTile({super.key, required this.pid, required this.onTap});
 
@@ -14,17 +14,14 @@ class SensorTile extends ConsumerWidget {
     final liveData = ref.watch(realTimeStateProvider);
     final sensorData = liveData[pid.name];
 
+    // Pegamos a cor de texto base do tema para aplicar opacidades
+    final onSurfaceColor = Theme.of(context).colorScheme.onSurface;
+
     return Card(
-      elevation: 2,
-      color: const Color(0xFF1E222D),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: Colors.white10, width: 1),
-      ),
+      // A COR E O SHAPE AGORA VÊM AUTOMATICAMENTE DO THEMEDATA (main.dart)
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap:
-            onTap, // NOVO: Chama a função externa ao invés de usar o Navigator aqui
+        onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -33,24 +30,24 @@ class SensorTile extends ConsumerWidget {
             children: [
               Text(
                 pid.name,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Colors.white70,
+                  color: onSurfaceColor.withValues(
+                    alpha: 0.7,
+                  ), // Substitui o Colors.white70
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 8),
-
-              // Exibe o tradutor (se existir) ou o número
               if (sensorData != null && pid.formatValue != null)
                 Text(
                   pid.formatValue!(sensorData.value),
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.amberAccent,
+                    color: Colors.amberAccent, // Cor semântica (mantém)
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -65,16 +62,18 @@ class SensorTile extends ConsumerWidget {
                   style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: Colors.greenAccent,
+                    color: Colors.greenAccent, // Cor semântica (mantém)
                     fontFamily: 'Monospace',
                   ),
                 ),
-
               Text(
                 pid.unit.isEmpty && pid.formatValue == null
                     ? "Status"
                     : pid.unit,
-                style: const TextStyle(fontSize: 12, color: Colors.white38),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: onSurfaceColor.withValues(alpha: 0.38),
+                ),
               ),
             ],
           ),
