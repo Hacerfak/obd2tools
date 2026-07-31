@@ -338,13 +338,29 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
               else if (connState == AppConnectionState.connectingBluetooth) ...[
                 const Spacer(),
                 const Center(
-                  child: CircularProgressIndicator(color: Colors.blueAccent),
+                  // TIRAMOS O SPINNER E COLOCAMOS UM ÍCONE ESTÁTICO IMPONENTE
+                  child: Icon(
+                    Icons
+                        .bluetooth_audio_rounded, // Ícone que remete a tráfego de dados
+                    size: 80,
+                    color: Colors.blueAccent,
+                  ),
                 ),
                 const SizedBox(height: 24),
                 const Text(
-                  "Conectando com o adaptador bluetooth...",
+                  "Estabelecendo conexão segura...",
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.white70),
+                  style: TextStyle(
+                    color: Colors.blueAccent,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  "Isso pode levar alguns segundos.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white54),
                 ),
                 const Spacer(),
               ]

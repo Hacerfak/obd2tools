@@ -172,7 +172,9 @@ class DtcNotifier extends Notifier<DtcState> {
       }
     }
 
-    state = DtcState(isLoading: false, faults: updatedFaults);
+    // CORREÇÃO: Usa o 'state.isLoading' atual em vez de cravar 'false'.
+    // O carregamento só vai terminar quando o Manager mandar!
+    state = DtcState(isLoading: state.isLoading, faults: updatedFaults);
   }
 
   // Anexa o Freeze Frame ao primeiro erro Confirmado que encontrar

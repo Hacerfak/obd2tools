@@ -62,7 +62,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           appBar: AppBar(
             backgroundColor: const Color(0xFF1A1D24),
             title: const Text(
-              "Montana OBD",
+              "ODB-II Tools",
               style: TextStyle(color: Colors.white),
             ),
             actions: [

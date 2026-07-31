@@ -223,12 +223,6 @@ class ObdManager {
     try {
       if (response.contains("NO DATA") || response.contains("ERROR")) {
         _addLog("ALERTA: Erro ou dado inexistente.");
-
-        // CORREÇÃO: Em vez de setCodes([]), apenas desligamos o carregamento,
-        // mantendo intactas as falhas de outros modos que já possam ter sido lidas.
-        if (ref.read(dtcStateProvider).isLoading) {
-          ref.read(dtcStateProvider.notifier).setLoading(false);
-        }
         return;
       }
 
@@ -435,6 +429,11 @@ class ObdManager {
             }
           });
         }
+      }
+      // CORREÇÃO: Se não estamos em polling (estamos lendo falhas) e a fila esvaziou, o diagnóstico ACABOU!
+      else if (!_isPollingEnabled && _commandQueue.isEmpty) {
+        ref.read(dtcStateProvider.notifier).setLoading(false);
+        _addLog("Diagnóstico concluído com sucesso.");
       }
     }
   }

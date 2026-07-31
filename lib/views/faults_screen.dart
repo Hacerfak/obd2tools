@@ -13,18 +13,27 @@ class FaultsScreen extends ConsumerStatefulWidget {
 
 class _FaultsScreenState extends ConsumerState<FaultsScreen> {
   DtcStatus? _selectedFilter; // null = Todas
+  bool _isInitializing = true; // NOVA FLAG: Impede a piscadinha inicial!
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(obdManagerProvider).scanAllFaults();
+      if (mounted) {
+        setState(
+          () => _isInitializing = false,
+        ); // Libera o controle para o Provider
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final dtcState = ref.watch(dtcStateProvider);
+
+    // VARIÁVEL DE CONTROLE: É carregamento se for a tela inicializando OU se o Manager estiver buscando
+    final bool isScreenLoading = _isInitializing || dtcState.isLoading;
 
     // Aplica o filtro selecionado
     List<DtcFault> filteredFaults = dtcState.faults.values.where((fault) {
@@ -51,11 +60,13 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
                     color: Colors.white,
                   ),
                 ),
-                IconButton.filledTonal(
-                  onPressed: () => ref.read(obdManagerProvider).scanAllFaults(),
-                  icon: const Icon(Icons.refresh),
-                  color: Colors.blueAccent,
-                ),
+                if (!isScreenLoading)
+                  IconButton.filledTonal(
+                    onPressed: () =>
+                        ref.read(obdManagerProvider).scanAllFaults(),
+                    icon: const Icon(Icons.refresh),
+                    color: Colors.blueAccent,
+                  ),
               ],
             ),
             const SizedBox(height: 16),
@@ -79,10 +90,20 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
 
             // LISTA DE FALHAS
             Expanded(
-              child: dtcState.isLoading
+              child:
+                  isScreenLoading // USA A NOVA VARIÁVEL DE CONTROLE AQUI
                   ? const Center(
-                      child: CircularProgressIndicator(
-                        color: Colors.blueAccent,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircularProgressIndicator(color: Colors.blueAccent),
+                          SizedBox(height: 16),
+                          Text(
+                            "Lendo memória da ECU e dados congelados...\nPor favor, aguarde.",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: Colors.white70),
+                          ),
+                        ],
                       ),
                     )
                   : filteredFaults.isEmpty
