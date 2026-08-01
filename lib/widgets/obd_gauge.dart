@@ -20,6 +20,8 @@ class ObdGauge extends ConsumerWidget {
     if (pid.unit == "%") return 100;
     if (pid.unit == "V") return 16;
     if (pid.unit == "kPa") return 255;
+    if (pid.unit == "λ" || pid.unit == "Lambda") return 2.0;
+    if (pid.unit == "Pa") return 8192;
     return 100;
   }
 
@@ -157,8 +159,12 @@ class ObdGauge extends ConsumerWidget {
         Expanded(
           child: LineChart(
             LineChartData(
+              // TRAVA O EIXO Y
               minY: 0,
               maxY: maxValue,
+              // TRAVA O EIXO X (Nosso histórico tem max 30 pontos, então vai de 0 a 29)
+              minX: 0,
+              maxX: 29,
               gridData: const FlGridData(show: false),
               titlesData: const FlTitlesData(show: false),
               borderData: FlBorderData(show: false),
@@ -169,7 +175,8 @@ class ObdGauge extends ConsumerWidget {
                       .entries
                       .map((e) => FlSpot(e.key.toDouble(), e.value))
                       .toList(),
-                  isCurved: true,
+                  isCurved:
+                      false, // REMOVE O CHICOTE (Fica estilo batimento cardíaco/Racing)
                   color: Colors.greenAccent,
                   barWidth: 3,
                   dotData: const FlDotData(show: false),

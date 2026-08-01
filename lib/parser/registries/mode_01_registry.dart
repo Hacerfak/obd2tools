@@ -7,7 +7,15 @@ final Map<int, ObdPid> pidRegistry = {
     name: "Status dos Monitores DTC",
     unit: "",
     expectedBytes: 4,
-    calculate: (bytes) => bytes[0].toDouble(), // Status de flags
+    calculate: (bytes) => bytes[0].toDouble(), // Analisamos o Byte A
+    formatValue: (value) {
+      int val = value.toInt();
+      // O 8º bit (128) indica se a Luz de Injeção (MIL) está acesa
+      bool isMilOn = (val & 0x80) != 0;
+      // Os 7 bits restantes (0 a 127) indicam a quantidade de falhas gravadas
+      int dtcCount = val & 0x7F;
+      return "Luz ${isMilOn ? 'Acesa' : 'Apagada'} ($dtcCount Erros)";
+    },
   ),
   0x03: ObdPid(
     id: 0x03,
@@ -41,6 +49,16 @@ final Map<int, ObdPid> pidRegistry = {
     unit: "°C",
     expectedBytes: 1,
     calculate: (bytes) => bytes[0] - 40.0,
+    evaluateHealth: (value) {
+      if (value < 75) return SensorHealth.warning; // Motor frio
+      if (value >= 75 && value <= 105) {
+        return SensorHealth.normal;
+      } // Temperatura ideal de trabalho
+      if (value > 105 && value <= 115) {
+        return SensorHealth.warning;
+      } // Esquentar um pouco na subida
+      return SensorHealth.critical; // Ferveu!
+    },
   ),
   0x0B: ObdPid(
     id: 0x0B,
@@ -79,6 +97,13 @@ final Map<int, ObdPid> pidRegistry = {
     unit: "°C",
     expectedBytes: 1,
     calculate: (bytes) => bytes[0] - 40.0,
+    evaluateHealth: (value) {
+      if (value <= 50.0) return SensorHealth.normal;
+      if ((value > 50.0 && value <= 70.0)) {
+        return SensorHealth.warning;
+      }
+      return SensorHealth.critical; // Ar de admissão muito quente!
+    },
   ),
   0x10: ObdPid(
     id: 0x10,
@@ -102,6 +127,17 @@ final Map<int, ObdPid> pidRegistry = {
     unit: "",
     expectedBytes: 1,
     calculate: (bytes) => bytes[0].toDouble(),
+    formatValue: (value) {
+      // Cada bit '1' representa uma Sonda Lambda presente no escapamento.
+      // Convertendo para binário e contando os '1's:
+      int count = value
+          .toInt()
+          .toRadixString(2)
+          .split('')
+          .where((e) => e == '1')
+          .length;
+      return "$count Sensor(es) Detectado(s)";
+    },
   ),
   0x1C: ObdPid(
     id: 0x1C,
@@ -109,6 +145,89 @@ final Map<int, ObdPid> pidRegistry = {
     unit: "",
     expectedBytes: 1,
     calculate: (bytes) => bytes[0].toDouble(),
+    formatValue: (value) {
+      int val = value.toInt();
+      switch (val) {
+        case 1:
+          return "OBD-II (EUA)";
+        case 2:
+          return "OBD (Federal EPA - EUA)";
+        case 3:
+          return "OBD e OBD-II";
+        case 4:
+          return "OBD-I";
+        case 5:
+          return "Não Projetado para OBD";
+        case 6:
+          return "EOBD (Europa)";
+        case 7:
+          return "EOBD e OBD-II";
+        case 8:
+          return "EOBD e OBD";
+        case 9:
+          return "EOBD, OBD e OBD-II";
+        case 10:
+          return "JOBD (Japão)";
+        case 11:
+          return "JOBD e OBD-II";
+        case 12:
+          return "JOBD e EOBD";
+        case 13:
+          return "JOBD, EOBD e OBD-II";
+        case 14:
+          return "Heavy Duty (Euro IV B1)";
+        case 15:
+          return "Heavy Duty (Euro V B2)";
+        case 16:
+          return "Heavy Duty (Euro EEV C)";
+        case 17:
+          return "EMD (Diagnóstico do Fabricante)";
+        case 18:
+          return "EMD+ (Diagnóstico Avançado)";
+        case 19:
+          return "HD OBD-C (Heavy Duty Parcial)";
+        case 20:
+          return "HD OBD (Heavy Duty EUA)";
+        case 21:
+          return "WWH OBD (Padrão Mundial Harmonizado)";
+        // O valor 22 é historicamente reservado/sem uso na tabela
+        case 23:
+          return "HD EOBD-I (Heavy Duty Euro I)";
+        case 24:
+          return "HD EOBD-I N (Com Controle de NOx)";
+        case 25:
+          return "HD EOBD-II";
+        case 26:
+          return "HD EOBD-II N (Com Controle de NOx)";
+        case 27:
+          return "HD EOBD-III";
+        case 28:
+          return "HD EOBD-IV";
+        case 29:
+          return "HD EOBD-V";
+        // O valor 30 também é reservado
+        case 31:
+          return "OBDBr-1 (Brasil)";
+        case 32:
+          return "OBDBr-2 (Brasil)";
+        case 33:
+          return "KOBD (Coreia do Sul)";
+        case 34:
+          return "India OBD I";
+        case 35:
+          return "India OBD II";
+        case 36:
+          return "HD EOBD-VI";
+        case 37:
+          return "OBDBr-3 (Brasil)";
+        case 38:
+          return "India OBD III";
+        case 39:
+          return "India OBD IV";
+        default:
+          return "Reservado/Desconhecido ($val)";
+      }
+    },
   ),
   0x1F: ObdPid(
     id: 0x1F,
@@ -139,6 +258,13 @@ final Map<int, ObdPid> pidRegistry = {
     unit: "%",
     expectedBytes: 1,
     calculate: (bytes) => (bytes[0] / 255.0) * 100.0,
+    evaluateHealth: (value) {
+      if (value >= 15.0) return SensorHealth.normal;
+      if ((value >= 5.0 && value < 15.0)) {
+        return SensorHealth.warning; //Tanque na reserva
+      }
+      return SensorHealth.critical; // Muito abaixo da reserva
+    },
   ),
   0x30: ObdPid(
     id: 0x30,
@@ -176,6 +302,13 @@ final Map<int, ObdPid> pidRegistry = {
     unit: "",
     expectedBytes: 4,
     calculate: (bytes) => bytes[0].toDouble(),
+    formatValue: (value) {
+      int val = value.toInt();
+      // Similar ao 0x01, mas focado no ciclo de direção atual
+      int dtcCount = val & 0x7F;
+      if (dtcCount == 0) return "Limpos (Sem Falhas)";
+      return "$dtcCount Falha(s) neste ciclo";
+    },
   ),
   0x42: ObdPid(
     id: 0x42,
@@ -183,6 +316,13 @@ final Map<int, ObdPid> pidRegistry = {
     unit: "V",
     expectedBytes: 2,
     calculate: (bytes) => ((bytes[0] * 256) + bytes[1]) / 1000.0,
+    evaluateHealth: (value) {
+      if (value >= 13.5 && value <= 14.7) return SensorHealth.normal;
+      if ((value >= 12.0 && value < 13.5) || (value > 14.7 && value <= 15.0)) {
+        return SensorHealth.warning;
+      }
+      return SensorHealth.critical;
+    },
   ),
   0x43: ObdPid(
     id: 0x43,
@@ -198,6 +338,13 @@ final Map<int, ObdPid> pidRegistry = {
     unit: "λ",
     expectedBytes: 2,
     calculate: (bytes) => ((bytes[0] * 256) + bytes[1]) / 32768.0,
+    evaluateHealth: (value) {
+      if (value >= 0.95 && value <= 1.05) return SensorHealth.normal;
+      if ((value >= 0.90 && value < 0.95) || (value > 1.05 && value <= 1.10)) {
+        return SensorHealth.warning;
+      }
+      return SensorHealth.critical; // Mistura perigosamente rica ou pobre
+    },
   ),
   0x45: ObdPid(
     id: 0x45,

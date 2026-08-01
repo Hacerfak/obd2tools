@@ -76,10 +76,14 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
                     onSurface,
                   ),
                   const SizedBox(width: 8),
-                  _buildFilterChip("Pendentes", DtcStatus.pending, onSurface),
+                  _buildFilterChip(
+                    "Em avaliação",
+                    DtcStatus.pending,
+                    onSurface,
+                  ),
                   const SizedBox(width: 8),
                   _buildFilterChip(
-                    "Permanentes",
+                    "Monitoradas pela ECU",
                     DtcStatus.permanent,
                     onSurface,
                   ),

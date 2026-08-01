@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -32,31 +31,31 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
     super.dispose();
   }
 
+  // --- LIMITES FIXOS PARA O GRÁFICO PARAR DE PULAR ---
+  List<double> _getFixedBounds(String unit) {
+    if (unit == "RPM") return [0, 8000];
+    if (unit == "km/h") return [0, 220];
+    if (unit == "°C") return [-10, 130];
+    if (unit == "%") return [0, 100];
+    if (unit == "V") return [9, 16]; // Bateria do carro
+    if (unit == "kPa") return [0, 255]; // Pressão
+    if (unit == "g/s") return [0, 200]; // Fluxo de ar MAF
+    if (unit == "°") return [-20, 60]; // Avanço de ignição
+    if (unit == "λ" || unit == "Lambda") return [0, 2]; // Ar/Combustível
+    if (unit == "Pa") return [-8192, 8192]; // Pressão Evaporativa
+    return [0, 100]; // Padrão seguro
+  }
+
   @override
   Widget build(BuildContext context) {
     final liveData = ref.watch(realTimeStateProvider);
     final sensorData = liveData[widget.pid.name];
     final onSurface = Theme.of(context).colorScheme.onSurface;
 
-    double minY = 0;
-    double maxY = 100;
-    if (sensorData != null && sensorData.history.isNotEmpty) {
-      double minVal = sensorData.history.reduce(min);
-      double maxVal = sensorData.history.reduce(max);
-      double range = maxVal - minVal;
-
-      if (range < 20) {
-        minY = minVal - 10;
-        maxY = maxVal + 10;
-      } else {
-        minY = minVal - (range * 0.15);
-        maxY = maxVal + (range * 0.15);
-      }
-
-      if (minY < 0 && minVal >= 0) {
-        minY = 0;
-      }
-    }
+    // Busca os limites travados baseados na unidade do sensor!
+    final bounds = _getFixedBounds(widget.pid.unit);
+    final double minY = bounds[0];
+    final double maxY = bounds[1];
 
     return Scaffold(
       appBar: AppBar(
@@ -81,6 +80,7 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
               ),
             ),
             const SizedBox(height: 8),
+            // SE O SENSOR TIVER TRADUTOR (Ex: Malha Fechada)
             if (sensorData != null && widget.pid.formatValue != null)
               Text(
                 widget.pid.formatValue!(sensorData.value),
@@ -90,6 +90,7 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
                   color: Colors.amberAccent,
                 ),
               )
+            // SE FOR UM SENSOR NUMÉRICO NORMAL (Ex: RPM, Temp)
             else
               Row(
                 crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -118,75 +119,106 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
                   ),
                 ],
               ),
+
             const SizedBox(height: 48),
-            Text(
-              "Comportamento Recente",
-              style: TextStyle(
-                color: onSurface.withValues(alpha: 0.54),
-                fontSize: 16,
+
+            // --- NOVA REGRA: MOSTRA O GRÁFICO SÓ SE TIVER UNIDADE ---
+            if (widget.pid.unit.isNotEmpty) ...[
+              Text(
+                "Comportamento Recente",
+                style: TextStyle(
+                  color: onSurface.withValues(alpha: 0.54),
+                  fontSize: 16,
+                ),
               ),
-            ),
-            const SizedBox(height: 24),
-            Expanded(
-              child: (sensorData == null || sensorData.history.length < 2)
-                  ? Center(
-                      child: Text(
-                        "Lendo dados do CAN Bus...\n(Aguarde o preenchimento do gráfico)",
-                        textAlign: TextAlign.center,
+              const SizedBox(height: 24),
+              Expanded(
+                child: (sensorData == null || sensorData.history.length < 2)
+                    ? Center(
+                        child: Text(
+                          "Lendo dados do CAN Bus...\n(Aguarde o preenchimento do gráfico)",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: onSurface.withValues(alpha: 0.38),
+                          ),
+                        ),
+                      )
+                    : LineChart(
+                        LineChartData(
+                          minY: minY,
+                          maxY: maxY,
+                          minX: 0, // TRAVA O EIXO X
+                          maxX: 29, // TRAVA O EIXO X
+                          gridData: FlGridData(
+                            show: true,
+                            drawVerticalLine: false,
+                            getDrawingHorizontalLine: (value) => FlLine(
+                              color: onSurface.withValues(alpha: 0.1),
+                              strokeWidth: 1,
+                            ),
+                          ),
+                          titlesData: const FlTitlesData(
+                            leftTitles: AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: true,
+                                reservedSize: 45,
+                              ),
+                            ),
+                            bottomTitles: AxisTitles(
+                              sideTitles: SideTitles(showTitles: false),
+                            ),
+                            rightTitles: AxisTitles(
+                              sideTitles: SideTitles(showTitles: false),
+                            ),
+                            topTitles: AxisTitles(
+                              sideTitles: SideTitles(showTitles: false),
+                            ),
+                          ),
+                          borderData: FlBorderData(show: false),
+                          lineBarsData: [
+                            LineChartBarData(
+                              spots: sensorData.history.asMap().entries.map((
+                                e,
+                              ) {
+                                return FlSpot(e.key.toDouble(), e.value);
+                              }).toList(),
+                              isCurved: false,
+                              color: Colors.blueAccent,
+                              barWidth: 3,
+                              dotData: const FlDotData(show: false),
+                              belowBarData: BarAreaData(
+                                show: true,
+                                color: Colors.blueAccent.withValues(alpha: 0.2),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+              ),
+            ] else ...[
+              // Para sensores estáticos/textuais, exibimos uma mensagem sutil no lugar do gráfico
+              Expanded(
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.analytics_outlined,
+                        size: 80,
+                        color: onSurface.withValues(alpha: 0.05),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        "Histórico não aplicável para status em texto.",
                         style: TextStyle(
                           color: onSurface.withValues(alpha: 0.38),
                         ),
                       ),
-                    )
-                  : LineChart(
-                      LineChartData(
-                        minY: minY,
-                        maxY: maxY,
-                        gridData: FlGridData(
-                          show: true,
-                          drawVerticalLine: false,
-                          getDrawingHorizontalLine: (value) => FlLine(
-                            color: onSurface.withValues(alpha: 0.1),
-                            strokeWidth: 1,
-                          ),
-                        ),
-                        titlesData: const FlTitlesData(
-                          leftTitles: AxisTitles(
-                            sideTitles: SideTitles(
-                              showTitles: true,
-                              reservedSize: 45,
-                            ),
-                          ),
-                          bottomTitles: AxisTitles(
-                            sideTitles: SideTitles(showTitles: false),
-                          ),
-                          rightTitles: AxisTitles(
-                            sideTitles: SideTitles(showTitles: false),
-                          ),
-                          topTitles: AxisTitles(
-                            sideTitles: SideTitles(showTitles: false),
-                          ),
-                        ),
-                        borderData: FlBorderData(show: false),
-                        lineBarsData: [
-                          LineChartBarData(
-                            spots: sensorData.history.asMap().entries.map((e) {
-                              return FlSpot(e.key.toDouble(), e.value);
-                            }).toList(),
-                            isCurved: true,
-                            preventCurveOverShooting: true,
-                            color: Colors.blueAccent,
-                            barWidth: 3,
-                            dotData: const FlDotData(show: false),
-                            belowBarData: BarAreaData(
-                              show: true,
-                              color: Colors.blueAccent.withValues(alpha: 0.2),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-            ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),

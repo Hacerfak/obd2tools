@@ -1,3 +1,5 @@
+enum SensorHealth { normal, warning, critical, none }
+
 class ObdPid {
   final int id;
   final String name;
@@ -11,6 +13,9 @@ class ObdPid {
   // NOVO: Define se o sensor exige atualização em tempo real (RPM, Vel)
   final bool isFast;
 
+  // NOVO: Função que avalia se o número está bom ou ruim
+  final SensorHealth Function(double value)? evaluateHealth;
+
   const ObdPid({
     required this.id,
     required this.name,
@@ -20,5 +25,6 @@ class ObdPid {
     this.formatValue, // Pode ser nulo
     this.isFast =
         false, // Por padrão, os sensores são lentos (Temperatura, etc)
+    this.evaluateHealth,
   });
 }
