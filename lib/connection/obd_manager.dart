@@ -72,6 +72,13 @@ class ObdManager {
     queueCommand("04");
   }
 
+  // --- INFORMAÇÕES DO VEÍCULO (MODO 09) ---
+  void requestVehicleInfo() {
+    _addLog("Solicitando mapeamento do Modo 09 (PIDs Suportados)...");
+    _isPollingEnabled = false;
+    queueCommand("0900"); // A mágica começa aqui!
+  }
+
   // --- VARREDURA E CARROSSEL ---
   void setPollingPids(
     List<int> pids, {
@@ -276,9 +283,34 @@ class ObdManager {
       }
       // MODO 09 - Info do Veículo
       else if (cleanHex.startsWith("49")) {
-        Map<String, String> parsedInfo = Mode09Parser.parse(cleanHex);
-        if (parsedInfo.isNotEmpty) {
-          ref.read(vehicleInfoStateProvider.notifier).updateInfo(parsedInfo);
+        // Se for a resposta do mapeamento (0900 -> 4900)
+        if (cleanHex.startsWith("4900")) {
+          final RegExp supportRegex = RegExp(r'4900([0-9A-F]{8})');
+          final match = supportRegex.firstMatch(cleanHex);
+          if (match != null) {
+            String dataHex = match.group(1)!;
+            // Reutiliza o nosso decodificador de bits do Modo 01!
+            List<int> supported = Mode01Parser.parseSupportedPids(dataHex, 0);
+
+            _addLog("Mapeamento 09 concluído. PIDs suportados: $supported");
+            // Dispara automaticamente a fila pedindo os dados que o carro suporta
+            for (int pid in supported) {
+              if (pid != 0) {
+                String hexReq = pid
+                    .toRadixString(16)
+                    .padLeft(2, '0')
+                    .toUpperCase();
+                queueCommand("09$hexReq");
+              }
+            }
+          }
+        }
+        // Se for a resposta com os dados em si (ex: 4902...)
+        else {
+          Map<String, String> parsedInfo = Mode09Parser.parse(cleanHex);
+          if (parsedInfo.isNotEmpty) {
+            ref.read(vehicleInfoStateProvider.notifier).updateInfo(parsedInfo);
+          }
         }
       }
       // LÊ FALHAS CONFIRMADAS (Modo 03)

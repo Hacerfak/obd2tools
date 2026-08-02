@@ -6,6 +6,7 @@ import 'hud_screen.dart';
 import 'connection_screen.dart';
 import 'faults_screen.dart';
 import 'settings_screen.dart';
+import 'vehicle_info_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -21,7 +22,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     const SensorsDashboardScreen(),
     const HudScreen(),
     const FaultsScreen(),
-    const Center(child: Text("Informações do Veículo em breve")),
+    const VehicleInfoScreen(),
   ];
 
   void _disconnectAndExit() async {
