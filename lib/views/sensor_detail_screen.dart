@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -46,18 +45,22 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
     return [0, 100];
   }
 
-  Color _getColorForHealth(SensorHealth? health, Color defaultColor) {
-    if (health == SensorHealth.normal) return Colors.greenAccent;
-    if (health == SensorHealth.warning) return Colors.amberAccent;
-    if (health == SensorHealth.critical) return Colors.redAccent;
-    return defaultColor;
-  }
-
   @override
   Widget build(BuildContext context) {
     final liveData = ref.watch(realTimeStateProvider);
     final sensorData = liveData[widget.pid.name];
     final onSurface = Theme.of(context).colorScheme.onSurface;
+
+    // CAPTURA AS CORES ESCOLHIDAS
+    final appColors = ref.watch(appColorsProvider);
+
+    // FUNÇÃO DINÂMICA INTERNA
+    Color getColorForHealth(SensorHealth? health, Color defaultColor) {
+      if (health == SensorHealth.normal) return appColors.normal;
+      if (health == SensorHealth.warning) return appColors.warning;
+      if (health == SensorHealth.critical) return appColors.critical;
+      return defaultColor;
+    }
 
     double minY = 0;
     double maxY = 100;
@@ -75,7 +78,7 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
         ? widget.pid.evaluateHealth!(sensorData.value)
         : null;
 
-    Color activeColor = _getColorForHealth(currentHealth, Colors.blueAccent);
+    Color activeColor = getColorForHealth(currentHealth, appColors.primary);
 
     return Scaffold(
       appBar: AppBar(

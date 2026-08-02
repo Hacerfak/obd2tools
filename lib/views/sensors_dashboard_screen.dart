@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../parser/registries/mode_01_registry.dart';
 import '../state/obd_providers.dart';
 import '../widgets/sensor_tile.dart';
@@ -58,12 +57,12 @@ class _SensorsDashboardScreenState
     final onSurface = Theme.of(context).colorScheme.onSurface;
 
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
               "Sensores Mapeados (${availablePids.length})",
               style: TextStyle(
                 fontSize: 18,
@@ -71,18 +70,21 @@ class _SensorsDashboardScreenState
                 color: onSurface,
               ),
             ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: availablePids.isEmpty
-                  ? Center(
-                      child: Text(
-                        "Nenhum sensor encontrado.",
-                        style: TextStyle(
-                          color: onSurface.withValues(alpha: 0.54),
-                        ),
+          ),
+
+          Expanded(
+            child: availablePids.isEmpty
+                ? Center(
+                    child: Text(
+                      "Nenhum sensor encontrado.",
+                      style: TextStyle(
+                        color: onSurface.withValues(alpha: 0.54),
                       ),
-                    )
-                  : LayoutBuilder(
+                    ),
+                  )
+                : Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: LayoutBuilder(
                       builder: (context, constraints) {
                         int crossAxisCount = constraints.maxWidth > 900
                             ? 4
@@ -91,9 +93,9 @@ class _SensorsDashboardScreenState
                           gridDelegate:
                               SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: crossAxisCount,
-                                crossAxisSpacing: 12,
-                                mainAxisSpacing: 12,
-                                childAspectRatio: 1.2,
+                                crossAxisSpacing: 10,
+                                mainAxisSpacing: 10,
+                                childAspectRatio: 2.2,
                               ),
                           itemCount: availablePids.length,
                           itemBuilder: (context, index) {
@@ -118,9 +120,27 @@ class _SensorsDashboardScreenState
                         );
                       },
                     ),
+                  ),
+          ),
+
+          Container(
+            width: double.infinity,
+            height: 60,
+            margin: const EdgeInsets.only(top: 8),
+            color: Theme.of(context).colorScheme.inverseSurface,
+            child: Center(
+              child: Text(
+                "ESPAÇO RESERVADO PARA ADMOB",
+                style: TextStyle(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onInverseSurface.withValues(alpha: 0.38),
+                  letterSpacing: 2,
+                ),
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

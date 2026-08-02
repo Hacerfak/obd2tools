@@ -182,9 +182,9 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                 fontSize: 12,
               ),
             ),
-            trailing: const Icon(
+            trailing: Icon(
               Icons.bluetooth_connected,
-              color: Colors.blueAccent,
+              color: Theme.of(context).colorScheme.primary,
             ),
             onTap: () => _startConnection(device["mac"]!),
           ),
@@ -218,10 +218,10 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Icon(
+              Icon(
                 Icons.bluetooth_searching,
                 size: 56,
-                color: Colors.blueAccent,
+                color: Theme.of(context).colorScheme.primary,
               ),
               const SizedBox(height: 16),
               Text(
@@ -244,10 +244,10 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
+                            Text(
                               "Dispositivos Pareados",
                               style: TextStyle(
-                                color: Colors.blueAccent,
+                                color: Theme.of(context).colorScheme.primary,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -271,10 +271,10 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
+                              Text(
                                 "Dispositivos Próximos",
                                 style: TextStyle(
-                                  color: Colors.blueAccent,
+                                  color: Theme.of(context).colorScheme.primary,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -309,27 +309,29 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                     ),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor: Colors.blueAccent.withValues(alpha: 0.2),
-                      foregroundColor: Colors.blueAccent,
+                      backgroundColor: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.2),
+                      foregroundColor: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                 ],
               ] else if (connState ==
                   AppConnectionState.connectingBluetooth) ...[
                 const Spacer(),
-                const Center(
+                Center(
                   child: Icon(
                     Icons.bluetooth_audio_rounded,
                     size: 80,
-                    color: Colors.blueAccent,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
                 const SizedBox(height: 24),
-                const Text(
+                Text(
                   "Estabelecendo conexão segura...",
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Colors.blueAccent,
+                    color: Theme.of(context).colorScheme.primary,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -373,8 +375,10 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
               ] else if (connState ==
                   AppConnectionState.discoveringSensors) ...[
                 const Spacer(),
-                const Center(
-                  child: CircularProgressIndicator(color: Colors.blueAccent),
+                Center(
+                  child: CircularProgressIndicator(
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                 ),
                 const SizedBox(height: 24),
                 Text(

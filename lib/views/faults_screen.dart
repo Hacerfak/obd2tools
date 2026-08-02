@@ -59,7 +59,7 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
                     onPressed: () =>
                         ref.read(obdManagerProvider).scanAllFaults(),
                     icon: const Icon(Icons.refresh),
-                    color: Colors.blueAccent,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
               ],
             ),
@@ -97,8 +97,8 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const CircularProgressIndicator(
-                            color: Colors.blueAccent,
+                          CircularProgressIndicator(
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                           const SizedBox(height: 16),
                           Text(
@@ -155,14 +155,18 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
         setState(() => _selectedFilter = selected ? status : null);
       },
       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-      selectedColor: Colors.blueAccent.withValues(alpha: 0.2),
+      selectedColor: Theme.of(
+        context,
+      ).colorScheme.primary.withValues(alpha: 0.2),
       labelStyle: TextStyle(
         color: isSelected
-            ? Colors.blueAccent
+            ? Theme.of(context).colorScheme.primary
             : onSurface.withValues(alpha: 0.7),
       ),
       side: BorderSide(
-        color: isSelected ? Colors.blueAccent : Colors.transparent,
+        color: isSelected
+            ? Theme.of(context).colorScheme.primary
+            : Colors.transparent,
       ),
     );
   }

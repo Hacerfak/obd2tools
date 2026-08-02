@@ -45,10 +45,10 @@ class FaultDetailScreen extends ConsumerWidget {
                   .toList(),
             ),
             const SizedBox(height: 24),
-            const Text(
+            Text(
               "Dados Congelados (Freeze Frame):",
               style: TextStyle(
-                color: Colors.blueAccent,
+                color: Theme.of(context).colorScheme.primary,
                 fontWeight: FontWeight.bold,
               ),
             ),

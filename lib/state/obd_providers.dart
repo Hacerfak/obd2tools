@@ -4,6 +4,7 @@ import '../connection/obd_connection.dart';
 import '../models/dtc_fault.dart';
 import '../connection/obd_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // ============================================================================
 // CONTROLE DE TEMA (CLARO/ESCURO/SISTEMA)
@@ -19,6 +20,83 @@ class ThemeModeNotifier extends Notifier<ThemeMode> {
 
 final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(() {
   return ThemeModeNotifier();
+});
+
+// ============================================================================
+// CONTROLE DE CORES CUSTOMIZADAS
+// ============================================================================
+class AppColors {
+  final Color primary;
+  final Color normal;
+  final Color warning;
+  final Color critical;
+
+  AppColors({
+    this.primary = Colors.blueAccent,
+    this.normal = Colors.greenAccent,
+    this.warning = Colors.amberAccent,
+    this.critical = Colors.redAccent,
+  });
+
+  AppColors copyWith({
+    Color? primary,
+    Color? normal,
+    Color? warning,
+    Color? critical,
+  }) {
+    return AppColors(
+      primary: primary ?? this.primary,
+      normal: normal ?? this.normal,
+      warning: warning ?? this.warning,
+      critical: critical ?? this.critical,
+    );
+  }
+}
+
+class AppColorsNotifier extends Notifier<AppColors> {
+  @override
+  AppColors build() {
+    _loadColors();
+    return AppColors(); // Retorna o padrão enquanto carrega
+  }
+
+  Future<void> _loadColors() async {
+    final prefs = await SharedPreferences.getInstance();
+    final p = prefs.getInt('color_primary');
+    final n = prefs.getInt('color_normal');
+    final w = prefs.getInt('color_warning');
+    final c = prefs.getInt('color_critical');
+
+    state = AppColors(
+      primary: p != null ? Color(p) : Colors.blueAccent,
+      normal: n != null ? Color(n) : Colors.greenAccent,
+      warning: w != null ? Color(w) : Colors.amberAccent,
+      critical: c != null ? Color(c) : Colors.redAccent,
+    );
+  }
+
+  Future<void> updateColor(String key, Color color) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('color_$key', color.toARGB32());
+
+    if (key == 'primary') state = state.copyWith(primary: color);
+    if (key == 'normal') state = state.copyWith(normal: color);
+    if (key == 'warning') state = state.copyWith(warning: color);
+    if (key == 'critical') state = state.copyWith(critical: color);
+  }
+
+  Future<void> resetToDefaults() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('color_primary');
+    await prefs.remove('color_normal');
+    await prefs.remove('color_warning');
+    await prefs.remove('color_critical');
+    state = AppColors();
+  }
+}
+
+final appColorsProvider = NotifierProvider<AppColorsNotifier, AppColors>(() {
+  return AppColorsNotifier();
 });
 
 // ============================================================================

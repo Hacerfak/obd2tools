@@ -15,60 +15,94 @@ class SensorTile extends ConsumerWidget {
     final sensorData = liveData[pid.name];
     final onSurfaceColor = Theme.of(context).colorScheme.onSurface;
 
+    // CAPTURA AS CORES ESCOLHIDAS
+    final appColors = ref.watch(appColorsProvider);
+
+    // FUNÇÃO DINÂMICA INTERNA
+    Color getColorForHealth(SensorHealth? health, Color defaultColor) {
+      if (health == SensorHealth.normal) return appColors.normal;
+      if (health == SensorHealth.warning) return appColors.warning;
+      if (health == SensorHealth.critical) return appColors.critical;
+      return defaultColor;
+    }
+
+    // Calcula a saúde para pintar o texto (usando a função nova)
+    SensorHealth? currentHealth =
+        sensorData != null && pid.evaluateHealth != null
+        ? pid.evaluateHealth!(sensorData.value)
+        : null;
+
+    Color activeColor = getColorForHealth(
+      currentHealth,
+      appColors.primary,
+    ); // Usa a primary como default
+
     return Card(
+      elevation: 1,
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              // NOME DO SENSOR
               Text(
                 pid.name,
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: onSurfaceColor.withValues(alpha: 0.7),
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(height: 8),
-              if (sensorData != null && pid.formatValue != null)
-                Text(
-                  pid.formatValue!(sensorData.value),
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.amberAccent,
+
+              // VALOR E UNIDADE
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Expanded(
+                    child: (sensorData != null && pid.formatValue != null)
+                        // Texto traduzido (Status)
+                        ? Text(
+                            pid.formatValue!(sensorData.value),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: activeColor,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          )
+                        // Valor numérico
+                        : Text(
+                            sensorData != null
+                                ? sensorData.value.toStringAsFixed(
+                                    pid.unit == "RPM" ? 0 : 1,
+                                  )
+                                : "--",
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w900,
+                              color: activeColor,
+                              fontFamily: 'Monospace',
+                            ),
+                          ),
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                )
-              else
-                Text(
-                  sensorData != null
-                      ? sensorData.value.toStringAsFixed(
-                          pid.unit == "RPM" ? 0 : 1,
-                        )
-                      : "--",
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.greenAccent,
-                    fontFamily: 'Monospace',
-                  ),
-                ),
-              Text(
-                pid.unit.isEmpty && pid.formatValue == null
-                    ? "Status"
-                    : pid.unit,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: onSurfaceColor.withValues(alpha: 0.38),
-                ),
+                  if (pid.unit.isNotEmpty && pid.formatValue == null)
+                    Text(
+                      pid.unit,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: activeColor.withValues(alpha: 0.7),
+                      ),
+                    ),
+                ],
               ),
             ],
           ),

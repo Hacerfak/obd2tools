@@ -102,7 +102,7 @@ class _HudScreenState extends ConsumerState<HudScreen> {
                         );
                       },
                       icon: const Icon(Icons.edit_rounded),
-                      color: Colors.blueAccent,
+                      color: Theme.of(context).colorScheme.primary,
                       tooltip: 'Gerenciar Sensores',
                     ),
                     const SizedBox(width: 12),
@@ -128,7 +128,9 @@ class _HudScreenState extends ConsumerState<HudScreen> {
                       style: SegmentedButton.styleFrom(
                         backgroundColor: onSurface.withValues(alpha: 0.1),
                         selectedForegroundColor: Colors.white,
-                        selectedBackgroundColor: Colors.blueAccent,
+                        selectedBackgroundColor: Theme.of(
+                          context,
+                        ).colorScheme.primary,
                       ),
                     ),
                   ],

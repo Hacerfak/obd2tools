@@ -31,54 +31,55 @@ class ObdGauge extends ConsumerWidget {
     return 100;
   }
 
-  Color _getColorForHealth(SensorHealth? health, Color defaultColor) {
-    if (health == SensorHealth.normal) return Colors.greenAccent;
-    if (health == SensorHealth.warning) return Colors.amberAccent;
-    if (health == SensorHealth.critical) return Colors.redAccent;
-    return defaultColor;
-  }
-
-  ZoneGradient _buildZoneGradient(
-    double minY,
-    double maxY,
-    Color defaultColor,
-  ) {
-    if (pid.evaluateHealth == null) {
-      // CORREÇÃO 2: Retorna a cor SÓLIDA para que a barra de progresso fique visível!
-      return ZoneGradient([defaultColor, defaultColor], [0.0, 1.0]);
-    }
-
-    List<Color> colors = [];
-    List<double> stops = [];
-    SensorHealth? lastHealth;
-
-    int steps = 100;
-    for (int i = 0; i <= steps; i++) {
-      double percent = i / steps;
-      double val = minY + (percent * (maxY - minY));
-
-      SensorHealth health = pid.evaluateHealth!(val);
-      Color healthColor = _getColorForHealth(health, defaultColor);
-
-      if (lastHealth != null && health != lastHealth) {
-        colors.add(_getColorForHealth(lastHealth, defaultColor));
-        stops.add(percent);
-        colors.add(healthColor);
-        stops.add(percent);
-      } else if (i == 0 || i == steps) {
-        colors.add(healthColor);
-        stops.add(percent);
-      }
-      lastHealth = health;
-    }
-    return ZoneGradient(colors, stops);
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final liveData = ref.watch(realTimeStateProvider);
     final sensorData = liveData[pid.name];
     final onSurface = Theme.of(context).colorScheme.onSurface;
+
+    // CAPTURA AS CORES ESCOLHIDAS
+    final appColors = ref.watch(appColorsProvider);
+
+    // FUNÇÃO DINÂMICA INTERNA
+    Color getColorForHealth(SensorHealth? health, Color defaultColor) {
+      if (health == SensorHealth.normal) return appColors.normal;
+      if (health == SensorHealth.warning) return appColors.warning;
+      if (health == SensorHealth.critical) return appColors.critical;
+      return defaultColor;
+    }
+
+    // E lá onde a gente gera as zonas, você também atualizará:
+    ZoneGradient buildZoneGradient(
+      double minY,
+      double maxY,
+      Color defaultColor,
+    ) {
+      if (pid.evaluateHealth == null) {
+        return ZoneGradient([defaultColor, defaultColor], [0.0, 1.0]);
+      }
+      List<Color> colors = [];
+      List<double> stops = [];
+      SensorHealth? lastHealth;
+      int steps = 100;
+      for (int i = 0; i <= steps; i++) {
+        double percent = i / steps;
+        double val = minY + (percent * (maxY - minY));
+        SensorHealth health = pid.evaluateHealth!(val);
+        Color healthColor = getColorForHealth(health, defaultColor);
+
+        if (lastHealth != null && health != lastHealth) {
+          colors.add(getColorForHealth(lastHealth, defaultColor));
+          stops.add(percent);
+          colors.add(healthColor);
+          stops.add(percent);
+        } else if (i == 0 || i == steps) {
+          colors.add(healthColor);
+          stops.add(percent);
+        }
+        lastHealth = health;
+      }
+      return ZoneGradient(colors, stops);
+    }
 
     double currentValue = sensorData?.value ?? 0.0;
     double maxValue = _getMaxValue();
@@ -87,9 +88,9 @@ class ObdGauge extends ConsumerWidget {
     SensorHealth? currentHealth = pid.evaluateHealth != null
         ? pid.evaluateHealth!(currentValue)
         : null;
-    Color activeColor = _getColorForHealth(currentHealth, Colors.blueAccent);
+    Color activeColor = getColorForHealth(currentHealth, appColors.primary);
 
-    ZoneGradient zones = _buildZoneGradient(0, maxValue, Colors.blueAccent);
+    ZoneGradient zones = buildZoneGradient(0, maxValue, appColors.primary);
 
     return Container(
       decoration: BoxDecoration(

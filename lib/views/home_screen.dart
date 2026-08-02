@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../state/obd_providers.dart';
 import 'sensors_dashboard_screen.dart';
 import 'hud_screen.dart';
 import 'connection_screen.dart';
 import 'faults_screen.dart';
+import 'settings_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -21,9 +21,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     const SensorsDashboardScreen(),
     const HudScreen(),
     const FaultsScreen(),
-    const Center(
-      child: Text("Informações do Veículo em breve"), // O tema já cuida da cor
-    ),
+    const Center(child: Text("Informações do Veículo em breve")),
   ];
 
   void _disconnectAndExit() async {
@@ -45,6 +43,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         (route) => false,
       );
     }
+  }
+
+  // --- BOTÃO DE CONFIGURAÇÕES ---
+  Widget _buildConfigButton() {
+    return IconButton(
+      icon: const Icon(Icons.settings),
+      tooltip: 'Configurações',
+      color: Theme.of(context).iconTheme.color,
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const SettingsScreen()),
+        );
+      },
+    );
   }
 
   Widget _buildThemeToggle() {
@@ -73,7 +86,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             : currentTheme == ThemeMode.light
             ? ThemeMode.dark
             : ThemeMode.system;
-
         ref.read(themeModeProvider.notifier).setTheme(newTheme);
       },
     );
@@ -122,6 +134,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          _buildConfigButton(), // INSERIDO ACIMA DO TEMA NA VERTICAL
+          const SizedBox(height: 8),
           _buildThemeToggle(),
           const SizedBox(height: 8),
           ledDot,
@@ -134,6 +148,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+          _buildConfigButton(), // INSERIDO ANTES DO TEMA NA HORIZONTAL
+          const SizedBox(width: 8),
           _buildThemeToggle(),
           const SizedBox(width: 8),
           ledDot,

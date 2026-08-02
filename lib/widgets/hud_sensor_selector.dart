@@ -97,7 +97,7 @@ class _HudSensorSelectorState extends ConsumerState<HudSensorSelector> {
                       style: TextStyle(
                         color: isMaxReached
                             ? Colors.redAccent
-                            : Colors.blueAccent,
+                            : Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -109,7 +109,7 @@ class _HudSensorSelectorState extends ConsumerState<HudSensorSelector> {
                     Navigator.pop(context);
                   },
                   style: FilledButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
                   ),
                   child: const Text(
                     "Salvar",
@@ -149,12 +149,12 @@ class _HudSensorSelectorState extends ConsumerState<HudSensorSelector> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (selectedPidsFull.isNotEmpty) ...[
-                  const Padding(
+                  Padding(
                     padding: EdgeInsets.all(16.0),
                     child: Text(
                       "SELECIONADOS (Arraste para reordenar)",
                       style: TextStyle(
-                        color: Colors.blueAccent,
+                        color: Theme.of(context).colorScheme.primary,
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                       ),
@@ -250,7 +250,7 @@ class _HudSensorSelectorState extends ConsumerState<HudSensorSelector> {
                               Icons.add_circle,
                               color: isDisabled
                                   ? onSurface.withValues(alpha: 0.12)
-                                  : Colors.blueAccent,
+                                  : Theme.of(context).colorScheme.primary,
                             ),
                             onPressed: isDisabled
                                 ? null
