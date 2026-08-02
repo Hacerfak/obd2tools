@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -31,19 +32,25 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
     super.dispose();
   }
 
-  // --- LIMITES FIXOS PARA O GRÁFICO PARAR DE PULAR ---
   List<double> _getFixedBounds(String unit) {
     if (unit == "RPM") return [0, 8000];
     if (unit == "km/h") return [0, 220];
-    if (unit == "°C") return [-10, 130];
+    if (unit == "°C" || unit == "C") return [-10, 130];
     if (unit == "%") return [0, 100];
-    if (unit == "V") return [9, 16]; // Bateria do carro
-    if (unit == "kPa") return [0, 255]; // Pressão
-    if (unit == "g/s") return [0, 200]; // Fluxo de ar MAF
-    if (unit == "°") return [-20, 60]; // Avanço de ignição
-    if (unit == "λ" || unit == "Lambda") return [0, 2]; // Ar/Combustível
-    if (unit == "Pa") return [-8192, 8192]; // Pressão Evaporativa
-    return [0, 100]; // Padrão seguro
+    if (unit == "V") return [9, 16];
+    if (unit == "kPa") return [0, 255];
+    if (unit == "g/s") return [0, 200];
+    if (unit == "°") return [-20, 60];
+    if (unit == "λ" || unit == "Lambda") return [0, 2];
+    if (unit == "Pa") return [-8192, 8192];
+    return [0, 100];
+  }
+
+  Color _getColorForHealth(SensorHealth? health, Color defaultColor) {
+    if (health == SensorHealth.normal) return Colors.greenAccent;
+    if (health == SensorHealth.warning) return Colors.amberAccent;
+    if (health == SensorHealth.critical) return Colors.redAccent;
+    return defaultColor;
   }
 
   @override
@@ -52,10 +59,23 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
     final sensorData = liveData[widget.pid.name];
     final onSurface = Theme.of(context).colorScheme.onSurface;
 
-    // Busca os limites travados baseados na unidade do sensor!
-    final bounds = _getFixedBounds(widget.pid.unit);
-    final double minY = bounds[0];
-    final double maxY = bounds[1];
+    double minY = 0;
+    double maxY = 100;
+
+    if (widget.pid.unit.isNotEmpty &&
+        sensorData != null &&
+        sensorData.history.isNotEmpty) {
+      final bounds = _getFixedBounds(widget.pid.unit);
+      minY = bounds[0];
+      maxY = bounds[1];
+    }
+
+    SensorHealth? currentHealth =
+        sensorData != null && widget.pid.evaluateHealth != null
+        ? widget.pid.evaluateHealth!(sensorData.value)
+        : null;
+
+    Color activeColor = _getColorForHealth(currentHealth, Colors.blueAccent);
 
     return Scaffold(
       appBar: AppBar(
@@ -80,17 +100,15 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            // SE O SENSOR TIVER TRADUTOR (Ex: Malha Fechada)
             if (sensorData != null && widget.pid.formatValue != null)
               Text(
                 widget.pid.formatValue!(sensorData.value),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: Colors.amberAccent,
+                  color: activeColor,
                 ),
               )
-            // SE FOR UM SENSOR NUMÉRICO NORMAL (Ex: RPM, Temp)
             else
               Row(
                 crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -102,10 +120,10 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
                             widget.pid.unit == "RPM" ? 0 : 1,
                           )
                         : "--",
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 56,
                       fontWeight: FontWeight.bold,
-                      color: Colors.greenAccent,
+                      color: activeColor,
                       fontFamily: 'Monospace',
                     ),
                   ),
@@ -122,7 +140,6 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
 
             const SizedBox(height: 48),
 
-            // --- NOVA REGRA: MOSTRA O GRÁFICO SÓ SE TIVER UNIDADE ---
             if (widget.pid.unit.isNotEmpty) ...[
               Text(
                 "Comportamento Recente",
@@ -147,8 +164,8 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
                         LineChartData(
                           minY: minY,
                           maxY: maxY,
-                          minX: 0, // TRAVA O EIXO X
-                          maxX: 29, // TRAVA O EIXO X
+                          minX: 0,
+                          maxX: 29,
                           gridData: FlGridData(
                             show: true,
                             drawVerticalLine: false,
@@ -175,20 +192,71 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
                             ),
                           ),
                           borderData: FlBorderData(show: false),
+
+                          lineTouchData: LineTouchData(
+                            getTouchedSpotIndicator:
+                                (
+                                  LineChartBarData barData,
+                                  List<int> spotIndexes,
+                                ) {
+                                  return spotIndexes.map((spotIndex) {
+                                    return TouchedSpotIndicatorData(
+                                      FlLine(
+                                        color: onSurface.withValues(alpha: 0.3),
+                                        strokeWidth: 2,
+                                      ),
+                                      FlDotData(
+                                        show: true,
+                                        getDotPainter:
+                                            (spot, percent, barData, index) {
+                                              return FlDotCirclePainter(
+                                                radius: 4,
+                                                color: onSurface,
+                                                strokeWidth: 2,
+                                                strokeColor: Theme.of(
+                                                  context,
+                                                ).cardColor,
+                                              );
+                                            },
+                                      ),
+                                    );
+                                  }).toList();
+                                },
+                            touchTooltipData: LineTouchTooltipData(
+                              getTooltipColor: (touchedSpot) =>
+                                  Theme.of(context).colorScheme.inverseSurface,
+                              getTooltipItems: (touchedSpots) {
+                                return touchedSpots.map((touchedSpot) {
+                                  return LineTooltipItem(
+                                    touchedSpot.y.toStringAsFixed(1),
+                                    TextStyle(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onInverseSurface,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  );
+                                }).toList();
+                              },
+                            ),
+                          ),
+
                           lineBarsData: [
                             LineChartBarData(
-                              spots: sensorData.history.asMap().entries.map((
-                                e,
-                              ) {
-                                return FlSpot(e.key.toDouble(), e.value);
-                              }).toList(),
+                              spots: sensorData.history
+                                  .asMap()
+                                  .entries
+                                  .map((e) => FlSpot(e.key.toDouble(), e.value))
+                                  .toList(),
                               isCurved: false,
-                              color: Colors.blueAccent,
+                              color: activeColor, // LINHA SÓLIDA!
                               barWidth: 3,
                               dotData: const FlDotData(show: false),
                               belowBarData: BarAreaData(
                                 show: true,
-                                color: Colors.blueAccent.withValues(alpha: 0.2),
+                                color: activeColor.withValues(
+                                  alpha: 0.15,
+                                ), // FUNDO SÓLIDO
                               ),
                             ),
                           ],
@@ -196,7 +264,6 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
                       ),
               ),
             ] else ...[
-              // Para sensores estáticos/textuais, exibimos uma mensagem sutil no lugar do gráfico
               Expanded(
                 child: Center(
                   child: Column(

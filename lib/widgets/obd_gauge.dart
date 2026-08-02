@@ -7,6 +7,12 @@ import '../state/obd_providers.dart';
 
 enum GaugeStyle { digital, analog, lineChart }
 
+class ZoneGradient {
+  final List<Color> colors;
+  final List<double> stops;
+  ZoneGradient(this.colors, this.stops);
+}
+
 class ObdGauge extends ConsumerWidget {
   final ObdPid pid;
   final GaugeStyle style;
@@ -16,13 +22,56 @@ class ObdGauge extends ConsumerWidget {
   double _getMaxValue() {
     if (pid.unit == "RPM") return 8000;
     if (pid.unit == "km/h") return 220;
-    if (pid.unit == "°C") return 130;
+    if (pid.unit == "°C" || pid.unit == "C") return 130;
     if (pid.unit == "%") return 100;
     if (pid.unit == "V") return 16;
     if (pid.unit == "kPa") return 255;
     if (pid.unit == "λ" || pid.unit == "Lambda") return 2.0;
     if (pid.unit == "Pa") return 8192;
     return 100;
+  }
+
+  Color _getColorForHealth(SensorHealth? health, Color defaultColor) {
+    if (health == SensorHealth.normal) return Colors.greenAccent;
+    if (health == SensorHealth.warning) return Colors.amberAccent;
+    if (health == SensorHealth.critical) return Colors.redAccent;
+    return defaultColor;
+  }
+
+  ZoneGradient _buildZoneGradient(
+    double minY,
+    double maxY,
+    Color defaultColor,
+  ) {
+    if (pid.evaluateHealth == null) {
+      // CORREÇÃO 2: Retorna a cor SÓLIDA para que a barra de progresso fique visível!
+      return ZoneGradient([defaultColor, defaultColor], [0.0, 1.0]);
+    }
+
+    List<Color> colors = [];
+    List<double> stops = [];
+    SensorHealth? lastHealth;
+
+    int steps = 100;
+    for (int i = 0; i <= steps; i++) {
+      double percent = i / steps;
+      double val = minY + (percent * (maxY - minY));
+
+      SensorHealth health = pid.evaluateHealth!(val);
+      Color healthColor = _getColorForHealth(health, defaultColor);
+
+      if (lastHealth != null && health != lastHealth) {
+        colors.add(_getColorForHealth(lastHealth, defaultColor));
+        stops.add(percent);
+        colors.add(healthColor);
+        stops.add(percent);
+      } else if (i == 0 || i == steps) {
+        colors.add(healthColor);
+        stops.add(percent);
+      }
+      lastHealth = health;
+    }
+    return ZoneGradient(colors, stops);
   }
 
   @override
@@ -34,6 +83,13 @@ class ObdGauge extends ConsumerWidget {
     double currentValue = sensorData?.value ?? 0.0;
     double maxValue = _getMaxValue();
     double percent = (currentValue / maxValue).clamp(0.0, 1.0);
+
+    SensorHealth? currentHealth = pid.evaluateHealth != null
+        ? pid.evaluateHealth!(currentValue)
+        : null;
+    Color activeColor = _getColorForHealth(currentHealth, Colors.blueAccent);
+
+    ZoneGradient zones = _buildZoneGradient(0, maxValue, Colors.blueAccent);
 
     return Container(
       decoration: BoxDecoration(
@@ -61,22 +117,25 @@ class ObdGauge extends ConsumerWidget {
                   ),
                   child: style == GaugeStyle.lineChart
                       ? _buildLineChart(
+                          context,
                           sensorData?.history ?? [],
                           maxValue,
                           onSurface,
+                          activeColor,
                         )
                       : CustomPaint(
                           size: const Size.square(double.infinity),
                           painter: style == GaugeStyle.digital
                               ? DigitalGaugePainter(
                                   percent: percent,
-                                  maxValue: maxValue,
                                   baseColor: onSurface,
+                                  zones: zones,
                                 )
                               : AnalogGaugePainter(
                                   percent: percent,
-                                  maxValue: maxValue,
                                   baseColor: onSurface,
+                                  activeColor: activeColor,
+                                  zones: zones,
                                 ),
                         ),
                 ),
@@ -97,14 +156,14 @@ class ObdGauge extends ConsumerWidget {
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.w900,
-                              color: onSurface,
+                              color: activeColor,
                               fontFamily: 'Monospace',
                             ),
                           ),
                           Text(
                             pid.unit,
-                            style: const TextStyle(
-                              color: Colors.blueAccent,
+                            style: TextStyle(
+                              color: activeColor.withValues(alpha: 0.7),
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
                             ),
@@ -141,10 +200,13 @@ class ObdGauge extends ConsumerWidget {
     );
   }
 
+  // CORREÇÃO 3: Gráfico de linha super veloz e sem gradientes!
   Widget _buildLineChart(
+    BuildContext context,
     List<double> history,
     double maxValue,
     Color onSurface,
+    Color activeColor,
   ) {
     if (history.length < 2) {
       return Center(
@@ -159,15 +221,54 @@ class ObdGauge extends ConsumerWidget {
         Expanded(
           child: LineChart(
             LineChartData(
-              // TRAVA O EIXO Y
               minY: 0,
               maxY: maxValue,
-              // TRAVA O EIXO X (Nosso histórico tem max 30 pontos, então vai de 0 a 29)
               minX: 0,
               maxX: 29,
               gridData: const FlGridData(show: false),
               titlesData: const FlTitlesData(show: false),
               borderData: FlBorderData(show: false),
+
+              lineTouchData: LineTouchData(
+                getTouchedSpotIndicator:
+                    (LineChartBarData barData, List<int> spotIndexes) {
+                      return spotIndexes.map((spotIndex) {
+                        return TouchedSpotIndicatorData(
+                          FlLine(
+                            color: onSurface.withValues(alpha: 0.3),
+                            strokeWidth: 2,
+                          ),
+                          FlDotData(
+                            show: true,
+                            getDotPainter: (spot, percent, barData, index) {
+                              return FlDotCirclePainter(
+                                radius: 4,
+                                color: onSurface,
+                                strokeWidth: 2,
+                                strokeColor: Theme.of(context).cardColor,
+                              );
+                            },
+                          ),
+                        );
+                      }).toList();
+                    },
+                touchTooltipData: LineTouchTooltipData(
+                  getTooltipColor: (touchedSpot) =>
+                      Theme.of(context).colorScheme.inverseSurface,
+                  getTooltipItems: (touchedSpots) {
+                    return touchedSpots.map((touchedSpot) {
+                      return LineTooltipItem(
+                        touchedSpot.y.toStringAsFixed(1),
+                        TextStyle(
+                          color: Theme.of(context).colorScheme.onInverseSurface,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      );
+                    }).toList();
+                  },
+                ),
+              ),
+
               lineBarsData: [
                 LineChartBarData(
                   spots: history
@@ -175,14 +276,13 @@ class ObdGauge extends ConsumerWidget {
                       .entries
                       .map((e) => FlSpot(e.key.toDouble(), e.value))
                       .toList(),
-                  isCurved:
-                      false, // REMOVE O CHICOTE (Fica estilo batimento cardíaco/Racing)
-                  color: Colors.greenAccent,
+                  isCurved: false,
+                  color: activeColor, // LINHA SÓLIDA
                   barWidth: 3,
                   dotData: const FlDotData(show: false),
                   belowBarData: BarAreaData(
                     show: true,
-                    color: Colors.greenAccent.withValues(alpha: 0.1),
+                    color: activeColor.withValues(alpha: 0.15), // FUNDO SÓLIDO
                   ),
                 ),
               ],
@@ -195,7 +295,7 @@ class ObdGauge extends ConsumerWidget {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: onSurface,
+            color: activeColor,
           ),
         ),
       ],
@@ -203,18 +303,55 @@ class ObdGauge extends ConsumerWidget {
   }
 }
 
-// ============================================================================
-// PINTOR 1: DIGITAL / RACING
-// ============================================================================
+// CORREÇÃO 1: A Mágica Matemática que impede o vazamento de cor nas tampas arredondadas do Flutter
+Shader _createSmartSweepShader(
+  List<Color> colors,
+  List<double> stops,
+  Rect rect,
+  double startAngle,
+  double sweepAngle,
+) {
+  final double sweepFraction = sweepAngle / (2 * pi);
+  List<Color> mappedColors = [];
+  List<double> mappedStops = [];
+
+  // Mapeia nossas zonas para os 70% úteis do círculo
+  for (int i = 0; i < colors.length; i++) {
+    mappedColors.add(colors[i]);
+    mappedStops.add(stops[i] * sweepFraction);
+  }
+
+  Color firstColor = colors.first;
+  Color lastColor = colors.last;
+
+  // Zona morta para segurar a cor da ponta direita
+  mappedColors.add(lastColor);
+  mappedStops.add(sweepFraction + 0.05);
+
+  // Zona morta reversa para blindar o vazamento da ponta esquerda!
+  mappedColors.add(firstColor);
+  mappedStops.add(1.0 - 0.05);
+  mappedColors.add(firstColor);
+  mappedStops.add(1.0);
+
+  return SweepGradient(
+    startAngle: 0.0,
+    endAngle: 2 * pi, // Gráfico cobre 360, mas o desenho corta
+    colors: mappedColors,
+    stops: mappedStops,
+    transform: GradientRotation(startAngle),
+  ).createShader(rect);
+}
+
 class DigitalGaugePainter extends CustomPainter {
   final double percent;
-  final double maxValue;
-  final Color baseColor; // Recebe a cor do tema
+  final Color baseColor;
+  final ZoneGradient zones;
 
   DigitalGaugePainter({
     required this.percent,
-    required this.maxValue,
     required this.baseColor,
+    required this.zones,
   });
 
   @override
@@ -225,25 +362,33 @@ class DigitalGaugePainter extends CustomPainter {
     const startAngle = 0.8 * pi;
     const sweepAngle = 1.4 * pi;
 
+    final trackShader = _createSmartSweepShader(
+      zones.colors.map((c) => c.withValues(alpha: 0.15)).toList(),
+      zones.stops,
+      rect,
+      startAngle,
+      sweepAngle,
+    );
+
+    final fillShader = _createSmartSweepShader(
+      zones.colors,
+      zones.stops,
+      rect,
+      startAngle,
+      sweepAngle,
+    );
+
     canvas.drawArc(
       rect,
       startAngle,
       sweepAngle,
       false,
       Paint()
-        ..color = baseColor.withValues(alpha: 0.1)
+        ..shader = trackShader
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke
         ..strokeWidth = 12,
     );
-
-    final gradient = const SweepGradient(
-      startAngle: startAngle,
-      endAngle: startAngle + sweepAngle,
-      colors: [Colors.greenAccent, Colors.yellowAccent, Colors.redAccent],
-      stops: [0.0, 0.6, 1.0],
-      transform: GradientRotation(startAngle),
-    ).createShader(rect);
 
     canvas.drawArc(
       rect,
@@ -251,7 +396,7 @@ class DigitalGaugePainter extends CustomPainter {
       sweepAngle * percent,
       false,
       Paint()
-        ..shader = gradient
+        ..shader = fillShader
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke
         ..strokeWidth = 12,
@@ -260,21 +405,20 @@ class DigitalGaugePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant DigitalGaugePainter oldDelegate) =>
-      oldDelegate.percent != percent || oldDelegate.baseColor != baseColor;
+      oldDelegate.percent != percent;
 }
 
-// ============================================================================
-// PINTOR 2: ANALÓGICO / CLÁSSICO
-// ============================================================================
 class AnalogGaugePainter extends CustomPainter {
   final double percent;
-  final double maxValue;
-  final Color baseColor; // Recebe a cor do tema
+  final Color baseColor;
+  final Color activeColor;
+  final ZoneGradient zones;
 
   AnalogGaugePainter({
     required this.percent,
-    required this.maxValue,
     required this.baseColor,
+    required this.activeColor,
+    required this.zones,
   });
 
   @override
@@ -285,28 +429,24 @@ class AnalogGaugePainter extends CustomPainter {
     const startAngle = 0.8 * pi;
     const sweepAngle = 1.4 * pi;
 
+    final trackShader = _createSmartSweepShader(
+      zones.colors.map((c) => c.withValues(alpha: 0.4)).toList(),
+      zones.stops,
+      rect,
+      startAngle,
+      sweepAngle,
+    );
+
     canvas.drawArc(
       rect,
       startAngle,
       sweepAngle,
       false,
       Paint()
-        ..color = baseColor.withValues(alpha: 0.24)
+        ..shader = trackShader
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 3,
-    );
-
-    canvas.drawArc(
-      rect,
-      startAngle + (sweepAngle * 0.8),
-      sweepAngle * 0.2,
-      false,
-      Paint()
-        ..color = Colors.redAccent
-        ..strokeCap = StrokeCap.round
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 3,
+        ..strokeWidth = 6,
     );
 
     final tickPaint = Paint()
@@ -327,8 +467,9 @@ class AnalogGaugePainter extends CustomPainter {
 
     final pointerAngle = startAngle + (sweepAngle * percent);
     final pointerLength = radius - 14;
+
     final pointerPaint = Paint()
-      ..color = Colors.redAccent
+      ..color = activeColor
       ..strokeCap = StrokeCap.round
       ..strokeWidth = 4;
 
@@ -341,14 +482,10 @@ class AnalogGaugePainter extends CustomPainter {
       pointerPaint,
     );
     canvas.drawCircle(center, 8, Paint()..color = baseColor);
-    canvas.drawCircle(
-      center,
-      4,
-      Paint()..color = baseColor.withValues(alpha: 0.1),
-    );
+    canvas.drawCircle(center, 4, Paint()..color = activeColor);
   }
 
   @override
   bool shouldRepaint(covariant AnalogGaugePainter oldDelegate) =>
-      oldDelegate.percent != percent || oldDelegate.baseColor != baseColor;
+      oldDelegate.percent != percent || oldDelegate.activeColor != activeColor;
 }
