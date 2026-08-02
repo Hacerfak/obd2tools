@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../state/obd_providers.dart';
 import '../models/dtc_fault.dart';
 import 'fault_detail_screen.dart';
+import '../widgets/admob_banner.dart'; // IMPORT DO BANNER
 
 class FaultsScreen extends ConsumerStatefulWidget {
   const FaultsScreen({super.key});
@@ -26,11 +27,97 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
     });
   }
 
+  // --- MUDAMOS O DIÁLOGO PARA CÁ ---
+  void _showClearDialog(BuildContext context, WidgetRef ref, Color onSurface) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          "Apagar Luz de Injeção?",
+          style: TextStyle(color: onSurface),
+        ),
+        content: Text(
+          "Esta ação vai resetar a memória de falhas e o Freeze Frame da injeção eletrônica. Certifique-se de estar com a CHAVE LIGADA e o MOTOR DESLIGADO.",
+          style: TextStyle(color: onSurface.withValues(alpha: 0.7)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              "Cancelar",
+              style: TextStyle(color: onSurface.withValues(alpha: 0.54)),
+            ),
+          ),
+          FilledButton(
+            onPressed: () {
+              ref.read(obdManagerProvider).clearDTCs();
+              Navigator.pop(context);
+            },
+            style: FilledButton.styleFrom(backgroundColor: Colors.redAccent),
+            child: const Text(
+              "Sim, Apagar!",
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(
+    Color primaryColor,
+    Color onSurface,
+    bool isScreenLoading,
+    bool hasFaults,
+  ) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            "Diagnóstico (DTC)",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: onSurface,
+            ),
+          ),
+        ),
+
+        // SÓ MOSTRA AÇÕES SE A VARREDURA TIVER CONCLUÍDA!
+        if (!isScreenLoading) ...[
+          // BOTÃO DE APAGAR (SÓ APARECE SE HOUVER ALGUMA FALHA GRAVADA!)
+          if (hasFaults) ...[
+            IconButton.filled(
+              onPressed: () => _showClearDialog(context, ref, onSurface),
+              icon: const Icon(Icons.delete_forever),
+              tooltip: "Apagar todas as falhas",
+              style: IconButton.styleFrom(
+                backgroundColor: Colors.redAccent.withValues(alpha: 0.2),
+                foregroundColor: Colors.redAccent,
+              ),
+            ),
+            const SizedBox(width: 12),
+          ],
+
+          // BOTÃO DE ATUALIZAR (SEMPRE DISPONÍVEL APÓS O LOADING)
+          IconButton.filledTonal(
+            onPressed: () => ref.read(obdManagerProvider).scanAllFaults(),
+            icon: const Icon(Icons.refresh),
+            color: primaryColor,
+            tooltip: "Refazer Leitura",
+          ),
+        ],
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final dtcState = ref.watch(dtcStateProvider);
     final bool isScreenLoading = _isInitializing || dtcState.isLoading;
+    final bool hasFaults = dtcState.faults.isNotEmpty;
     final onSurface = Theme.of(context).colorScheme.onSurface;
+    final primaryColor = Theme.of(context).colorScheme.primary;
 
     List<DtcFault> filteredFaults = dtcState.faults.values.where((fault) {
       if (_selectedFilter == null) return true;
@@ -43,63 +130,45 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Diagnóstico (DTC)",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: onSurface,
-                  ),
-                ),
-                if (!isScreenLoading)
-                  IconButton.filledTonal(
-                    onPressed: () =>
-                        ref.read(obdManagerProvider).scanAllFaults(),
-                    icon: const Icon(Icons.refresh),
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-              ],
-            ),
+            _buildHeader(primaryColor, onSurface, isScreenLoading, hasFaults),
             const SizedBox(height: 16),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _buildFilterChip("Todas", null, onSurface),
-                  const SizedBox(width: 8),
-                  _buildFilterChip(
-                    "Confirmadas",
-                    DtcStatus.confirmed,
-                    onSurface,
-                  ),
-                  const SizedBox(width: 8),
-                  _buildFilterChip(
-                    "Em avaliação",
-                    DtcStatus.pending,
-                    onSurface,
-                  ),
-                  const SizedBox(width: 8),
-                  _buildFilterChip(
-                    "Monitoradas pela ECU",
-                    DtcStatus.permanent,
-                    onSurface,
-                  ),
-                ],
+            if (!isScreenLoading) ...[
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _buildFilterChip("Todas", null, onSurface),
+                    const SizedBox(width: 8),
+                    _buildFilterChip(
+                      "Confirmadas",
+                      DtcStatus.confirmed,
+                      onSurface,
+                    ),
+                    const SizedBox(width: 8),
+                    _buildFilterChip(
+                      "Em avaliação",
+                      DtcStatus.pending,
+                      onSurface,
+                    ),
+                    const SizedBox(width: 8),
+                    _buildFilterChip(
+                      "Monitoradas pela ECU",
+                      DtcStatus.permanent,
+                      onSurface,
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 24),
+              const SizedBox(height: 24),
+            ],
+
             Expanded(
               child: isScreenLoading
                   ? Center(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          CircularProgressIndicator(
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
+                          CircularProgressIndicator(color: primaryColor),
                           const SizedBox(height: 16),
                           Text(
                             "Lendo memória da ECU e dados congelados...\nPor favor, aguarde.",
@@ -135,19 +204,24 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
                   : ListView.builder(
                       itemCount: filteredFaults.length,
                       itemBuilder: (context, index) {
-                        final fault = filteredFaults[index];
-                        return _buildFaultCard(fault, onSurface);
+                        return _buildFaultCard(
+                          filteredFaults[index],
+                          onSurface,
+                        );
                       },
                     ),
             ),
           ],
         ),
       ),
+      // --- BANNER DO ADMOB NO RODAPÉ ---
+      bottomNavigationBar: const AdMobBanner(),
     );
   }
 
   Widget _buildFilterChip(String label, DtcStatus? status, Color onSurface) {
     bool isSelected = _selectedFilter == status;
+    final primaryColor = Theme.of(context).colorScheme.primary;
     return ChoiceChip(
       label: Text(label),
       selected: isSelected,
@@ -155,19 +229,11 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
         setState(() => _selectedFilter = selected ? status : null);
       },
       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-      selectedColor: Theme.of(
-        context,
-      ).colorScheme.primary.withValues(alpha: 0.2),
+      selectedColor: primaryColor.withValues(alpha: 0.2),
       labelStyle: TextStyle(
-        color: isSelected
-            ? Theme.of(context).colorScheme.primary
-            : onSurface.withValues(alpha: 0.7),
+        color: isSelected ? primaryColor : onSurface.withValues(alpha: 0.7),
       ),
-      side: BorderSide(
-        color: isSelected
-            ? Theme.of(context).colorScheme.primary
-            : Colors.transparent,
-      ),
+      side: BorderSide(color: isSelected ? primaryColor : Colors.transparent),
     );
   }
 

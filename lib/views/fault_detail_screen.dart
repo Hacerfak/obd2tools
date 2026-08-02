@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/dtc_fault.dart';
-import '../state/obd_providers.dart';
+import '../parser/registries/dtc_dictionary.dart';
+import '../widgets/admob_banner.dart';
 
 class FaultDetailScreen extends ConsumerWidget {
   final DtcFault fault;
@@ -11,6 +12,11 @@ class FaultDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final onSurface = Theme.of(context).colorScheme.onSurface;
+    final primary = Theme.of(context).colorScheme.primary;
+
+    // Busca as informações do Dicionário
+    final dtcInfo = getDtcExplanation(fault.code);
+    final hasFreezeFrame = fault.freezeFrame.isNotEmpty;
 
     return Scaffold(
       appBar: AppBar(
@@ -19,107 +25,119 @@ class FaultDetailScreen extends ConsumerWidget {
         iconTheme: IconThemeData(color: onSurface),
         title: Text("Detalhes da Falha", style: TextStyle(color: onSurface)),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Icon(Icons.build, size: 60, color: Colors.redAccent),
-            const SizedBox(height: 16),
-            Text(
-              fault.code,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 40,
-                fontWeight: FontWeight.bold,
-                color: onSurface,
-                fontFamily: 'Monospace',
-              ),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 8,
-              children: fault.statuses
-                  .map((s) => _buildExplanatoryBadge(s))
-                  .toList(),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              "Dados Congelados (Freeze Frame):",
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.primary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Divider(color: onSurface.withValues(alpha: 0.2)),
-            Expanded(
-              child: fault.freezeFrame.isEmpty
-                  ? Center(
-                      child: Text(
-                        "Nenhum dado congelado disponível para este erro.",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: onSurface.withValues(alpha: 0.54),
-                        ),
-                      ),
-                    )
-                  : ListView.builder(
-                      itemCount: fault.freezeFrame.length,
-                      itemBuilder: (context, index) {
-                        String sensorName = fault.freezeFrame.keys.elementAt(
-                          index,
-                        );
-                        final result = fault.freezeFrame[sensorName]!;
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  sensorName,
-                                  style: TextStyle(
-                                    color: onSurface.withValues(alpha: 0.7),
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                "${result.value.toStringAsFixed(result.value == result.value.toInt() ? 0 : 1)} ${result.unit}",
-                                style: TextStyle(
-                                  color: onSurface,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: () => _showClearConfirmation(context, ref, onSurface),
-              icon: const Icon(Icons.delete_forever),
-              label: const Text("APAGAR FALHAS DA ECU"),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                backgroundColor: Colors.redAccent.withValues(alpha: 0.2),
-                foregroundColor: Colors.redAccent,
-                side: const BorderSide(color: Colors.redAccent, width: 2),
-                textStyle: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1,
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.all(24.0),
+              children: [
+                Icon(
+                  fault.statuses.contains(DtcStatus.confirmed)
+                      ? Icons.warning_rounded
+                      : Icons.build_circle,
+                  size: 80,
+                  color: fault.statuses.contains(DtcStatus.confirmed)
+                      ? Colors.redAccent
+                      : Colors.orangeAccent,
                 ),
-              ),
+                const SizedBox(height: 16),
+                Text(
+                  fault.code,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 48,
+                    fontWeight: FontWeight.bold,
+                    color: onSurface,
+                    fontFamily: 'Monospace',
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 8,
+                  children: fault.statuses
+                      .map((s) => _buildExplanatoryBadge(s))
+                      .toList(),
+                ),
+                const SizedBox(height: 32),
+
+                // --- INFORMAÇÕES DO DICIONÁRIO ---
+                Text(
+                  dtcInfo.title,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: onSurface,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: onSurface.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    dtcInfo.description,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: onSurface.withValues(alpha: 0.8),
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+
+                // --- FREEZE FRAME (SÓ APARECE SE EXISTIR DADOS CONGELADOS!) ---
+                if (hasFreezeFrame) ...[
+                  const SizedBox(height: 32),
+                  Divider(color: onSurface.withValues(alpha: 0.1)),
+                  const SizedBox(height: 16),
+                  Text(
+                    "Dados Congelados (Freeze Frame):",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: primary,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  ...fault.freezeFrame.entries.map((entry) {
+                    final sensorName = entry.key;
+                    final result = entry.value;
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              sensorName,
+                              style: TextStyle(
+                                color: onSurface.withValues(alpha: 0.7),
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            "${result.value.toStringAsFixed(result.value == result.value.toInt() ? 0 : 1)} ${result.unit}",
+                            style: TextStyle(
+                              color: onSurface,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+                ],
+              ],
             ),
-            const SizedBox(height: 24),
-          ],
-        ),
+          ),
+        ],
       ),
+      bottomNavigationBar: const AdMobBanner(),
     );
   }
 
@@ -172,47 +190,6 @@ class FaultDetailScreen extends ConsumerWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  void _showClearConfirmation(
-    BuildContext context,
-    WidgetRef ref,
-    Color onSurface,
-  ) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          "Apagar Luz de Injeção?",
-          style: TextStyle(color: onSurface),
-        ),
-        content: Text(
-          "Esta ação vai resetar a memória de falhas e o Freeze Frame da injeção eletrônica. Certifique-se de estar com a CHAVE LIGADA e o MOTOR DESLIGADO.",
-          style: TextStyle(color: onSurface.withValues(alpha: 0.7)),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              "Cancelar",
-              style: TextStyle(color: onSurface.withValues(alpha: 0.54)),
-            ),
-          ),
-          FilledButton(
-            onPressed: () {
-              ref.read(obdManagerProvider).clearDTCs();
-              Navigator.pop(context);
-              Navigator.pop(context);
-            },
-            style: FilledButton.styleFrom(backgroundColor: Colors.redAccent),
-            child: const Text(
-              "Sim, Apagar!",
-              style: TextStyle(color: Colors.white),
-            ), // Texto sempre branco no botão vermelho
-          ),
-        ],
       ),
     );
   }

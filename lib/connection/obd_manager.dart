@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'obd_connection.dart';
 import '/parser/obd_parser.dart';
 import '../parser/parsers/mode_01_parser.dart';
+import '../parser/parsers/mode_06_parser.dart';
 import '../parser/parsers/mode_09_parser.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../state/obd_providers.dart';
@@ -77,6 +78,25 @@ class ObdManager {
     _addLog("Solicitando mapeamento do Modo 09 (PIDs Suportados)...");
     _isPollingEnabled = false;
     queueCommand("0900"); // A mágica começa aqui!
+  }
+
+  // --- TESTES DE MONITORES (MODO 06) ---
+  void scanTestResults() {
+    _addLog("Solicitando mapeamento do Modo 06 (Testes Suportados)...");
+    _isPollingEnabled = false;
+    ref.read(testResultsProvider.notifier).clear();
+    ref.read(testResultsProvider.notifier).setLoading(true);
+
+    queueCommand("0600");
+
+    // Timer de segurança caso a ECU demore ou ignore o Modo 06
+    Future.delayed(const Duration(seconds: 4), () {
+      if (_commandQueue.isEmpty &&
+          ref.read(testResultsProvider.notifier).isLoading) {
+        ref.read(testResultsProvider.notifier).setLoading(false);
+        _addLog("Varredura de Modo 06 concluída.");
+      }
+    });
   }
 
   // --- VARREDURA E CARROSSEL ---
@@ -281,6 +301,56 @@ class ObdManager {
           }
         }
       }
+      // LÊ TESTES DE MONITORES (Modo 06)
+      else if (cleanHex.startsWith("46")) {
+        // Se for a resposta do mapeamento (4600, 4620, etc...)
+        if (cleanHex.contains("4600") ||
+            cleanHex.contains("4620") ||
+            cleanHex.contains("4640")) {
+          final RegExp supportRegex = RegExp(
+            r'46(00|20|40|60|80|A0|C0)([0-9A-F]{8})',
+          );
+          final matches = supportRegex.allMatches(cleanHex);
+
+          for (final match in matches) {
+            int basePid = int.parse(match.group(1)!, radix: 16);
+            String dataHex = match.group(2)!;
+
+            // Reutiliza o decodificador de suporte do Modo 01
+            List<int> supported = Mode01Parser.parseSupportedPids(
+              dataHex,
+              basePid,
+            );
+
+            for (int mid in supported) {
+              if (mid % 0x20 != 0) {
+                // Ignora os próximos pings de suporte
+                String hexReq = mid
+                    .toRadixString(16)
+                    .padLeft(2, '0')
+                    .toUpperCase();
+                queueCommand("06$hexReq");
+              }
+            }
+
+            // Pergunta pelo próximo grupo de suportes se necessário
+            if (supported.contains(basePid + 0x20)) {
+              String nextGroupHex = (basePid + 0x20)
+                  .toRadixString(16)
+                  .padLeft(2, '0')
+                  .toUpperCase();
+              queueCommand("06$nextGroupHex");
+            }
+          }
+        }
+        // Se for a resposta de um teste específico (ex: 4601...)
+        else {
+          List<Mode06Result> parsedData = Mode06Parser.parse(cleanHex);
+          for (var result in parsedData) {
+            ref.read(testResultsProvider.notifier).addResult(result);
+          }
+        }
+      }
       // MODO 09 - Info do Veículo
       else if (cleanHex.startsWith("49")) {
         // Se for a resposta do mapeamento (0900 -> 4900)
@@ -390,12 +460,14 @@ class ObdManager {
             }
           });
         }
-      } else if (!_isPollingEnabled &&
-          _commandQueue.isEmpty &&
-          ref.read(dtcStateProvider).isLoading) {
-        // Fila esvaziou durante o diagnóstico de falhas
-        ref.read(dtcStateProvider.notifier).setLoading(false);
-        _addLog("Diagnóstico concluído com sucesso.");
+      } else if (!_isPollingEnabled && _commandQueue.isEmpty) {
+        // Encerra apenas o carregamento de DTCs se ele estiver rodando
+        if (ref.read(dtcStateProvider).isLoading) {
+          ref.read(dtcStateProvider.notifier).setLoading(false);
+          _addLog("Diagnóstico concluído com sucesso.");
+        }
+
+        // Removemos daqui a checagem global do Modo 06 para evitar falsos positivos!
       }
     }
   }

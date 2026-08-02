@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import '../parser/obd_pid.dart';
 import '../state/obd_providers.dart';
 import '../connection/obd_manager.dart';
+import '../widgets/admob_banner.dart';
 
 class SensorDetailScreen extends ConsumerStatefulWidget {
   final ObdPid pid;
@@ -292,6 +293,7 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
           ],
         ),
       ),
+      bottomNavigationBar: const AdMobBanner(),
     );
   }
 }

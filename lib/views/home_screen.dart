@@ -5,8 +5,9 @@ import 'sensors_dashboard_screen.dart';
 import 'hud_screen.dart';
 import 'connection_screen.dart';
 import 'faults_screen.dart';
-import 'settings_screen.dart';
 import 'vehicle_info_screen.dart';
+import 'test_results_screen.dart';
+import 'settings_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -18,11 +19,14 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _selectedIndex = 0;
 
+  // LISTA COMPLETA DAS 6 ABAS DO SISTEMA
   final List<Widget> _pages = [
-    const SensorsDashboardScreen(),
-    const HudScreen(),
-    const FaultsScreen(),
-    const VehicleInfoScreen(),
+    const SensorsDashboardScreen(), // 0: Sensores
+    const HudScreen(), // 1: HUD
+    const TestResultsScreen(), // 2: Testes
+    const FaultsScreen(), // 3: Falhas
+    const VehicleInfoScreen(), // 4: Veículo
+    const SettingsScreen(), // 5: Configurações
   ];
 
   void _disconnectAndExit() async {
@@ -44,21 +48,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         (route) => false,
       );
     }
-  }
-
-  // --- BOTÃO DE CONFIGURAÇÕES ---
-  Widget _buildConfigButton() {
-    return IconButton(
-      icon: const Icon(Icons.settings),
-      tooltip: 'Configurações',
-      color: Theme.of(context).iconTheme.color,
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const SettingsScreen()),
-        );
-      },
-    );
   }
 
   Widget _buildThemeToggle() {
@@ -135,8 +124,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildConfigButton(), // INSERIDO ACIMA DO TEMA NA VERTICAL
-          const SizedBox(height: 8),
           _buildThemeToggle(),
           const SizedBox(height: 8),
           ledDot,
@@ -149,8 +136,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildConfigButton(), // INSERIDO ANTES DO TEMA NA HORIZONTAL
-          const SizedBox(width: 8),
           _buildThemeToggle(),
           const SizedBox(width: 8),
           ledDot,
@@ -191,7 +176,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               children: [
                 if (isDesktop)
                   Container(
-                    width: 80,
+                    width: 85,
                     color: Theme.of(context).appBarTheme.backgroundColor,
                     child: Column(
                       children: [
@@ -213,12 +198,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 label: Text('HUD'),
                               ),
                               NavigationRailDestination(
+                                icon: Icon(Icons.fact_check_outlined),
+                                label: Text('Testes'),
+                              ),
+                              NavigationRailDestination(
                                 icon: Icon(Icons.warning_amber),
                                 label: Text('Falhas'),
                               ),
                               NavigationRailDestination(
                                 icon: Icon(Icons.directions_car),
                                 label: Text('Veículo'),
+                              ),
+                              NavigationRailDestination(
+                                icon: Icon(Icons.settings),
+                                label: Text('Ajustes'),
                               ),
                             ],
                           ),
@@ -282,12 +275,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       label: 'HUD',
                     ),
                     NavigationDestination(
+                      icon: Icon(Icons.fact_check_outlined),
+                      label: 'Testes',
+                    ),
+                    NavigationDestination(
                       icon: Icon(Icons.warning_amber),
                       label: 'Falhas',
                     ),
                     NavigationDestination(
                       icon: Icon(Icons.directions_car),
                       label: 'Veículo',
+                    ),
+                    NavigationDestination(
+                      icon: Icon(Icons.settings),
+                      label: 'Ajustes',
                     ),
                   ],
                 ),

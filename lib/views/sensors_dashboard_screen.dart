@@ -5,6 +5,7 @@ import '../state/obd_providers.dart';
 import '../widgets/sensor_tile.dart';
 import '../views/sensor_detail_screen.dart';
 import '../connection/obd_manager.dart';
+import '../widgets/admob_banner.dart';
 
 class SensorsDashboardScreen extends ConsumerStatefulWidget {
   const SensorsDashboardScreen({super.key});
@@ -122,26 +123,9 @@ class _SensorsDashboardScreenState
                     ),
                   ),
           ),
-
-          Container(
-            width: double.infinity,
-            height: 60,
-            margin: const EdgeInsets.only(top: 8),
-            color: Theme.of(context).colorScheme.inverseSurface,
-            child: Center(
-              child: Text(
-                "ESPAÇO RESERVADO PARA ADMOB",
-                style: TextStyle(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onInverseSurface.withValues(alpha: 0.38),
-                  letterSpacing: 2,
-                ),
-              ),
-            ),
-          ),
         ],
       ),
+      bottomNavigationBar: const AdMobBanner(),
     );
   }
 }

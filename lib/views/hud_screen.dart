@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import '../widgets/admob_banner.dart';
 import '../parser/registries/mode_01_registry.dart';
 import '../state/obd_providers.dart';
 import '../widgets/obd_gauge.dart';
@@ -180,25 +180,9 @@ class _HudScreenState extends ConsumerState<HudScreen> {
               ),
             ),
           ),
-          Container(
-            width: double.infinity,
-            height: 60,
-            margin: const EdgeInsets.only(top: 8),
-            color: Theme.of(context).colorScheme.inverseSurface,
-            child: Center(
-              child: Text(
-                "ESPAÇO RESERVADO PARA ADMOB",
-                style: TextStyle(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onInverseSurface.withValues(alpha: 0.38),
-                  letterSpacing: 2,
-                ),
-              ),
-            ),
-          ),
         ],
       ),
+      bottomNavigationBar: const AdMobBanner(),
     );
   }
 }

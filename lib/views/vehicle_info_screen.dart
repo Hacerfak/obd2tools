@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../state/obd_providers.dart';
+import '../widgets/admob_banner.dart';
 
 class VehicleInfoScreen extends ConsumerStatefulWidget {
   const VehicleInfoScreen({super.key});
@@ -10,25 +11,26 @@ class VehicleInfoScreen extends ConsumerStatefulWidget {
 }
 
 class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
-  bool _isRequesting = false;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    // Pede os dados automaticamente ao abrir a tela pela primeira vez
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _requestData();
     });
   }
 
-  void _requestData() {
-    setState(() => _isRequesting = true);
+  void _requestData() async {
+    setState(() => _isLoading = true);
     ref.read(obdManagerProvider).requestVehicleInfo();
 
-    // Simula um loading rápido
-    Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) setState(() => _isRequesting = false);
-    });
+    // Delay artificial de 2.5s para garantir que todos os PIDs 09 respondam
+    // e o usuário perceba a leitura da ECU
+    await Future.delayed(const Duration(milliseconds: 2500));
+    if (mounted) {
+      setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -47,14 +49,14 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "Identificação do Veículo",
+                  "Informações do Veículo",
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: onSurface,
                   ),
                 ),
-                if (!_isRequesting)
+                if (!_isLoading)
                   IconButton.filledTonal(
                     onPressed: _requestData,
                     icon: const Icon(Icons.refresh),
@@ -64,9 +66,8 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
               ],
             ),
             const SizedBox(height: 16),
-
             Expanded(
-              child: _isRequesting && vehicleInfo.isEmpty
+              child: _isLoading
                   ? Center(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -74,7 +75,8 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
                           CircularProgressIndicator(color: primaryColor),
                           const SizedBox(height: 16),
                           Text(
-                            "Lendo módulos da rede CAN...",
+                            "Consultando módulos e calibrações da ECU...\nPor favor, aguarde.",
+                            textAlign: TextAlign.center,
                             style: TextStyle(
                               color: onSurface.withValues(alpha: 0.54),
                             ),
@@ -97,12 +99,11 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
                       itemBuilder: (context, index) {
                         String key = vehicleInfo.keys.elementAt(index);
                         String value = vehicleInfo[key]!;
-
                         return Card(
                           margin: const EdgeInsets.only(bottom: 12),
                           child: ListTile(
                             leading: Icon(
-                              key.contains("VIN")
+                              key.contains("VIN") || key.contains("Chassi")
                                   ? Icons.directions_car
                                   : Icons.memory,
                               color: primaryColor,
@@ -111,7 +112,7 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
                               value,
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 18,
+                                fontSize: 16,
                                 color: onSurface,
                                 fontFamily: 'Monospace',
                               ),
@@ -119,19 +120,6 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
                             subtitle: Text(
                               key,
                               style: TextStyle(color: primaryColor),
-                            ),
-                            trailing: IconButton(
-                              icon: Icon(
-                                Icons.copy,
-                                size: 20,
-                                color: onSurface.withValues(alpha: 0.3),
-                              ),
-                              onPressed: () {
-                                // Futuramente podemos adicionar o clipboard aqui
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text("$key copiado!")),
-                                );
-                              },
                             ),
                           ),
                         );
@@ -141,6 +129,7 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
           ],
         ),
       ),
+      bottomNavigationBar: const AdMobBanner(),
     );
   }
 }

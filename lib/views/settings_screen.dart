@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import '../state/obd_providers.dart';
+import '../widgets/admob_banner.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -13,15 +14,13 @@ class SettingsScreen extends ConsumerWidget {
     Color currentColor,
     String title,
   ) {
-    // Variável local para segurar a cor enquanto o usuário mexe no seletor
     Color pickerColor = currentColor;
-
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
           "Escolher cor: $title",
-          style: const TextStyle(fontSize: 18),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         content: SingleChildScrollView(
           child: ColorPicker(
@@ -29,10 +28,9 @@ class SettingsScreen extends ConsumerWidget {
             onColorChanged: (Color color) {
               pickerColor = color;
             },
-            enableAlpha:
-                false, // Desativamos a transparência para evitar bugs visuais nos relógios
+            enableAlpha: false,
             displayThumbColor: true,
-            hexInputBar: true, // A MÁGICA: Habilita o campo de digitação HEX!
+            hexInputBar: true,
             pickerAreaHeightPercent: 0.8,
           ),
         ),
@@ -43,7 +41,6 @@ class SettingsScreen extends ConsumerWidget {
           ),
           FilledButton(
             onPressed: () {
-              // Salva a cor definitiva no cofre do Riverpod
               ref
                   .read(appColorsProvider.notifier)
                   .updateColor(key, pickerColor);
@@ -59,72 +56,89 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final onSurface = Theme.of(context).colorScheme.onSurface;
+    final primaryColor = Theme.of(context).colorScheme.primary;
     final appColors = ref.watch(appColorsProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Configurações"),
-        backgroundColor: Colors.transparent,
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Text(
-            "Paleta de Cores do Sistema",
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.primary,
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // CABEÇALHO PADRONIZADO COM AS OUTRAS TELAS
+            Text(
+              "Configurações do Sistema",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: onSurface,
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          _buildColorTile(
-            context,
-            ref,
-            "Cor Principal (Tema/Neutros)",
-            appColors.primary,
-            'primary',
-            onSurface,
-          ),
-          _buildColorTile(
-            context,
-            ref,
-            "Status Normal (Saudável)",
-            appColors.normal,
-            'normal',
-            onSurface,
-          ),
-          _buildColorTile(
-            context,
-            ref,
-            "Status Atenção (Alerta)",
-            appColors.warning,
-            'warning',
-            onSurface,
-          ),
-          _buildColorTile(
-            context,
-            ref,
-            "Status Crítico (Perigo)",
-            appColors.critical,
-            'critical',
-            onSurface,
-          ),
+            const SizedBox(height: 16),
 
-          const SizedBox(height: 32),
-          ElevatedButton.icon(
-            onPressed: () =>
-                ref.read(appColorsProvider.notifier).resetToDefaults(),
-            icon: const Icon(Icons.restore),
-            label: const Text("Restaurar Cores Padrão"),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              foregroundColor: Colors.redAccent,
-              backgroundColor: Colors.redAccent.withValues(alpha: 0.1),
+            Expanded(
+              child: ListView(
+                children: [
+                  Text(
+                    "Paleta de Cores",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: primaryColor,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  _buildColorTile(
+                    context,
+                    ref,
+                    "Cor Principal (Tema/Neutros)",
+                    appColors.primary,
+                    'primary',
+                    onSurface,
+                  ),
+                  _buildColorTile(
+                    context,
+                    ref,
+                    "Status Normal (Saudável)",
+                    appColors.normal,
+                    'normal',
+                    onSurface,
+                  ),
+                  _buildColorTile(
+                    context,
+                    ref,
+                    "Status Atenção (Alerta)",
+                    appColors.warning,
+                    'warning',
+                    onSurface,
+                  ),
+                  _buildColorTile(
+                    context,
+                    ref,
+                    "Status Crítico (Perigo)",
+                    appColors.critical,
+                    'critical',
+                    onSurface,
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: () =>
+                        ref.read(appColorsProvider.notifier).resetToDefaults(),
+                    icon: const Icon(Icons.restore),
+                    label: const Text("Restaurar Cores Padrão"),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      foregroundColor: Colors.redAccent,
+                      backgroundColor: Colors.redAccent.withValues(alpha: 0.1),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
+      bottomNavigationBar: const AdMobBanner(),
     );
   }
 

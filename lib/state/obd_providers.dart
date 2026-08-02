@@ -32,10 +32,10 @@ class AppColors {
   final Color critical;
 
   AppColors({
-    this.primary = Colors.blueAccent,
-    this.normal = Colors.greenAccent,
-    this.warning = Colors.amberAccent,
-    this.critical = Colors.redAccent,
+    this.primary = Colors.blue,
+    this.normal = Colors.green,
+    this.warning = Colors.amber,
+    this.critical = Colors.red,
   });
 
   AppColors copyWith({
@@ -328,4 +328,63 @@ class FreezeFrameNotifier extends Notifier<FreezeFrameState> {
 final freezeFrameProvider =
     NotifierProvider<FreezeFrameNotifier, FreezeFrameState>(() {
       return FreezeFrameNotifier();
+    });
+
+// ============================================================================
+// TÚNEL 8: RESULTADOS DE TESTES (MODO 06)
+// ============================================================================
+class Mode06Result {
+  final int mid; // Monitor ID
+  final int tid; // Test ID
+  final int cid; // Component ID
+  final int value;
+  final int min;
+  final int max;
+
+  Mode06Result({
+    required this.mid,
+    required this.tid,
+    required this.cid,
+    required this.value,
+    required this.min,
+    required this.max,
+  });
+
+  // Verifica se o teste já foi executado pela ECU (se tem dados reais)
+  bool get hasData => value != 0 || min != 0 || max != 0;
+
+  // Um teste passa se o valor estiver entre o Mínimo e o Máximo
+  bool get isPass => value >= min && value <= max;
+}
+
+class TestResultsNotifier extends Notifier<List<Mode06Result>> {
+  bool isLoading = false;
+
+  @override
+  List<Mode06Result> build() => [];
+
+  void setLoading(bool loading) {
+    isLoading = loading;
+    // Força a atualização da tela
+    state = List.from(state);
+  }
+
+  void addResult(Mode06Result result) {
+    // Evita duplicatas do mesmo monitor e teste
+    final currentList = List<Mode06Result>.from(state);
+    currentList.removeWhere(
+      (r) => r.mid == result.mid && r.tid == result.tid && r.cid == result.cid,
+    );
+    currentList.add(result);
+    state = currentList;
+  }
+
+  void clear() {
+    state = [];
+  }
+}
+
+final testResultsProvider =
+    NotifierProvider<TestResultsNotifier, List<Mode06Result>>(() {
+      return TestResultsNotifier();
     });
