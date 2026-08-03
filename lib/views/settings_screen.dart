@@ -4,8 +4,28 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import '../state/obd_providers.dart';
 import '../widgets/admob_banner.dart';
 
-class SettingsScreen extends ConsumerWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
+
+  @override
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+  bool _isEditingLight = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // Inicia a tela editando o tema atual do usuário
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {
+          _isEditingLight = Theme.of(context).brightness == Brightness.light;
+        });
+      }
+    });
+  }
 
   void _showColorPicker(
     BuildContext context,
@@ -43,7 +63,7 @@ class SettingsScreen extends ConsumerWidget {
             onPressed: () {
               ref
                   .read(appColorsProvider.notifier)
-                  .updateColor(key, pickerColor);
+                  .updateColor(_isEditingLight, key, pickerColor);
               Navigator.pop(context);
             },
             child: const Text("Aplicar"),
@@ -54,10 +74,13 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final onSurface = Theme.of(context).colorScheme.onSurface;
     final primaryColor = Theme.of(context).colorScheme.primary;
-    final appColors = ref.watch(appColorsProvider);
+
+    // Captura as paletas e filtra baseada no segmento escolhido
+    final palette = ref.watch(appColorsProvider);
+    final appColors = _isEditingLight ? palette.light : palette.dark;
 
     return Scaffold(
       body: Padding(
@@ -65,7 +88,6 @@ class SettingsScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // CABEÇALHO PADRONIZADO COM AS OUTRAS TELAS
             Text(
               "Configurações do Sistema",
               style: TextStyle(
@@ -75,10 +97,10 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 16),
-
             Expanded(
               child: ListView(
                 children: [
+                  const SizedBox(height: 12),
                   Text(
                     "Paleta de Cores",
                     style: TextStyle(
@@ -88,39 +110,56 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
+
+                  // SELETOR DE TEMA PARA EDIÇÃO
+                  Center(
+                    child: SegmentedButton<bool>(
+                      segments: const [
+                        ButtonSegment(
+                          value: true,
+                          icon: Icon(Icons.light_mode),
+                          label: Text("Tema Claro"),
+                        ),
+                        ButtonSegment(
+                          value: false,
+                          icon: Icon(Icons.dark_mode),
+                          label: Text("Tema Escuro"),
+                        ),
+                      ],
+                      selected: {_isEditingLight},
+                      onSelectionChanged: (newSelection) {
+                        setState(() => _isEditingLight = newSelection.first);
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
                   _buildColorTile(
-                    context,
-                    ref,
                     "Cor Principal (Tema/Neutros)",
                     appColors.primary,
                     'primary',
                     onSurface,
                   ),
                   _buildColorTile(
-                    context,
-                    ref,
                     "Status Normal (Saudável)",
                     appColors.normal,
                     'normal',
                     onSurface,
                   ),
                   _buildColorTile(
-                    context,
-                    ref,
                     "Status Atenção (Alerta)",
                     appColors.warning,
                     'warning',
                     onSurface,
                   ),
                   _buildColorTile(
-                    context,
-                    ref,
                     "Status Crítico (Perigo)",
                     appColors.critical,
                     'critical',
                     onSurface,
                   ),
-                  const SizedBox(height: 24),
+
+                  const SizedBox(height: 16),
                   ElevatedButton.icon(
                     onPressed: () =>
                         ref.read(appColorsProvider.notifier).resetToDefaults(),
@@ -130,6 +169,53 @@ class SettingsScreen extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       foregroundColor: Colors.redAccent,
                       backgroundColor: Colors.redAccent.withValues(alpha: 0.1),
+                    ),
+                  ),
+
+                  const SizedBox(height: 32),
+                  Text(
+                    "Performance e Economia",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: primaryColor,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Card(
+                    elevation: 0,
+                    color: onSurface.withValues(alpha: 0.05),
+                    child: ListTile(
+                      title: const Text("Taxa de Atualização dos Sensores"),
+                      subtitle: const Text(
+                        "Aumente o tempo se o celular estiver aquecendo",
+                      ),
+                      trailing: DropdownButton<int>(
+                        value: ref.watch(pollingIntervalProvider),
+                        underline: const SizedBox(),
+                        items: const [
+                          DropdownMenuItem(value: 0, child: Text("Máxima")),
+                          DropdownMenuItem(
+                            value: 250,
+                            child: Text("Rápido (250ms)"),
+                          ),
+                          DropdownMenuItem(
+                            value: 500,
+                            child: Text("Normal (0.5s)"),
+                          ),
+                          DropdownMenuItem(
+                            value: 1000,
+                            child: Text("Econômico (1s)"),
+                          ),
+                        ],
+                        onChanged: (value) {
+                          if (value != null) {
+                            ref
+                                .read(pollingIntervalProvider.notifier)
+                                .updateInterval(value);
+                          }
+                        },
+                      ),
                     ),
                   ),
                 ],
@@ -143,8 +229,6 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Widget _buildColorTile(
-    BuildContext context,
-    WidgetRef ref,
     String title,
     Color color,
     String stateKey,

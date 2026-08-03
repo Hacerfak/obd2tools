@@ -450,11 +450,24 @@ class ObdManager {
       }
     } finally {
       if (_isPollingEnabled && _commandQueue.isEmpty) {
-        if (_isFastInitialPass || _pollingCooldown == Duration.zero) {
-          _triggerNextPollingRequest();
+        // Puxa o intervalo escolhido pelo usuário nas Configurações
+        int userInterval = ref.read(pollingIntervalProvider);
+        Duration delay = Duration(milliseconds: userInterval);
+
+        // Se a tela de dashboard pediu um resfriamento maior (ex: 3s), respeitamos o maior
+        if (_pollingCooldown > delay) delay = _pollingCooldown;
+
+        _cooldownTimer?.cancel();
+
+        if (_isFastInitialPass || delay == Duration.zero) {
+          // Mesmo no modo "Tempo Real", damos 15ms de respiro para o Flutter desenhar a tela e o celular não fritar
+          _cooldownTimer = Timer(const Duration(milliseconds: 15), () {
+            if (_isPollingEnabled && _commandQueue.isEmpty) {
+              _triggerNextPollingRequest();
+            }
+          });
         } else {
-          _cooldownTimer?.cancel();
-          _cooldownTimer = Timer(_pollingCooldown, () {
+          _cooldownTimer = Timer(delay, () {
             if (_isPollingEnabled && _commandQueue.isEmpty) {
               _triggerNextPollingRequest();
             }
@@ -466,8 +479,6 @@ class ObdManager {
           ref.read(dtcStateProvider.notifier).setLoading(false);
           _addLog("Diagnóstico concluído com sucesso.");
         }
-
-        // Removemos daqui a checagem global do Modo 06 para evitar falsos positivos!
       }
     }
   }

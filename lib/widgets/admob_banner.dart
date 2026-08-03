@@ -7,18 +7,23 @@ class AdMobBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final onSurface = Theme.of(context).colorScheme.onSurface;
 
-    return Container(
-      width: double.infinity,
-      height: 50, // Altura padrão de um banner de anúncio
-      color: onSurface.withValues(alpha: 0.05),
-      child: Center(
-        child: Text(
-          "ESPAÇO RESERVADO PARA ADMOB",
-          style: TextStyle(
-            color: onSurface.withValues(alpha: 0.4),
-            fontWeight: FontWeight.bold,
-            letterSpacing: 2,
-            fontSize: 12,
+    // O SafeArea impede que o banner seja cortado pelos cantos arredondados ou barra gestual do celular
+    return SafeArea(
+      child: Container(
+        width: double.infinity,
+        height:
+            90, // Altura ampliada ideal para o formato Large Banner (320x100)
+        color: onSurface.withValues(alpha: 0.05),
+        child: Center(
+          child: Text(
+            "ESPAÇO RESERVADO PARA ADMOB\n(LARGE BANNER)",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: onSurface.withValues(alpha: 0.4),
+              fontWeight: FontWeight.bold,
+              letterSpacing: 2,
+              fontSize: 12,
+            ),
           ),
         ),
       ),

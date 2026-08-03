@@ -13,7 +13,11 @@ class Obd2ToolsApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
-    final appColors = ref.watch(appColorsProvider);
+    final appThemePalette = ref.watch(appColorsProvider);
+
+    // Captura as configurações de forma independente
+    final lightColors = appThemePalette.light;
+    final darkColors = appThemePalette.dark;
 
     return MaterialApp(
       title: 'OBD2 Tools',
@@ -24,28 +28,23 @@ class Obd2ToolsApp extends ConsumerWidget {
       theme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.light,
-        colorSchemeSeed: appColors.primary,
+        colorSchemeSeed: lightColors.primary,
         scaffoldBackgroundColor: const Color(0xFFF8F9FA),
-
         appBarTheme: const AppBarTheme(
           backgroundColor: Color(0xFFE9ECEF),
           foregroundColor: Colors.black87,
           elevation: 0,
-          surfaceTintColor:
-              Colors.transparent, // Tira o tingimento só da AppBar
+          surfaceTintColor: Colors.transparent,
         ),
-
-        // CORREÇÃO AQUI: A classe correta é CardTheme
         cardTheme: CardThemeData(
-          color: Colors.white, // Força o branco puro
+          color: Colors.white,
           elevation: 2,
-          surfaceTintColor: Colors.transparent, // Tira o tingimento do Card
+          surfaceTintColor: Colors.transparent,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
             side: const BorderSide(color: Colors.black12, width: 1),
           ),
         ),
-
         filledButtonTheme: FilledButtonThemeData(
           style: FilledButton.styleFrom(
             shape: RoundedRectangleBorder(
@@ -59,27 +58,23 @@ class Obd2ToolsApp extends ConsumerWidget {
       darkTheme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
-        colorSchemeSeed: appColors.primary,
+        colorSchemeSeed: darkColors.primary,
         scaffoldBackgroundColor: const Color(0xFF12151C),
-
         appBarTheme: const AppBarTheme(
           backgroundColor: Color(0xFF1A1D24),
           foregroundColor: Colors.white,
           elevation: 0,
-          surfaceTintColor: Colors.transparent, // Tira o tingimento da AppBar
+          surfaceTintColor: Colors.transparent,
         ),
-
-        // CORREÇÃO AQUI
         cardTheme: CardThemeData(
-          color: const Color(0xFF1E222D), // Força o cinza puro
+          color: const Color(0xFF1E222D),
           elevation: 2,
-          surfaceTintColor: Colors.transparent, // Tira o tingimento do Card
+          surfaceTintColor: Colors.transparent,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
             side: const BorderSide(color: Colors.white10, width: 1),
           ),
         ),
-
         filledButtonTheme: FilledButtonThemeData(
           style: FilledButton.styleFrom(
             shape: RoundedRectangleBorder(
@@ -88,7 +83,7 @@ class Obd2ToolsApp extends ConsumerWidget {
           ),
         ),
       ),
-      home: const ConnectionScreen(),
+      home: const ConnectionScreen(attemptAutoConnect: true),
     );
   }
 }

@@ -16,7 +16,7 @@ class SensorTile extends ConsumerWidget {
     final onSurfaceColor = Theme.of(context).colorScheme.onSurface;
 
     // CAPTURA AS CORES ESCOLHIDAS
-    final appColors = ref.watch(appColorsProvider);
+    final appColors = ref.watch(appColorsProvider).current(context);
 
     // FUNÇÃO DINÂMICA INTERNA
     Color getColorForHealth(SensorHealth? health, Color defaultColor) {
@@ -67,16 +67,18 @@ class SensorTile extends ConsumerWidget {
                 children: [
                   Expanded(
                     child: (sensorData != null && pid.formatValue != null)
-                        // Texto traduzido (Status)
-                        ? Text(
-                            pid.formatValue!(sensorData.value),
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: activeColor,
+                        // Texto traduzido com FittedBox para não estourar a tela!
+                        ? FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              pid.formatValue!(sensorData.value),
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: activeColor,
+                              ),
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                           )
                         // Valor numérico
                         : Text(

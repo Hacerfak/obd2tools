@@ -90,13 +90,18 @@ class _SensorsDashboardScreenState
                         int crossAxisCount = constraints.maxWidth > 900
                             ? 4
                             : (constraints.maxWidth > 600 ? 3 : 2);
+                        // No mobile (<= 600), deixamos o bloco mais alto (1.6) para caber o texto
+                        double aspectRatio = constraints.maxWidth > 600
+                            ? 2.2
+                            : 1.6;
+
                         return GridView.builder(
                           gridDelegate:
                               SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: crossAxisCount,
                                 crossAxisSpacing: 10,
                                 mainAxisSpacing: 10,
-                                childAspectRatio: 2.2,
+                                childAspectRatio: aspectRatio,
                               ),
                           itemCount: availablePids.length,
                           itemBuilder: (context, index) {

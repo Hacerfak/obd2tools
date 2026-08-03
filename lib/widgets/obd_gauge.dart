@@ -16,7 +16,6 @@ class ZoneGradient {
 class ObdGauge extends ConsumerWidget {
   final ObdPid pid;
   final GaugeStyle style;
-
   const ObdGauge({super.key, required this.pid, required this.style});
 
   double _getMaxValue() {
@@ -31,16 +30,30 @@ class ObdGauge extends ConsumerWidget {
     return 100;
   }
 
+  // ENCURTA NOMES LONGOS NO HUD
+  String _getShortName(String fullName) {
+    if (fullName.contains("Arrefecimento")) return "Temp. Motor";
+    if (fullName.contains("Velocidade")) return "Velocidade";
+    if (fullName.contains("Rotação")) return "RPM Motor";
+    if (fullName.contains("Pressão Admissão")) return "Pressão MAP";
+    if (fullName.contains("Fluxo de Ar")) return "Fluxo MAF";
+    if (fullName.contains("Posição do Acelerador")) return "Acelerador";
+    if (fullName.contains("Temp. Ar Admissão")) return "Temp. Ar";
+    if (fullName.contains("Carga Calculada")) return "Carga Motor";
+    if (fullName.contains("Tensão")) return "Bateria";
+    if (fullName.contains("Barométrica")) return "Pressão Atm.";
+    if (fullName.contains("Razão Equivalência")) return "Mistura (AF)";
+    if (fullName.contains("Ar Ambiente")) return "Temp. Ext.";
+    return fullName;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final liveData = ref.watch(realTimeStateProvider);
     final sensorData = liveData[pid.name];
     final onSurface = Theme.of(context).colorScheme.onSurface;
+    final appColors = ref.watch(appColorsProvider).current(context);
 
-    // CAPTURA AS CORES ESCOLHIDAS
-    final appColors = ref.watch(appColorsProvider);
-
-    // FUNÇÃO DINÂMICA INTERNA
     Color getColorForHealth(SensorHealth? health, Color defaultColor) {
       if (health == SensorHealth.normal) return appColors.normal;
       if (health == SensorHealth.warning) return appColors.warning;
@@ -48,7 +61,6 @@ class ObdGauge extends ConsumerWidget {
       return defaultColor;
     }
 
-    // E lá onde a gente gera as zonas, você também atualizará:
     ZoneGradient buildZoneGradient(
       double minY,
       double maxY,
@@ -61,6 +73,7 @@ class ObdGauge extends ConsumerWidget {
       List<double> stops = [];
       SensorHealth? lastHealth;
       int steps = 100;
+
       for (int i = 0; i <= steps; i++) {
         double percent = i / steps;
         double val = minY + (percent * (maxY - minY));
@@ -88,8 +101,8 @@ class ObdGauge extends ConsumerWidget {
     SensorHealth? currentHealth = pid.evaluateHealth != null
         ? pid.evaluateHealth!(currentValue)
         : null;
-    Color activeColor = getColorForHealth(currentHealth, appColors.primary);
 
+    Color activeColor = getColorForHealth(currentHealth, appColors.primary);
     ZoneGradient zones = buildZoneGradient(0, maxValue, appColors.primary);
 
     return Container(
@@ -143,33 +156,37 @@ class ObdGauge extends ConsumerWidget {
                 if (style != GaugeStyle.lineChart)
                   Positioned(
                     bottom: 12,
-                    left: 40,
-                    right: 40,
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            currentValue.toStringAsFixed(
-                              pid.unit == "RPM" ? 0 : 1,
+                    left: 20,
+                    right: 20,
+                    // ALINHAMENTO DESLOCADO PARA NÃO SOBREPOR!
+                    child: Align(
+                      alignment: const Alignment(0, 0.4),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              currentValue.toStringAsFixed(
+                                pid.unit == "RPM" ? 0 : 1,
+                              ),
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w900,
+                                color: activeColor,
+                                fontFamily: 'Monospace',
+                              ),
                             ),
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.w900,
-                              color: activeColor,
-                              fontFamily: 'Monospace',
+                            Text(
+                              pid.unit,
+                              style: TextStyle(
+                                color: activeColor.withValues(alpha: 0.7),
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                          Text(
-                            pid.unit,
-                            style: TextStyle(
-                              color: activeColor.withValues(alpha: 0.7),
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -184,7 +201,7 @@ class ObdGauge extends ConsumerWidget {
               top: 8.0,
             ),
             child: Text(
-              pid.name.toUpperCase(),
+              _getShortName(pid.name).toUpperCase(), // NOME ABREVIADO
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -201,7 +218,7 @@ class ObdGauge extends ConsumerWidget {
     );
   }
 
-  // CORREÇÃO 3: Gráfico de linha super veloz e sem gradientes!
+  // GRÁFICO SUAVIZADO (BEZIER) SEM PONTOS (PARA NÃO TREMER NO MOBILE)
   Widget _buildLineChart(
     BuildContext context,
     List<double> history,
@@ -229,47 +246,9 @@ class ObdGauge extends ConsumerWidget {
               gridData: const FlGridData(show: false),
               titlesData: const FlTitlesData(show: false),
               borderData: FlBorderData(show: false),
-
               lineTouchData: LineTouchData(
-                getTouchedSpotIndicator:
-                    (LineChartBarData barData, List<int> spotIndexes) {
-                      return spotIndexes.map((spotIndex) {
-                        return TouchedSpotIndicatorData(
-                          FlLine(
-                            color: onSurface.withValues(alpha: 0.3),
-                            strokeWidth: 2,
-                          ),
-                          FlDotData(
-                            show: true,
-                            getDotPainter: (spot, percent, barData, index) {
-                              return FlDotCirclePainter(
-                                radius: 4,
-                                color: onSurface,
-                                strokeWidth: 2,
-                                strokeColor: Theme.of(context).cardColor,
-                              );
-                            },
-                          ),
-                        );
-                      }).toList();
-                    },
-                touchTooltipData: LineTouchTooltipData(
-                  getTooltipColor: (touchedSpot) =>
-                      Theme.of(context).colorScheme.inverseSurface,
-                  getTooltipItems: (touchedSpots) {
-                    return touchedSpots.map((touchedSpot) {
-                      return LineTooltipItem(
-                        touchedSpot.y.toStringAsFixed(1),
-                        TextStyle(
-                          color: Theme.of(context).colorScheme.onInverseSurface,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      );
-                    }).toList();
-                  },
-                ),
-              ),
-
+                enabled: false,
+              ), // Desliga touch no HUD
               lineBarsData: [
                 LineChartBarData(
                   spots: history
@@ -277,13 +256,16 @@ class ObdGauge extends ConsumerWidget {
                       .entries
                       .map((e) => FlSpot(e.key.toDouble(), e.value))
                       .toList(),
-                  isCurved: false,
-                  color: activeColor, // LINHA SÓLIDA
+                  isCurved: true, // SUAVIZAÇÃO ATIVADA
+                  curveSmoothness: 0.2, // Curva leve
+                  preventCurveOverShooting: true,
+                  color: activeColor,
                   barWidth: 3,
-                  dotData: const FlDotData(show: false),
+                  isStrokeCapRound: true,
+                  dotData: const FlDotData(show: false), // ESCONDE OS PONTOS
                   belowBarData: BarAreaData(
                     show: true,
-                    color: activeColor.withValues(alpha: 0.15), // FUNDO SÓLIDO
+                    color: activeColor.withValues(alpha: 0.15),
                   ),
                 ),
               ],
@@ -304,7 +286,6 @@ class ObdGauge extends ConsumerWidget {
   }
 }
 
-// CORREÇÃO 1: A Mágica Matemática que impede o vazamento de cor nas tampas arredondadas do Flutter
 Shader _createSmartSweepShader(
   List<Color> colors,
   List<double> stops,
@@ -316,7 +297,6 @@ Shader _createSmartSweepShader(
   List<Color> mappedColors = [];
   List<double> mappedStops = [];
 
-  // Mapeia nossas zonas para os 70% úteis do círculo
   for (int i = 0; i < colors.length; i++) {
     mappedColors.add(colors[i]);
     mappedStops.add(stops[i] * sweepFraction);
@@ -325,11 +305,8 @@ Shader _createSmartSweepShader(
   Color firstColor = colors.first;
   Color lastColor = colors.last;
 
-  // Zona morta para segurar a cor da ponta direita
   mappedColors.add(lastColor);
   mappedStops.add(sweepFraction + 0.05);
-
-  // Zona morta reversa para blindar o vazamento da ponta esquerda!
   mappedColors.add(firstColor);
   mappedStops.add(1.0 - 0.05);
   mappedColors.add(firstColor);
@@ -337,7 +314,7 @@ Shader _createSmartSweepShader(
 
   return SweepGradient(
     startAngle: 0.0,
-    endAngle: 2 * pi, // Gráfico cobre 360, mas o desenho corta
+    endAngle: 2 * pi,
     colors: mappedColors,
     stops: mappedStops,
     transform: GradientRotation(startAngle),
@@ -360,6 +337,7 @@ class DigitalGaugePainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2 - 10);
     final radius = min(size.width / 2, size.height / 2) - 8;
     final rect = Rect.fromCircle(center: center, radius: radius);
+
     const startAngle = 0.8 * pi;
     const sweepAngle = 1.4 * pi;
 
@@ -427,6 +405,7 @@ class AnalogGaugePainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2 - 10);
     final radius = min(size.width / 2, size.height / 2) - 8;
     final rect = Rect.fromCircle(center: center, radius: radius);
+
     const startAngle = 0.8 * pi;
     const sweepAngle = 1.4 * pi;
 
@@ -453,6 +432,7 @@ class AnalogGaugePainter extends CustomPainter {
     final tickPaint = Paint()
       ..color = baseColor.withValues(alpha: 0.54)
       ..strokeWidth = 2;
+
     for (int i = 0; i <= 10; i++) {
       double angle = startAngle + (sweepAngle * (i / 10));
       Offset inner = Offset(
@@ -482,6 +462,7 @@ class AnalogGaugePainter extends CustomPainter {
       ),
       pointerPaint,
     );
+
     canvas.drawCircle(center, 8, Paint()..color = baseColor);
     canvas.drawCircle(center, 4, Paint()..color = activeColor);
   }

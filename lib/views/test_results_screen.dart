@@ -37,7 +37,7 @@ class _TestResultsScreenState extends ConsumerState<TestResultsScreen> {
   Widget build(BuildContext context) {
     final resultsList = ref.watch(testResultsProvider);
     final onSurface = Theme.of(context).colorScheme.onSurface;
-    final appColors = ref.watch(appColorsProvider);
+    final appColors = ref.watch(appColorsProvider).current(context);
 
     return Scaffold(
       body: Padding(

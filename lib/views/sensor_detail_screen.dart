@@ -8,7 +8,6 @@ import '../widgets/admob_banner.dart';
 
 class SensorDetailScreen extends ConsumerStatefulWidget {
   final ObdPid pid;
-
   const SensorDetailScreen({super.key, required this.pid});
 
   @override
@@ -52,10 +51,9 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
     final sensorData = liveData[widget.pid.name];
     final onSurface = Theme.of(context).colorScheme.onSurface;
 
-    // CAPTURA AS CORES ESCOLHIDAS
-    final appColors = ref.watch(appColorsProvider);
+    // Puxa a paleta de cores automática para o tema atual!
+    final appColors = ref.watch(appColorsProvider).current(context);
 
-    // FUNÇÃO DINÂMICA INTERNA
     Color getColorForHealth(SensorHealth? health, Color defaultColor) {
       if (health == SensorHealth.normal) return appColors.normal;
       if (health == SensorHealth.warning) return appColors.warning;
@@ -65,7 +63,6 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
 
     double minY = 0;
     double maxY = 100;
-
     if (widget.pid.unit.isNotEmpty &&
         sensorData != null &&
         sensorData.history.isNotEmpty) {
@@ -141,9 +138,7 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
                   ),
                 ],
               ),
-
             const SizedBox(height: 48),
-
             if (widget.pid.unit.isNotEmpty) ...[
               Text(
                 "Comportamento Recente",
@@ -196,7 +191,6 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
                             ),
                           ),
                           borderData: FlBorderData(show: false),
-
                           lineTouchData: LineTouchData(
                             getTouchedSpotIndicator:
                                 (
@@ -244,7 +238,6 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
                               },
                             ),
                           ),
-
                           lineBarsData: [
                             LineChartBarData(
                               spots: sensorData.history
@@ -252,15 +245,18 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
                                   .entries
                                   .map((e) => FlSpot(e.key.toDouble(), e.value))
                                   .toList(),
-                              isCurved: false,
-                              color: activeColor, // LINHA SÓLIDA!
+
+                              // A MÁGICA DA SUAVIZAÇÃO AQUI!
+                              isCurved: true,
+                              curveSmoothness: 0.2,
+                              preventCurveOverShooting: true,
+                              isStrokeCapRound: true,
+                              color: activeColor,
                               barWidth: 3,
                               dotData: const FlDotData(show: false),
                               belowBarData: BarAreaData(
                                 show: true,
-                                color: activeColor.withValues(
-                                  alpha: 0.15,
-                                ), // FUNDO SÓLIDO
+                                color: activeColor.withValues(alpha: 0.15),
                               ),
                             ),
                           ],

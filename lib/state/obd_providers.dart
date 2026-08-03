@@ -23,7 +23,7 @@ final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(() {
 });
 
 // ============================================================================
-// CONTROLE DE CORES CUSTOMIZADAS
+// CONTROLE DE CORES CUSTOMIZADAS (CLARO E ESCURO)
 // ============================================================================
 class AppColors {
   final Color primary;
@@ -32,10 +32,10 @@ class AppColors {
   final Color critical;
 
   AppColors({
-    this.primary = Colors.blue,
-    this.normal = Colors.green,
-    this.warning = Colors.amber,
-    this.critical = Colors.red,
+    required this.primary,
+    required this.normal,
+    required this.warning,
+    required this.critical,
   });
 
   AppColors copyWith({
@@ -53,51 +53,123 @@ class AppColors {
   }
 }
 
-class AppColorsNotifier extends Notifier<AppColors> {
+class AppThemePalette {
+  final AppColors light;
+  final AppColors dark;
+  AppThemePalette({required this.light, required this.dark});
+}
+
+// Extensão mágica para as telas pegarem a cor certa automaticamente!
+extension AppThemePaletteExtension on AppThemePalette {
+  AppColors current(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.light ? light : dark;
+  }
+}
+
+class AppColorsNotifier extends Notifier<AppThemePalette> {
   @override
-  AppColors build() {
+  AppThemePalette build() {
     _loadColors();
-    return AppColors(); // Retorna o padrão enquanto carrega
+    // PADRÃO: Preto para o Claro, Branco para o Escuro
+    return AppThemePalette(
+      light: AppColors(
+        primary: Colors.black,
+        normal: Colors.green,
+        warning: Colors.amber,
+        critical: Colors.red,
+      ),
+      dark: AppColors(
+        primary: Colors.white,
+        normal: Colors.green,
+        warning: Colors.amber,
+        critical: Colors.red,
+      ),
+    );
   }
 
   Future<void> _loadColors() async {
     final prefs = await SharedPreferences.getInstance();
-    final p = prefs.getInt('color_primary');
-    final n = prefs.getInt('color_normal');
-    final w = prefs.getInt('color_warning');
-    final c = prefs.getInt('color_critical');
 
-    state = AppColors(
-      primary: p != null ? Color(p) : Colors.blueAccent,
-      normal: n != null ? Color(n) : Colors.greenAccent,
-      warning: w != null ? Color(w) : Colors.amberAccent,
-      critical: c != null ? Color(c) : Colors.redAccent,
+    Color getColor(String key, Color defaultColor) {
+      final val = prefs.getInt(key);
+      return val != null ? Color(val) : defaultColor;
+    }
+
+    state = AppThemePalette(
+      light: AppColors(
+        primary: getColor('light_primary', Colors.black),
+        normal: getColor('light_normal', Colors.green),
+        warning: getColor('light_warning', Colors.amber),
+        critical: getColor('light_critical', Colors.red),
+      ),
+      dark: AppColors(
+        primary: getColor('dark_primary', Colors.white),
+        normal: getColor('dark_normal', Colors.green),
+        warning: getColor('dark_warning', Colors.amber),
+        critical: getColor('dark_critical', Colors.red),
+      ),
     );
   }
 
-  Future<void> updateColor(String key, Color color) async {
+  Future<void> updateColor(bool isLight, String key, Color color) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('color_$key', color.toARGB32());
+    final prefix = isLight ? 'light' : 'dark';
+    await prefs.setInt('${prefix}_$key', color.toARGB32());
 
-    if (key == 'primary') state = state.copyWith(primary: color);
-    if (key == 'normal') state = state.copyWith(normal: color);
-    if (key == 'warning') state = state.copyWith(warning: color);
-    if (key == 'critical') state = state.copyWith(critical: color);
+    if (isLight) {
+      AppColors updatedLight = state.light;
+      if (key == 'primary') {
+        updatedLight = updatedLight.copyWith(primary: color);
+      }
+      if (key == 'normal') updatedLight = updatedLight.copyWith(normal: color);
+      if (key == 'warning') {
+        updatedLight = updatedLight.copyWith(warning: color);
+      }
+      if (key == 'critical') {
+        updatedLight = updatedLight.copyWith(critical: color);
+      }
+      state = AppThemePalette(light: updatedLight, dark: state.dark);
+    } else {
+      AppColors updatedDark = state.dark;
+      if (key == 'primary') updatedDark = updatedDark.copyWith(primary: color);
+      if (key == 'normal') updatedDark = updatedDark.copyWith(normal: color);
+      if (key == 'warning') updatedDark = updatedDark.copyWith(warning: color);
+      if (key == 'critical') {
+        updatedDark = updatedDark.copyWith(critical: color);
+      }
+      state = AppThemePalette(light: state.light, dark: updatedDark);
+    }
   }
 
   Future<void> resetToDefaults() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('color_primary');
-    await prefs.remove('color_normal');
-    await prefs.remove('color_warning');
-    await prefs.remove('color_critical');
-    state = AppColors();
+    final keys = ['primary', 'normal', 'warning', 'critical'];
+    for (var k in keys) {
+      await prefs.remove('light_$k');
+      await prefs.remove('dark_$k');
+    }
+    state = AppThemePalette(
+      light: AppColors(
+        primary: Colors.black,
+        normal: Colors.green,
+        warning: Colors.amber,
+        critical: Colors.red,
+      ),
+      dark: AppColors(
+        primary: Colors.white,
+        normal: Colors.green,
+        warning: Colors.amber,
+        critical: Colors.red,
+      ),
+    );
   }
 }
 
-final appColorsProvider = NotifierProvider<AppColorsNotifier, AppColors>(() {
-  return AppColorsNotifier();
-});
+final appColorsProvider = NotifierProvider<AppColorsNotifier, AppThemePalette>(
+  () {
+    return AppColorsNotifier();
+  },
+);
 
 // ============================================================================
 // TÚNEL 1: DADOS EM TEMPO REAL COM HISTÓRICO (Modo 01)
@@ -388,3 +460,50 @@ final testResultsProvider =
     NotifierProvider<TestResultsNotifier, List<Mode06Result>>(() {
       return TestResultsNotifier();
     });
+
+// ============================================================================
+// CONTROLE DE TAXA DE ATUALIZAÇÃO (POLLING RATE)
+// ============================================================================
+class PollingIntervalNotifier extends Notifier<int> {
+  @override
+  int build() {
+    _loadInterval();
+    return 0; // Retorna 0 (Máxima) como padrão enquanto carrega
+  }
+
+  // Busca a configuração salva ao abrir o app
+  Future<void> _loadInterval() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedInterval = prefs.getInt('polling_interval');
+    if (savedInterval != null) {
+      state = savedInterval;
+    }
+  }
+
+  // Atualiza o estado na tela e salva no disco simultaneamente
+  Future<void> updateInterval(int value) async {
+    state = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('polling_interval', value);
+  }
+}
+
+final pollingIntervalProvider = NotifierProvider<PollingIntervalNotifier, int>(
+  () {
+    return PollingIntervalNotifier();
+  },
+);
+
+// ============================================================================
+// CONTROLE DE TELA CHEIA (FULLSCREEN) DO HUD
+// ============================================================================
+class HudFullscreenNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  void toggle() => state = !state;
+}
+
+final hudFullscreenProvider = NotifierProvider<HudFullscreenNotifier, bool>(() {
+  return HudFullscreenNotifier();
+});

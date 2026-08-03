@@ -149,6 +149,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final connState = ref.watch(connectionStateProvider);
+    final isFullscreen = ref.watch(hudFullscreenProvider);
 
     ref.listen(connectionStateProvider, (previous, next) {
       if (next == AppConnectionState.waitingForEcu ||
@@ -174,7 +175,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           body: SafeArea(
             child: Row(
               children: [
-                if (isDesktop)
+                if (isDesktop && !isFullscreen)
                   Container(
                     width: 85,
                     color: Theme.of(context).appBarTheme.backgroundColor,
@@ -223,7 +224,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 Expanded(
                   child: Column(
                     children: [
-                      if (!isDesktop)
+                      if (!isDesktop && !isFullscreen)
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 16,
@@ -255,7 +256,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ],
             ),
           ),
-          bottomNavigationBar: isDesktop
+          bottomNavigationBar: (isDesktop || isFullscreen)
               ? null
               : NavigationBar(
                   selectedIndex: _selectedIndex,
