@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "odb2tools" "\0"
+            VALUE "FileDescription", "OBD2 Tools" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "odb2tools" "\0"
+            VALUE "InternalName", "obd2tools" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "odb2tools.exe" "\0"
-            VALUE "ProductName", "odb2tools" "\0"
+            VALUE "OriginalFilename", "obd2tools.exe" "\0"
+            VALUE "ProductName", "OBD2 Tools" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

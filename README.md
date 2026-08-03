@@ -1,4 +1,4 @@
-# 🚗 Smart OBD-II Scanner (ODB2Tools)
+# 🚗 Smart OBD-II Scanner (OBD2 Tools)
 
 Um aplicativo de diagnóstico automotivo de alto desempenho desenvolvido em **Flutter**. Este projeto conecta-se a adaptadores Bluetooth ELM327 para ler, em tempo real, a telemetria e as informações vitais da Injeção Eletrônica (ECU) do veículo via rede CAN Bus.
 

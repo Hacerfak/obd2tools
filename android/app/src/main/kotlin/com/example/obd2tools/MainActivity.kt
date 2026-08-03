@@ -1,4 +1,4 @@
-package com.example.odb2tools
+package com.example.obd2tools
 
 import io.flutter.embedding.android.FlutterActivity
 

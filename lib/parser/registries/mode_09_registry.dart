@@ -65,8 +65,9 @@ String _decodeAscii(String hexData) {
   String text = "";
   for (int i = 0; i < hexData.length - 1; i += 2) {
     int charCode = int.parse(hexData.substring(i, i + 2), radix: 16);
-    if (charCode >= 32 && charCode <= 126)
+    if (charCode >= 32 && charCode <= 126) {
       text += String.fromCharCode(charCode);
+    }
   }
   return text.trim();
 }
