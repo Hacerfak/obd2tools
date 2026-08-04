@@ -3,58 +3,51 @@ import '../../state/obd_providers.dart';
 class Mode06Parser {
   static List<Mode06Result> parse(String cleanHex) {
     List<Mode06Result> results = [];
-    int cursor = 0;
 
-    while (cursor < cleanHex.length) {
-      // Localiza o início de uma resposta do Modo 06
-      cursor = cleanHex.indexOf("46", cursor);
-      if (cursor == -1) break;
+    // Acha onde começa a resposta
+    int cursor = cleanHex.indexOf("46");
+    if (cursor == -1) return results;
 
-      cursor += 2; // Pula o "46"
+    cursor += 2; // Pula os 2 caracteres do "46" para alinhar a leitura!
 
-      // Cada bloco de teste no CAN tem exatos 18 caracteres (9 bytes):
-      // [MID](2) [TID](2) [CID](2) [VAL](4) [MIN](4) [MAX](4)
-      while (cursor + 18 <= cleanHex.length) {
-        // Se encontrar um novo cabeçalho '46', interrompe este bloco e vai pro próximo pacote
-        if (cleanHex.startsWith("46", cursor)) {
-          break;
-        }
+    // Em redes CAN, os dados vêm em blocos contínuos de exatos 18 caracteres (9 bytes):
+    // [MID](2) [TID](2) [UAS](2) [VAL](4) [MIN](4) [MAX](4)
+    while (cursor + 18 <= cleanHex.length) {
+      String block = cleanHex.substring(cursor, cursor + 18);
 
-        String block = cleanHex.substring(cursor, cursor + 18);
-
-        // Pula lixo de preenchimento da rede CAN (000000... ou AAAAAA...)
-        if (block.startsWith("0000000000000000") ||
-            block.contains("AAAAAAAA")) {
-          cursor += 18;
-          continue;
-        }
-
-        try {
-          int mid = int.parse(block.substring(0, 2), radix: 16);
-          int tid = int.parse(block.substring(2, 4), radix: 16);
-          int cid = int.parse(block.substring(4, 6), radix: 16);
-          int value = int.parse(block.substring(6, 10), radix: 16);
-          int min = int.parse(block.substring(10, 14), radix: 16);
-          int max = int.parse(block.substring(14, 18), radix: 16);
-
-          // AGORA ELE ADICIONA TODOS OS TESTES, MESMO OS ZERADOS!
-          results.add(
-            Mode06Result(
-              mid: mid,
-              tid: tid,
-              cid: cid,
-              value: value,
-              min: min,
-              max: max,
-            ),
-          );
-        } catch (e) {
-          // Ignora blocos corrompidos
-        }
-
-        // Avança exatamente os 18 caracteres para o próximo teste!
+      // Pula lixo de preenchimento da rede CAN (ex: AAAAAA ou 0000000000000000)
+      if (block.startsWith("0000000000000000") || block.contains("AAAAAAAA")) {
         cursor += 18;
+        continue;
       }
+
+      try {
+        int mid = int.parse(block.substring(0, 2), radix: 16);
+        int tid = int.parse(block.substring(2, 4), radix: 16);
+        int uas = int.parse(
+          block.substring(4, 6),
+          radix: 16,
+        ); // UAS (Unidade/Escala)
+        int value = int.parse(block.substring(6, 10), radix: 16);
+        int min = int.parse(block.substring(10, 14), radix: 16);
+        int max = int.parse(block.substring(14, 18), radix: 16);
+
+        results.add(
+          Mode06Result(
+            mid: mid,
+            tid: tid,
+            cid: uas, // Usamos a propriedade CID para guardar o UAS
+            value: value,
+            min: min,
+            max: max,
+          ),
+        );
+      } catch (e) {
+        // Ignora blocos corrompidos
+      }
+
+      // Avança exatamente os 18 caracteres para o próximo teste!
+      cursor += 18;
     }
 
     return results;

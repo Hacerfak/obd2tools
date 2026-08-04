@@ -82,19 +82,36 @@ class ObdManager {
 
   // --- TESTES DE MONITORES (MODO 06) ---
   void scanTestResults() {
-    _addLog("Solicitando mapeamento do Modo 06 (Testes Suportados)...");
+    _addLog("Solicitando Modo 06: Mapeamento + Busca Cega...");
     _isPollingEnabled = false;
     ref.read(testResultsProvider.notifier).clear();
     ref.read(testResultsProvider.notifier).setLoading(true);
 
+    // 1. Tática de Força Bruta (Mapeamento Padrão)
     queueCommand("0600");
+    queueCommand("0620");
+    queueCommand("0640");
+    queueCommand("0660");
+    queueCommand("0680");
+    queueCommand("06A0");
 
-    // Timer de segurança caso a ECU demore ou ignore o Modo 06
-    Future.delayed(const Duration(seconds: 4), () {
-      if (_commandQueue.isEmpty &&
-          ref.read(testResultsProvider.notifier).isLoading) {
+    // 2. Tática de Busca Cega (Ignoramos se a GM diz não suportar, pedimos à força!)
+
+    // Sondas Lambdas (Banco 1 - Sensores 1 e 2)
+    queueCommand("0601");
+    queueCommand("0602");
+
+    // Catalisador (Banco 1 e 2)
+    queueCommand("0621");
+    queueCommand("0622");
+
+    // VVT / Comando de Válvulas
+    queueCommand("0635");
+
+    Future.delayed(const Duration(seconds: 15), () {
+      if (ref.read(testResultsProvider.notifier).isLoading) {
         ref.read(testResultsProvider.notifier).setLoading(false);
-        _addLog("Varredura de Modo 06 concluída.");
+        _addLog("Varredura de Modo 06 abortada por Timeout de 15s.");
       }
     });
   }
@@ -237,6 +254,15 @@ class ObdManager {
       String rawResponse = response.replaceAll("SEARCHING...", "").trim();
       String cleanHex = ObdParser.cleanRawResponse(rawResponse);
 
+      if (cleanHex.startsWith("46")) {
+        debugPrint("=========================================");
+        debugPrint("🔍 [MODO 06 - DADOS BRUTOS ELM327]:");
+        debugPrint(rawResponse);
+        debugPrint("🧹 [MODO 06 - APÓS NOSSA LIMPEZA]:");
+        debugPrint(cleanHex);
+        debugPrint("=========================================");
+      }
+
       // 2. A ECU ACORDOU!
       if (cleanHex.startsWith("41") ||
           cleanHex.startsWith("42") ||
@@ -303,12 +329,10 @@ class ObdManager {
       }
       // LÊ TESTES DE MONITORES (Modo 06)
       else if (cleanHex.startsWith("46")) {
-        // Se for a resposta do mapeamento (4600, 4620, etc...)
-        if (cleanHex.contains("4600") ||
-            cleanHex.contains("4620") ||
-            cleanHex.contains("4640")) {
+        // Se for a resposta do mapeamento usando nossa tática de Força Bruta
+        if (RegExp(r'46(00|20|40|60|80|A0|C0|E0)').hasMatch(cleanHex)) {
           final RegExp supportRegex = RegExp(
-            r'46(00|20|40|60|80|A0|C0)([0-9A-F]{8})',
+            r'46(00|20|40|60|80|A0|C0|E0)([0-9A-F]{8})',
           );
           final matches = supportRegex.allMatches(cleanHex);
 
@@ -316,7 +340,6 @@ class ObdManager {
             int basePid = int.parse(match.group(1)!, radix: 16);
             String dataHex = match.group(2)!;
 
-            // Reutiliza o decodificador de suporte do Modo 01
             List<int> supported = Mode01Parser.parseSupportedPids(
               dataHex,
               basePid,
@@ -324,7 +347,7 @@ class ObdManager {
 
             for (int mid in supported) {
               if (mid % 0x20 != 0) {
-                // Ignora os próximos pings de suporte
+                // Aqui nós pedimos diretamente o teste aprovado pela máscara!
                 String hexReq = mid
                     .toRadixString(16)
                     .padLeft(2, '0')
@@ -332,18 +355,9 @@ class ObdManager {
                 queueCommand("06$hexReq");
               }
             }
-
-            // Pergunta pelo próximo grupo de suportes se necessário
-            if (supported.contains(basePid + 0x20)) {
-              String nextGroupHex = (basePid + 0x20)
-                  .toRadixString(16)
-                  .padLeft(2, '0')
-                  .toUpperCase();
-              queueCommand("06$nextGroupHex");
-            }
           }
         }
-        // Se for a resposta de um teste específico (ex: 4601...)
+        // Se for a resposta de um teste específico (ex: 4601, 46A2...)
         else {
           List<Mode06Result> parsedData = Mode06Parser.parse(cleanHex);
           for (var result in parsedData) {
@@ -478,6 +492,11 @@ class ObdManager {
         if (ref.read(dtcStateProvider).isLoading) {
           ref.read(dtcStateProvider.notifier).setLoading(false);
           _addLog("Diagnóstico concluído com sucesso.");
+        }
+        // Encerra Loading do Modo 06 de forma natural (quando não há mais comandos pendentes)
+        if (ref.read(testResultsProvider.notifier).isLoading) {
+          ref.read(testResultsProvider.notifier).setLoading(false);
+          _addLog("Varredura de Modo 06 concluída naturalmente.");
         }
       }
     }
