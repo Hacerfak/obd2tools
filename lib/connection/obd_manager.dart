@@ -94,6 +94,8 @@ class ObdManager {
     queueCommand("0660");
     queueCommand("0680");
     queueCommand("06A0");
+    queueCommand("06C0");
+    queueCommand("06E0");
 
     // 2. Tática de Busca Cega (Ignoramos se a GM diz não suportar, pedimos à força!)
 
@@ -254,15 +256,6 @@ class ObdManager {
       String rawResponse = response.replaceAll("SEARCHING...", "").trim();
       String cleanHex = ObdParser.cleanRawResponse(rawResponse);
 
-      if (cleanHex.startsWith("46")) {
-        debugPrint("=========================================");
-        debugPrint("🔍 [MODO 06 - DADOS BRUTOS ELM327]:");
-        debugPrint(rawResponse);
-        debugPrint("🧹 [MODO 06 - APÓS NOSSA LIMPEZA]:");
-        debugPrint(cleanHex);
-        debugPrint("=========================================");
-      }
-
       // 2. A ECU ACORDOU!
       if (cleanHex.startsWith("41") ||
           cleanHex.startsWith("42") ||
@@ -287,9 +280,8 @@ class ObdManager {
 
       // 3. ROTEAMENTO MODO 01 (Sensores e Paginação)
       if (cleanHex.startsWith("41")) {
-        if (cleanHex.startsWith("4100") ||
-            cleanHex.startsWith("4120") ||
-            cleanHex.startsWith("4140")) {
+        // Agora aceita a descoberta dinâmica de 00 até C0!
+        if (RegExp(r'^41(00|20|40|60|80|A0|C0)').hasMatch(cleanHex)) {
           final RegExp supportRegex = RegExp(
             r'41(00|20|40|60|80|A0|C0)([0-9A-F]{8})',
           );
@@ -414,9 +406,8 @@ class ObdManager {
       }
       // FREEZE FRAME (Modo 02)
       else if (cleanHex.startsWith("42")) {
-        if (cleanHex.contains("420000") ||
-            cleanHex.contains("422000") ||
-            cleanHex.contains("424000")) {
+        // Libera a passagem para mapeamento de todos os Freeze Frames
+        if (RegExp(r'42(00|20|40|60|80|A0|C0)00').hasMatch(cleanHex)) {
           final RegExp supportRegex = RegExp(
             r'42(00|20|40|60|80|A0|C0)00([0-9A-F]{8})',
           );

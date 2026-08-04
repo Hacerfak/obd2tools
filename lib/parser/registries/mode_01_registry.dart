@@ -60,6 +60,44 @@ final Map<int, ObdPid> pidRegistry = {
       return SensorHealth.critical; // Ferveu!
     },
   ),
+  // --- COMPLEMENTOS DO BLOCO 1 (Fuel Trims e Pressão) ---
+  0x06: ObdPid(
+    id: 0x06,
+    name: "Ajuste de Combustível a Curto Prazo (Banco 1)",
+    unit: "%",
+    expectedBytes: 1,
+    calculate: (bytes) => (bytes[0] / 1.28) - 100.0,
+    isFast: true,
+  ),
+  0x07: ObdPid(
+    id: 0x07,
+    name: "Ajuste de Combustível a Longo Prazo (Banco 1)",
+    unit: "%",
+    expectedBytes: 1,
+    calculate: (bytes) => (bytes[0] / 1.28) - 100.0,
+  ),
+  0x08: ObdPid(
+    id: 0x08,
+    name: "Ajuste de Combustível a Curto Prazo (Banco 2)",
+    unit: "%",
+    expectedBytes: 1,
+    calculate: (bytes) => (bytes[0] / 1.28) - 100.0,
+    isFast: true,
+  ),
+  0x09: ObdPid(
+    id: 0x09,
+    name: "Ajuste de Combustível a Longo Prazo (Banco 2)",
+    unit: "%",
+    expectedBytes: 1,
+    calculate: (bytes) => (bytes[0] / 1.28) - 100.0,
+  ),
+  0x0A: ObdPid(
+    id: 0x0A,
+    name: "Pressão do Combustível (Bomba)",
+    unit: "kPa",
+    expectedBytes: 1,
+    calculate: (bytes) => bytes[0] * 3.0,
+  ),
   0x0B: ObdPid(
     id: 0x0B,
     name: "Pressão Admissão (MAP)",
@@ -138,6 +176,38 @@ final Map<int, ObdPid> pidRegistry = {
           .length;
       return "$count Sensor(es) Detectado(s)";
     },
+  ),
+  0x14: ObdPid(
+    id: 0x14,
+    name: "Tensão da Sonda Lambda (B1S1)",
+    unit: "V",
+    expectedBytes: 2,
+    calculate: (bytes) => bytes[0] / 200.0,
+    isFast: true,
+  ),
+  0x15: ObdPid(
+    id: 0x15,
+    name: "Tensão da Sonda Lambda (B1S2)",
+    unit: "V",
+    expectedBytes: 2,
+    calculate: (bytes) => bytes[0] / 200.0,
+    isFast: true,
+  ),
+  0x16: ObdPid(
+    id: 0x16,
+    name: "Tensão da Sonda Lambda (B2S1)",
+    unit: "V",
+    expectedBytes: 2,
+    calculate: (bytes) => bytes[0] / 200.0,
+    isFast: true,
+  ),
+  0x17: ObdPid(
+    id: 0x17,
+    name: "Tensão da Sonda Lambda (B2S2)",
+    unit: "V",
+    expectedBytes: 2,
+    calculate: (bytes) => bytes[0] / 200.0,
+    isFast: true,
   ),
   0x1C: ObdPid(
     id: 0x1C,
@@ -245,6 +315,34 @@ final Map<int, ObdPid> pidRegistry = {
     expectedBytes: 2,
     calculate: (bytes) => ((bytes[0] * 256) + bytes[1]).toDouble(),
   ),
+  0x22: ObdPid(
+    id: 0x22,
+    name: "Pressão no Tubo Distribuidor (Fuel Rail) - Relativa",
+    unit: "kPa",
+    expectedBytes: 2,
+    calculate: (bytes) => ((bytes[0] * 256) + bytes[1]) * 0.079,
+  ),
+  0x23: ObdPid(
+    id: 0x23,
+    name: "Pressão no Tubo Distribuidor (Fuel Rail) - Absoluta",
+    unit: "kPa",
+    expectedBytes: 2,
+    calculate: (bytes) => ((bytes[0] * 256) + bytes[1]) * 10.0,
+  ),
+  0x2C: ObdPid(
+    id: 0x2C,
+    name: "Comando EGR",
+    unit: "%",
+    expectedBytes: 1,
+    calculate: (bytes) => (bytes[0] / 255.0) * 100.0,
+  ),
+  0x2D: ObdPid(
+    id: 0x2D,
+    name: "Erro do Sistema EGR",
+    unit: "%",
+    expectedBytes: 1,
+    calculate: (bytes) => (bytes[0] / 1.28) - 100.0,
+  ),
   0x2E: ObdPid(
     id: 0x2E,
     name: "Comando Purga Canister",
@@ -294,7 +392,51 @@ final Map<int, ObdPid> pidRegistry = {
     expectedBytes: 1,
     calculate: (bytes) => bytes[0].toDouble(),
   ),
-
+  0x34: ObdPid(
+    id: 0x34,
+    name: "Sonda Lambda 1 (B1S1) - Relação Equivalência",
+    unit: "λ",
+    expectedBytes: 4,
+    // Sensores de banda larga (Wideband) usam os Bytes A e B para Lambda, C e D para Tensão
+    calculate: (bytes) => ((bytes[0] * 256) + bytes[1]) / 32768.0,
+    isFast: true,
+  ),
+  0x35: ObdPid(
+    id: 0x35,
+    name: "Sonda Lambda 2 (B1S2) - Relação Equivalência",
+    unit: "λ",
+    expectedBytes: 4,
+    calculate: (bytes) => ((bytes[0] * 256) + bytes[1]) / 32768.0,
+    isFast: true,
+  ),
+  0x3C: ObdPid(
+    id: 0x3C,
+    name: "Temp. Catalisador (Banco 1, Sensor 1)",
+    unit: "°C",
+    expectedBytes: 2,
+    calculate: (bytes) => (((bytes[0] * 256) + bytes[1]) / 10.0) - 40.0,
+  ),
+  0x3D: ObdPid(
+    id: 0x3D,
+    name: "Temp. Catalisador (Banco 2, Sensor 1)",
+    unit: "°C",
+    expectedBytes: 2,
+    calculate: (bytes) => (((bytes[0] * 256) + bytes[1]) / 10.0) - 40.0,
+  ),
+  0x3E: ObdPid(
+    id: 0x3E,
+    name: "Temp. Catalisador (Banco 1, Sensor 2)",
+    unit: "°C",
+    expectedBytes: 2,
+    calculate: (bytes) => (((bytes[0] * 256) + bytes[1]) / 10.0) - 40.0,
+  ),
+  0x3F: ObdPid(
+    id: 0x3F,
+    name: "Temp. Catalisador (Banco 2, Sensor 2)",
+    unit: "°C",
+    expectedBytes: 2,
+    calculate: (bytes) => (((bytes[0] * 256) + bytes[1]) / 10.0) - 40.0,
+  ),
   // --- BLOCO 3 (0x41 a 0x60) ---
   0x41: ObdPid(
     id: 0x41,
@@ -389,49 +531,485 @@ final Map<int, ObdPid> pidRegistry = {
     expectedBytes: 1,
     calculate: (bytes) => (bytes[0] / 255.0) * 100.0,
   ),
+  // --- COMPLEMENTOS DO BLOCO 3 (0x41 a 0x60) ---
+  0x48: ObdPid(
+    id: 0x48,
+    name: "Posição Absoluta Borboleta C",
+    unit: "%",
+    expectedBytes: 1,
+    calculate: (bytes) => (bytes[0] / 255.0) * 100.0,
+  ),
+  0x4B: ObdPid(
+    id: 0x4B,
+    name: "Posição do Pedal Acelerador F",
+    unit: "%",
+    expectedBytes: 1,
+    calculate: (bytes) => (bytes[0] / 255.0) * 100.0,
+  ),
+  0x4D: ObdPid(
+    id: 0x4D,
+    name: "Tempo de Motor com Luz de Injeção Acesa",
+    unit: "min",
+    expectedBytes: 2,
+    calculate: (bytes) => ((bytes[0] * 256) + bytes[1]).toDouble(),
+  ),
+  0x4E: ObdPid(
+    id: 0x4E,
+    name: "Tempo de Motor desde Limpeza de Erros",
+    unit: "min",
+    expectedBytes: 2,
+    calculate: (bytes) => ((bytes[0] * 256) + bytes[1]).toDouble(),
+  ),
+  0x51: ObdPid(
+    id: 0x51,
+    name: "Tipo de Combustível do Veículo",
+    unit: "",
+    expectedBytes: 1,
+    calculate: (bytes) => bytes[0].toDouble(),
+    formatValue: (value) {
+      int val = value.toInt();
+      switch (val) {
+        case 0:
+          return "Não Disponível";
+        case 1:
+          return "Gasolina";
+        case 2:
+          return "Metanol";
+        case 3:
+          return "Etanol";
+        case 4:
+          return "Diesel";
+        case 5:
+          return "GPL (Gás Liquefeito de Petróleo)";
+        case 6:
+          return "GNV (Gás Natural Veicular)";
+        case 7:
+          return "Propano";
+        case 8:
+          return "Elétrico";
+        case 9:
+          return "Bifuel (Mistura Flex)";
+        case 10:
+          return "Híbrido (Gasolina/Elétrico)";
+        case 11:
+          return "Híbrido (Etanol/Elétrico)";
+        case 12:
+          return "Híbrido (Diesel/Elétrico)";
+        case 23:
+          return "E85 (85% Etanol)";
+        default:
+          return "Outro/Desconhecido ($val)";
+      }
+    },
+  ),
+  0x52: ObdPid(
+    id: 0x52,
+    name: "Percentual de Etanol no Combustível",
+    unit: "%",
+    expectedBytes: 1,
+    calculate: (bytes) => (bytes[0] / 255.0) * 100.0,
+  ),
+  0x5A: ObdPid(
+    id: 0x5A,
+    name: "Posição Relativa do Pedal do Acelerador",
+    unit: "%",
+    expectedBytes: 1,
+    calculate: (bytes) => (bytes[0] / 255.0) * 100.0,
+    isFast: true,
+  ),
+  0x5B: ObdPid(
+    id: 0x5B,
+    name: "Vida Útil da Bateria (Híbridos)",
+    unit: "%",
+    expectedBytes: 1,
+    calculate: (bytes) => (bytes[0] / 255.0) * 100.0,
+  ),
+  0x5C: ObdPid(
+    id: 0x5C,
+    name: "Temperatura do Óleo do Motor",
+    unit: "°C",
+    expectedBytes: 1,
+    calculate: (bytes) => bytes[0] - 40.0,
+    evaluateHealth: (value) {
+      if (value < 70) return SensorHealth.warning; // Óleo frio
+      if (value >= 70 && value <= 110) return SensorHealth.normal; // Ideal
+      if (value > 110 && value <= 125) {
+        return SensorHealth.warning;
+      } // Esquentando bem
+      return SensorHealth.critical; // Passando do limite de viscosidade segura
+    },
+  ),
+  0x5D: ObdPid(
+    id: 0x5D,
+    name: "Ponto de Injeção de Combustível",
+    unit: "°",
+    expectedBytes: 2,
+    // (A * 256 + B) / 128 - 210
+    calculate: (bytes) => (((bytes[0] * 256) + bytes[1]) / 128.0) - 210.0,
+  ),
+  0x5E: ObdPid(
+    id: 0x5E,
+    name: "Consumo de Combustível (Vazão)",
+    unit: "L/h",
+    expectedBytes: 2,
+    // (A * 256 + B) / 20
+    calculate: (bytes) => ((bytes[0] * 256) + bytes[1]) / 20.0,
+    isFast: true,
+  ),
+  // --- COMPLEMENTOS FINAIS DO BLOCO 3 ---
+  0x53: ObdPid(
+    id: 0x53,
+    name: "Pressão Absoluta de Vapor (EVAP)",
+    unit: "kPa",
+    expectedBytes: 2,
+    calculate: (bytes) => ((bytes[0] * 256) + bytes[1]) / 200.0,
+  ),
+  0x59: ObdPid(
+    id: 0x59,
+    name: "Pressão Absoluta no Tubo Distribuidor (Fuel Rail)",
+    unit: "kPa",
+    expectedBytes: 2,
+    calculate: (bytes) => ((bytes[0] * 256) + bytes[1]) * 10.0,
+  ),
+  0x5F: ObdPid(
+    id: 0x5F,
+    name: "Norma de Emissões Projetada",
+    unit: "",
+    expectedBytes: 1,
+    calculate: (bytes) => bytes[0].toDouble(),
+    formatValue: (value) {
+      int val = value.toInt();
+      // Retornos simplificados baseados na tabela de emissões da SAE
+      if (val == 1 || val == 2 || val == 3) return "Padrão OBD/OBD-II";
+      if (val >= 4 && val <= 8) return "Padrão Europeu (EOBD)";
+      if (val >= 9 && val <= 13) return "Padrão Japonês (JOBD)";
+      if (val == 14 || val == 15) return "Padrão Euro IV / V";
+      if (val >= 31 && val <= 37) return "Padrão Brasileiro (OBDBr)";
+      return "Padrão Regional ($val)";
+    },
+  ),
+
+  // --- BLOCO 4 (0x61 a 0x80) - TORQUE E EXAUSTÃO ---
+  0x61: ObdPid(
+    id: 0x61,
+    name: "Torque Demandado pelo Motorista",
+    unit: "%",
+    expectedBytes: 1,
+    calculate: (bytes) => bytes[0] - 125.0,
+    isFast: true,
+  ),
+  0x62: ObdPid(
+    id: 0x62,
+    name: "Torque Real do Motor",
+    unit: "%",
+    expectedBytes: 1,
+    calculate: (bytes) => bytes[0] - 125.0,
+    isFast: true,
+  ),
+  0x63: ObdPid(
+    id: 0x63,
+    name: "Torque de Referência do Motor",
+    unit: "Nm",
+    expectedBytes: 2,
+    calculate: (bytes) => ((bytes[0] * 256) + bytes[1]).toDouble(),
+  ),
+  0x66: ObdPid(
+    id: 0x66,
+    name: "Fluxo de Massa de Ar (Sensor A)",
+    unit: "g/s",
+    expectedBytes: 4, // Sensores MAF avançados usam mais bytes
+    // (A * 256 + B) / 32
+    calculate: (bytes) => ((bytes[0] * 256) + bytes[1]) / 32.0,
+    isFast: true,
+  ),
+  0x67: ObdPid(
+    id: 0x67,
+    name: "Temp. Arrefecimento (Sensores Múltiplos)",
+    unit: "°C",
+    expectedBytes: 3,
+    // Byte A é a máscara, Byte B é o Sensor 1, Byte C é o Sensor 2
+    calculate: (bytes) => bytes[1] - 40.0,
+  ),
+  0x68: ObdPid(
+    id: 0x68,
+    name: "Temp. Ar Admissão (Sensores Múltiplos)",
+    unit: "°C",
+    expectedBytes: 3,
+    calculate: (bytes) => bytes[1] - 40.0,
+  ),
+  0x6F: ObdPid(
+    id: 0x6F,
+    name: "Pressão de Entrada do Turbo",
+    unit: "kPa",
+    expectedBytes: 1,
+    calculate: (bytes) => bytes[0].toDouble(),
+    isFast: true,
+  ),
+  0x78: ObdPid(
+    id: 0x78,
+    name: "Temp. Gases de Escape (EGT) - Banco 1",
+    unit: "°C",
+    expectedBytes: 4,
+    // (B * 256 + C) / 10 - 40 (Ignoramos o Byte A que é máscara)
+    calculate: (bytes) => (((bytes[1] * 256) + bytes[2]) / 10.0) - 40.0,
+  ),
+  0x79: ObdPid(
+    id: 0x79,
+    name: "Temp. Gases de Escape (EGT) - Banco 2",
+    unit: "°C",
+    expectedBytes: 4,
+    calculate: (bytes) => (((bytes[1] * 256) + bytes[2]) / 10.0) - 40.0,
+  ),
+  // --- BLOCO 5 (0x81 a 0xA0) - EMISSÕES AVANÇADAS E HÍBRIDOS ---
+  0x81: ObdPid(
+    id: 0x81,
+    name: "Tempo de Motor com Controle de Emissão Ativo",
+    unit: "min",
+    expectedBytes: 2,
+    calculate: (bytes) => ((bytes[0] * 256) + bytes[1]).toDouble(),
+  ),
+  0x82: ObdPid(
+    id: 0x82,
+    name: "Tempo de Motor desde Início do Controle de Emissão",
+    unit: "min",
+    expectedBytes: 2,
+    calculate: (bytes) => ((bytes[0] * 256) + bytes[1]).toDouble(),
+  ),
+  0x83: ObdPid(
+    id: 0x83,
+    name: "Pressão de Vapor do Sistema Evaporativo (Alt)",
+    unit: "Pa",
+    expectedBytes: 2,
+    calculate: (bytes) => ((bytes[0] * 256) + bytes[1]) - 32768.0,
+  ),
+  0x84: ObdPid(
+    id: 0x84,
+    name: "Avanço/Tempo de Injeção de Combustível",
+    unit: "°",
+    expectedBytes: 2,
+    calculate: (bytes) => (((bytes[0] * 256) + bytes[1]) / 128.0) - 210.0,
+  ),
+  0x85: ObdPid(
+    id: 0x85,
+    name: "Taxa de Consumo de Combustível do Motor (Alt)",
+    unit: "L/h",
+    expectedBytes: 2,
+    calculate: (bytes) => ((bytes[0] * 256) + bytes[1]) / 20.0,
+    isFast: true,
+  ),
+  0x91: ObdPid(
+    id: 0x91,
+    name: "Temperatura do Óleo do Motor (Alt)",
+    unit: "°C",
+    expectedBytes: 1,
+    calculate: (bytes) => bytes[0] - 40.0,
+    evaluateHealth: (value) {
+      if (value < 70) return SensorHealth.warning;
+      if (value >= 70 && value <= 110) return SensorHealth.normal;
+      return SensorHealth.critical;
+    },
+  ),
+  0x92: ObdPid(
+    id: 0x92,
+    name: "Correção de Tempo de Injeção",
+    unit: "µs",
+    expectedBytes: 2,
+    calculate: (bytes) => ((bytes[0] * 256) + bytes[1]).toDouble(),
+  ),
+  0x98: ObdPid(
+    id: 0x98,
+    name: "Concentração do Sensor NOx",
+    unit: "ppm",
+    expectedBytes: 2,
+    calculate: (bytes) => ((bytes[0] * 256) + bytes[1]) / 10.0,
+  ),
+  // --- BLOCO 6 (0xA1 a 0xC0) - DADOS AVANÇADOS, TURBO E HODÔMETRO ---
+  0xA1: ObdPid(
+    id: 0xA1,
+    name: "Dados de Injeção (Taxa e Tempo)",
+    unit: "",
+    expectedBytes: 4,
+    // (A * 256 + B) para a taxa, C e D para o tempo. Retornando a Taxa.
+    calculate: (bytes) => ((bytes[0] * 256) + bytes[1]).toDouble(),
+  ),
+  0xA2: ObdPid(
+    id: 0xA2,
+    name: "Taxa de Combustível por Cilindro",
+    unit: "mg/ciclo",
+    expectedBytes: 2,
+    calculate: (bytes) => ((bytes[0] * 256) + bytes[1]) / 256.0,
+    isFast: true,
+  ),
+  0xA3: ObdPid(
+    id: 0xA3,
+    name: "Torque de Atrito do Motor",
+    unit: "%",
+    expectedBytes: 1,
+    calculate: (bytes) => bytes[0] - 125.0,
+  ),
+  0xA4: ObdPid(
+    id: 0xA4,
+    name: "Temperatura de Roteamento dos Gases de Escape",
+    unit: "°C",
+    expectedBytes: 4,
+    // Byte A é máscara. B e C formam a temperatura.
+    calculate: (bytes) => (((bytes[1] * 256) + bytes[2]) / 10.0) - 40.0,
+  ),
+  0xA6: ObdPid(
+    id: 0xA6,
+    name: "Hodômetro (Quilometragem da ECU)",
+    unit: "km",
+    expectedBytes: 4,
+    // A mágica de 4 bytes para distâncias gigantes: (A*2^24 + B*2^16 + C*2^8 + D) / 10
+    calculate: (bytes) =>
+        ((bytes[0] * 16777216) +
+            (bytes[1] * 65536) +
+            (bytes[2] * 256) +
+            bytes[3]) /
+        10.0,
+  ),
+  0xA7: ObdPid(
+    id: 0xA7,
+    name: "Sensor de NOx (Banco 1)",
+    unit: "ppm",
+    expectedBytes: 4,
+    calculate: (bytes) =>
+        (((bytes[1] * 256) + bytes[2]) / 10.0), // Ignora máscara no A
+  ),
+  0xA8: ObdPid(
+    id: 0xA8,
+    name: "Sensor de NOx (Banco 2)",
+    unit: "ppm",
+    expectedBytes: 4,
+    calculate: (bytes) => (((bytes[1] * 256) + bytes[2]) / 10.0),
+  ),
+  0xAA: ObdPid(
+    id: 0xAA,
+    name: "Temp. Intercooler (Charge Air Cooler)",
+    unit: "°C",
+    expectedBytes: 4,
+    // Byte A é máscara. Lendo o Banco 1 (Byte B).
+    calculate: (bytes) => bytes[1] - 40.0,
+    evaluateHealth: (value) {
+      if (value < 60) return SensorHealth.normal;
+      if (value >= 60 && value < 90) return SensorHealth.warning;
+      return SensorHealth
+          .critical; // Intercooler muito quente, perdendo eficiência do turbo!
+    },
+  ),
+  0xAB: ObdPid(
+    id: 0xAB,
+    name: "Pressão do Sistema de Injeção",
+    unit: "kPa",
+    expectedBytes: 4,
+    calculate: (bytes) =>
+        ((bytes[1] * 256) + bytes[2]) * 10.0, // Ignora máscara no A
+  ),
+  0xAF: ObdPid(
+    id: 0xAF,
+    name: "Sistema de Controle do Ar Secundário",
+    unit: "%",
+    expectedBytes: 2,
+    calculate: (bytes) => (bytes[0] / 255.0) * 100.0,
+  ),
+  0xB4: ObdPid(
+    id: 0xB4,
+    name: "Temperatura Sonda Lambda (B1, B2)",
+    unit: "°C",
+    expectedBytes: 4,
+    // Byte A (máscara). B e C (Banco 1, Sensor 1)
+    calculate: (bytes) => (((bytes[1] * 256) + bytes[2]) / 10.0) - 40.0,
+  ),
+  // --- BLOCOS 7 e 8 (0xC1 a 0xFF) - DIESEL, DPF E ELETRÓGENOS ---
+  0xC4: ObdPid(
+    id: 0xC4,
+    name: "Controle da Válvula EGR (Avançado)",
+    unit: "%",
+    expectedBytes: 4,
+    // Byte A (máscara). B e C formam a porcentagem
+    calculate: (bytes) => (((bytes[1] * 256) + bytes[2]) / 2.55) - 100.0,
+  ),
+  0xC5: ObdPid(
+    id: 0xC5,
+    name: "Controle do Turbo de Geometria Variável (VGT)",
+    unit: "%",
+    expectedBytes: 4,
+    calculate: (bytes) => (((bytes[1] * 256) + bytes[2]) / 2.55) - 100.0,
+    isFast: true,
+  ),
+  0xC6: ObdPid(
+    id: 0xC6,
+    name: "Pressão do Filtro de Partículas Diesel (DPF)",
+    unit: "kPa",
+    expectedBytes: 4,
+    calculate: (bytes) => ((bytes[1] * 256) + bytes[2]) / 100.0,
+  ),
+  0xC8: ObdPid(
+    id: 0xC8,
+    name: "Tempo de Aprendizado do Injetor",
+    unit: "ms",
+    expectedBytes: 4,
+    calculate: (bytes) => ((bytes[1] * 256) + bytes[2]) / 100.0,
+  ),
+  0xCB: ObdPid(
+    id: 0xCB,
+    name: "Sensor de NOx (Pós-Catalisador)",
+    unit: "ppm",
+    expectedBytes: 4,
+    calculate: (bytes) => ((bytes[1] * 256) + bytes[2]) / 10.0,
+  ),
+  0xCD: ObdPid(
+    id: 0xCD,
+    name: "Sensor de Material Particulado (PM)",
+    unit: "mg/m³",
+    expectedBytes: 4,
+    calculate: (bytes) => ((bytes[1] * 256) + bytes[2]) / 10.0,
+  ),
+  0xCE: ObdPid(
+    id: 0xCE,
+    name: "Aquecedor de Ar de Admissão",
+    unit: "%",
+    expectedBytes: 4,
+    calculate: (bytes) => (((bytes[1] * 256) + bytes[2]) / 2.55) - 100.0,
+  ),
+  0xD0: ObdPid(
+    id: 0xD0,
+    name: "Pressão do Sistema de Combustível (Alta Pressão)",
+    unit: "kPa",
+    expectedBytes: 4,
+    calculate: (bytes) => ((bytes[1] * 256) + bytes[2]) * 10.0,
+  ),
+  0xD2: ObdPid(
+    id: 0xD2,
+    name: "Controle da Bomba de Água Elétrica",
+    unit: "%",
+    expectedBytes: 2,
+    calculate: (bytes) => (bytes[0] / 255.0) * 100.0,
+  ),
+  0xDF: ObdPid(
+    id: 0xDF,
+    name: "Status do Controle de Exaustão (DPF/NOx)",
+    unit: "",
+    expectedBytes: 1,
+    calculate: (bytes) => bytes[0].toDouble(),
+    formatValue: (value) {
+      int val = value.toInt();
+      // Verificação simples por bitmask (se > 0, há regeneração ou controle ativo)
+      return val > 0 ? "Regeneração Ativa / Aquecimento" : "Modo Normal";
+    },
+  ),
+  0xE3: ObdPid(
+    id: 0xE3,
+    name: "Temperatura do Motor do Compressor do A/C",
+    unit: "°C",
+    expectedBytes: 2,
+    calculate: (bytes) => bytes[0] - 40.0,
+  ),
+  0xEA: ObdPid(
+    id: 0xEA,
+    name: "Temperatura do Inversor (Híbridos)",
+    unit: "°C",
+    expectedBytes: 2,
+    calculate: (bytes) => bytes[0] - 40.0,
+  ),
 };
-
-  // Siga exatamente esse padrão de 5 linhas para inserir os outros sensores da Wikipédia
-  // Dicionário com os nomes dos sensores mais comuns em português
-  /* final Map<int, String> _pidNames = {
-    // Grupo 01 a 20
-    0x01: "Status dos Monitores de Emissão",
-    0x03: "Status do Sistema de Combustível",
-    0x04: "Carga Calculada do Motor",
-    0x05: "Temperatura do Líquido de Arrefecimento",
-    0x06: "Ajuste de Combustível a Curto Prazo (Banco 1)",
-    0x07: "Ajuste de Combustível a Longo Prazo (Banco 1)",
-    0x0B: "Pressão Absoluta do Coletor (MAP)",
-    0x0C: "Rotação do Motor (RPM)",
-    0x0D: "Velocidade do Veículo",
-    0x0E: "Avanço do Ponto de Ignição",
-    0x0F: "Temperatura do Ar de Admissão",
-    0x10: "Taxa de Fluxo de Ar (MAF)",
-    0x11: "Posição do Acelerador (TPS)",
-    0x13: "Sensores de Oxigênio Presentes (Sonda Lambda)",
-    0x1C: "Padrão OBD suportado",
-    0x1F: "Tempo de Funcionamento do Motor",
-
-    // Grupo 21 a 40
-    0x21: "Distância Percorrida com Luz de Injeção Acesa",
-    0x2E: "Purga Evaporativa Comandada",
-    0x2F: "Nível do Tanque de Combustível",
-    0x30: "Aquecimentos desde que os erros foram limpos",
-    0x31: "Distância percorrida desde a limpeza de erros",
-    0x32: "Pressão de Vapor do Sistema Evaporativo",
-    0x33: "Pressão Atmosférica Absoluta",
-
-    // Grupo 41 a 60
-    0x41: "Status do Monitor no Ciclo de Direção Atual",
-    0x42: "Tensão do Módulo de Controle (ECU)",
-    0x43: "Valor Absoluto da Carga do Motor",
-    0x44: "Relação Ar/Combustível Comandada",
-    0x45: "Posição Relativa do Acelerador",
-    0x46: "Temperatura do Ar Ambiente",
-    0x47: "Posição Absoluta do Acelerador B",
-    0x49: "Posição do Pedal do Acelerador D",
-    0x4A: "Posição do Pedal do Acelerador E",
-    0x4C: "Atuador do Acelerador Comandado",
-    0x51: "Tipo de Combustível do Veículo",
-    0x5C: "Temperatura do Óleo do Motor",
-  }; */
