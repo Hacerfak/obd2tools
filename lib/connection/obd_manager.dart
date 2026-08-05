@@ -257,7 +257,7 @@ class ObdManager {
             return;
           }
         } else {
-          _addLog("Aviso: Dado não encontrado (Normal em DTC/Freeze Frame).");
+          //_addLog("Aviso: Dado não encontrado (Normal em DTC/Freeze Frame).");
         }
         return;
       }
