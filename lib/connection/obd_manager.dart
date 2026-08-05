@@ -42,6 +42,14 @@ class ObdManager {
     connection.dataStream.listen(_onDataReceived);
   }
 
+  // --- COMANDOS CUSTOMIZADOS (TERMINAL) ---
+  void sendCustomCommand(String command) {
+    //_addLog("Terminal enviando: $command");
+    _isPollingEnabled = false; // Pausa a varredura do painel
+    _commandQueue.clear(); // Limpa a fila
+    queueCommand(command);
+  }
+
   void _addLog(String message) {
     _logStreamController.add(message);
     if (kDebugMode) {
@@ -214,6 +222,7 @@ class ObdManager {
           .replaceAll(">", "")
           .replaceAll(RegExp(r'[\r\n]+'), " ")
           .trim();
+      _logStreamController.add(fullResponse);
       _handleCompleteResponse(fullResponse);
       _buffer = "";
       _isWaitingForResponse = false;

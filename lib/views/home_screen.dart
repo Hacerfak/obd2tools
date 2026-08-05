@@ -8,6 +8,7 @@ import 'faults_screen.dart';
 import 'vehicle_info_screen.dart';
 import 'test_results_screen.dart';
 import 'settings_screen.dart';
+import 'debug_console_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -19,15 +20,32 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _selectedIndex = 0;
 
-  // LISTA COMPLETA DAS 6 ABAS DO SISTEMA
-  final List<Widget> _pages = [
-    const SensorsDashboardScreen(), // 0: Sensores
-    const HudScreen(), // 1: HUD
-    const TestResultsScreen(), // 2: Testes
-    const FaultsScreen(), // 3: Falhas
-    const VehicleInfoScreen(), // 4: Veículo
-    const SettingsScreen(), // 5: Configurações
-  ];
+  final GlobalKey<NavigatorState> _moreTabKey = GlobalKey<NavigatorState>();
+
+  late final List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      const SensorsDashboardScreen(), // 0: Sensores
+      const HudScreen(), // 1: HUD
+      const TestResultsScreen(), // 2: Testes
+      const FaultsScreen(), // 3: Falhas
+      MoreMenuScreen(
+        navigatorKey: _moreTabKey,
+      ), // 4: Passando a chave com segurança!
+    ];
+  }
+
+  void _onTabTapped(int index) {
+    if (index == 4 && _selectedIndex == 4) {
+      // Se já estamos no "Mais" e o usuário tocou de novo, volta pro início!
+      _moreTabKey.currentState?.popUntil((route) => route.isFirst);
+    } else {
+      setState(() => _selectedIndex = index);
+    }
+  }
 
   void _disconnectAndExit() async {
     final manager = ref.read(obdManagerProvider);
@@ -184,9 +202,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         Expanded(
                           child: NavigationRail(
                             selectedIndex: _selectedIndex,
-                            onDestinationSelected: (int index) {
-                              setState(() => _selectedIndex = index);
-                            },
+                            onDestinationSelected: _onTabTapped,
                             labelType: NavigationRailLabelType.all,
                             backgroundColor: Colors.transparent,
                             destinations: const [
@@ -207,12 +223,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 label: Text('Falhas'),
                               ),
                               NavigationRailDestination(
-                                icon: Icon(Icons.directions_car),
-                                label: Text('Veículo'),
-                              ),
-                              NavigationRailDestination(
-                                icon: Icon(Icons.settings),
-                                label: Text('Ajustes'),
+                                icon: Icon(Icons.menu),
+                                label: Text('Mais'),
                               ),
                             ],
                           ),
@@ -260,9 +272,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ? null
               : NavigationBar(
                   selectedIndex: _selectedIndex,
-                  onDestinationSelected: (int index) {
-                    setState(() => _selectedIndex = index);
-                  },
+                  onDestinationSelected: _onTabTapped,
                   backgroundColor: Theme.of(
                     context,
                   ).appBarTheme.backgroundColor,
@@ -284,17 +294,107 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       label: 'Falhas',
                     ),
                     NavigationDestination(
-                      icon: Icon(Icons.directions_car),
-                      label: 'Veículo',
-                    ),
-                    NavigationDestination(
-                      icon: Icon(Icons.settings),
-                      label: 'Ajustes',
+                      icon: Icon(Icons.menu),
+                      label: 'Mais',
                     ),
                   ],
                 ),
         );
       },
+    );
+  }
+}
+
+class MoreMenuScreen extends StatelessWidget {
+  final GlobalKey<NavigatorState> navigatorKey; // Recebe a chave
+  const MoreMenuScreen({super.key, required this.navigatorKey});
+
+  @override
+  Widget build(BuildContext context) {
+    // A MÁGICA: Este Navigator isolado impede que as telas cubram a barra lateral do Desktop!
+    return Navigator(
+      key: navigatorKey,
+      onGenerateRoute: (settings) {
+        return MaterialPageRoute(
+          builder: (context) => const MoreMenuListView(),
+        );
+      },
+    );
+  }
+}
+
+class MoreMenuListView extends StatelessWidget {
+  const MoreMenuListView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Mais Opções")),
+      body: ListView(
+        children: [
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Text(
+              "DIAGNÓSTICO AVANÇADO",
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey,
+              ),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.directions_car),
+            title: const Text("Informações do Veículo"),
+            subtitle: const Text("Chassi, CVN, Monitores Modo 09"),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              // Agora o Navigator.of() usa o Navegador Aninhado!
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const VehicleInfoScreen(),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.terminal),
+            title: const Text("Terminal OBD2 (Debug)"),
+            subtitle: const Text("Envio de PIDs e Comandos AT manuais"),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const DebugConsoleScreen(),
+                ),
+              );
+            },
+          ),
+          const Divider(),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Text(
+              "APLICATIVO",
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey,
+              ),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.settings),
+            title: const Text("Ajustes"),
+            subtitle: const Text("Conexão, Protocolos e Preferências"),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }
