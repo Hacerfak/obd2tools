@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'views/connection_screen.dart';
 import 'state/obd_providers.dart';
+import 'l10n/app_localizations.dart';
 
 void main() {
   runApp(const ProviderScope(child: Obd2ToolsApp()));
@@ -20,9 +21,12 @@ class Obd2ToolsApp extends ConsumerWidget {
     final darkColors = appThemePalette.dark;
 
     return MaterialApp(
-      title: 'OBD2 Tools',
+      title: AppLocalizations.of(context)?.appTitle,
       debugShowCheckedModeBanner: false,
       themeMode: themeMode,
+
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
 
       // --- TEMA CLARO ---
       theme: ThemeData(

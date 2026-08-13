@@ -1,0 +1,256 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for Spanish Castilian (`es`).
+class AppLocalizationsEs extends AppLocalizations {
+  AppLocalizationsEs([String locale = 'es']) : super(locale);
+
+  @override
+  String get appTitle => 'OBD2 Tools';
+
+  @override
+  String get tabSensors => 'Sensores';
+
+  @override
+  String get tabHud => 'Panel';
+
+  @override
+  String get tabTests => 'Pruebas';
+
+  @override
+  String get tabFaults => 'Fallas';
+
+  @override
+  String get tabMore => 'Más';
+
+  @override
+  String get btnCancel => 'Cancelar';
+
+  @override
+  String get btnSave => 'Guardar';
+
+  @override
+  String get btnSend => 'Enviar';
+
+  @override
+  String get btnRefresh => 'Actualizar';
+
+  @override
+  String get connTitle => 'Conectar al Escáner';
+
+  @override
+  String get connPaired => 'Dispositivos Emparejados';
+
+  @override
+  String get connNearby => 'Dispositivos Cercanos';
+
+  @override
+  String get connNoDevices => 'No se encontraron dispositivos.';
+
+  @override
+  String get connSearching => 'Buscando...';
+
+  @override
+  String get connSearchNew => 'Buscar Nuevos Dispositivos';
+
+  @override
+  String get connEstablishing => 'Estableciendo conexión segura...';
+
+  @override
+  String get connWaitKey => 'Gire la llave de encendido para activar el panel.';
+
+  @override
+  String get connMapping => 'Mapeando sensores compatibles...';
+
+  @override
+  String get connSuccess => '¡Conexión Exitosa!';
+
+  @override
+  String get sensTitle => 'Sensores Mapeados';
+
+  @override
+  String get sensNone => 'No se encontraron sensores.';
+
+  @override
+  String get sensInstant => 'Valor Instantáneo';
+
+  @override
+  String get sensRecent => 'Comportamiento Reciente';
+
+  @override
+  String get sensReading => 'Leyendo datos del bus CAN...';
+
+  @override
+  String get sensNoHistory => 'El historial no aplica para estado de texto.';
+
+  @override
+  String get hudManage => 'Administrar Sensores';
+
+  @override
+  String get hudFullscreen => 'Pantalla Completa';
+
+  @override
+  String get hudImmersive => 'Modo Inmersivo';
+
+  @override
+  String get hudImmersiveDesc =>
+      'Toque dos veces la pantalla para entrar o salir de Pantalla Completa.';
+
+  @override
+  String get hudGotIt => 'Entendido';
+
+  @override
+  String get hudConfig => 'Configurar Panel';
+
+  @override
+  String get hudSelected => 'Sensores Seleccionados';
+
+  @override
+  String get hudAvailable => 'DISPONIBLES';
+
+  @override
+  String get hudSearch => 'Buscar sensor...';
+
+  @override
+  String get testTitle => 'Resultados de pruebas ECU';
+
+  @override
+  String get testConsulting =>
+      'Consultando monitores y límites de pruebas...\nPor favor, espere.';
+
+  @override
+  String get testNone => 'No se encontraron pruebas internas.';
+
+  @override
+  String get testWaiting => 'Esperando Ciclo de Conducción';
+
+  @override
+  String get testPassed => 'Aprobado';
+
+  @override
+  String get testFailed => 'Límite Fallido';
+
+  @override
+  String get faultTitle => 'Diagnóstico (DTC)';
+
+  @override
+  String get faultClearMil => '¿Borrar luz del motor (MIL)?';
+
+  @override
+  String get faultClearDesc =>
+      'Esta acción borrará la memoria de fallas y el Freeze Frame. Asegúrese de que la IGNICIÓN esté encendida y el MOTOR APAGADO.';
+
+  @override
+  String get faultYesClear => '¡Sí, borrar!';
+
+  @override
+  String get faultAll => 'Todas';
+
+  @override
+  String get faultConfirmed => 'Confirmadas';
+
+  @override
+  String get faultPending => 'Pendientes';
+
+  @override
+  String get faultPermanent => 'Permanentes';
+
+  @override
+  String get faultReading =>
+      'Leyendo memoria de la ECU y datos congelados...\nPor favor, espere.';
+
+  @override
+  String get faultNone => '¡No se encontraron fallas!';
+
+  @override
+  String get infoTitle => 'Información del Vehículo';
+
+  @override
+  String get infoConsulting =>
+      'Consultando módulos y calibraciones de la ECU...\nPor favor, espere.';
+
+  @override
+  String get infoNone =>
+      'No se encontró información.\nEl vehículo podría no soportar el Modo 09.';
+
+  @override
+  String get setTitle => 'Configuración del Sistema';
+
+  @override
+  String get setColor => 'Paleta de Colores';
+
+  @override
+  String get setThemeLight => 'Tema Claro';
+
+  @override
+  String get setThemeDark => 'Tema Oscuro';
+
+  @override
+  String get setMainColor => 'Color Principal (Tema/Neutros)';
+
+  @override
+  String get setNormalColor => 'Estado Normal (Saludable)';
+
+  @override
+  String get setWarningColor => 'Estado de Advertencia (Alerta)';
+
+  @override
+  String get setCriticalColor => 'Estado Crítico (Peligro)';
+
+  @override
+  String get setRestoreColors => 'Restaurar Colores Predeterminados';
+
+  @override
+  String get setPerf => 'Rendimiento y Batería';
+
+  @override
+  String get setRate => 'Tasa de actualización de sensores';
+
+  @override
+  String get setRateDesc => 'Aumente el tiempo si el teléfono se calienta';
+
+  @override
+  String get setRateMax => 'Máxima';
+
+  @override
+  String get setRateFast => 'Rápido (250ms)';
+
+  @override
+  String get setRateNormal => 'Normal (0.5s)';
+
+  @override
+  String get setRateEco => 'Económico (1s)';
+
+  @override
+  String get dbgTitle => 'Terminal de Diagnóstico';
+
+  @override
+  String get dbgHeader => 'Header (Opc)';
+
+  @override
+  String get dbgCommand => 'Comando (PID/AT)';
+
+  @override
+  String get dbgFormula => 'Fórmula Personalizada';
+
+  @override
+  String get dbgStop => 'Detener Búsqueda';
+
+  @override
+  String get dbgScan => 'Búsqueda Fuerza Bruta';
+
+  @override
+  String get dbgClear => 'Limpiar Terminal';
+
+  @override
+  String get dbgExport => 'Exportar Registros';
+
+  @override
+  String get dbgEmpty => 'El terminal está vacío. Nada que exportar.';
+
+  @override
+  String get dbgSaved => 'Archivo guardado exitosamente en:';
+}

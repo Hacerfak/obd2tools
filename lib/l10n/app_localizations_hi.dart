@@ -1,0 +1,257 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for Hindi (`hi`).
+class AppLocalizationsHi extends AppLocalizations {
+  AppLocalizationsHi([String locale = 'hi']) : super(locale);
+
+  @override
+  String get appTitle => 'OBD2 Tools';
+
+  @override
+  String get tabSensors => 'सेंसर';
+
+  @override
+  String get tabHud => 'डैशबोर्ड';
+
+  @override
+  String get tabTests => 'परीक्षण';
+
+  @override
+  String get tabFaults => 'दोष';
+
+  @override
+  String get tabMore => 'अधिक';
+
+  @override
+  String get btnCancel => 'रद्द करें';
+
+  @override
+  String get btnSave => 'सहेजें';
+
+  @override
+  String get btnSend => 'भेजें';
+
+  @override
+  String get btnRefresh => 'रीफ्रेश करें';
+
+  @override
+  String get connTitle => 'स्कैनर से कनेक्ट करें';
+
+  @override
+  String get connPaired => 'पेयर किए गए डिवाइस';
+
+  @override
+  String get connNearby => 'नज़दीकी डिवाइस';
+
+  @override
+  String get connNoDevices => 'कोई डिवाइस नहीं मिला।';
+
+  @override
+  String get connSearching => 'खोज रहा है...';
+
+  @override
+  String get connSearchNew => 'नए डिवाइस खोजें';
+
+  @override
+  String get connEstablishing => 'सुरक्षित कनेक्शन स्थापित किया जा रहा है...';
+
+  @override
+  String get connWaitKey =>
+      'डैशबोर्ड को चालू करने के लिए इग्निशन कुंजी चालू करें।';
+
+  @override
+  String get connMapping => 'समर्थित सेंसर की मैपिंग हो रही है...';
+
+  @override
+  String get connSuccess => 'कनेक्शन सफल!';
+
+  @override
+  String get sensTitle => 'मैप किए गए सेंसर';
+
+  @override
+  String get sensNone => 'कोई सेंसर नहीं मिला।';
+
+  @override
+  String get sensInstant => 'तत्काल मूल्य';
+
+  @override
+  String get sensRecent => 'हाल का व्यवहार';
+
+  @override
+  String get sensReading => 'CAN बस डेटा पढ़ा जा रहा है...';
+
+  @override
+  String get sensNoHistory => 'टेक्स्ट स्थिति के लिए इतिहास लागू नहीं है।';
+
+  @override
+  String get hudManage => 'सेंसर प्रबंधित करें';
+
+  @override
+  String get hudFullscreen => 'फ़ुलस्क्रीन';
+
+  @override
+  String get hudImmersive => 'इमर्सिव मोड';
+
+  @override
+  String get hudImmersiveDesc =>
+      'फ़ुलस्क्रीन में प्रवेश करने या बाहर निकलने के लिए स्क्रीन पर डबल टैप करें।';
+
+  @override
+  String get hudGotIt => 'समझ गया';
+
+  @override
+  String get hudConfig => 'डैशबोर्ड कॉन्फ़िगर करें';
+
+  @override
+  String get hudSelected => 'चयनित सेंसर';
+
+  @override
+  String get hudAvailable => 'उपलब्ध';
+
+  @override
+  String get hudSearch => 'सेंसर खोजें...';
+
+  @override
+  String get testTitle => 'ECU परीक्षण परिणाम';
+
+  @override
+  String get testConsulting =>
+      'मॉनिटर और परीक्षण सीमा की जांच की जा रही है...\nकृपया प्रतीक्षा करें।';
+
+  @override
+  String get testNone => 'कोई आंतरिक परीक्षण नहीं मिला।';
+
+  @override
+  String get testWaiting => 'ड्राइविंग साइकिल की प्रतीक्षा';
+
+  @override
+  String get testPassed => 'उत्तीर्ण';
+
+  @override
+  String get testFailed => 'सीमा विफल';
+
+  @override
+  String get faultTitle => 'डायग्नोस्टिक्स (DTC)';
+
+  @override
+  String get faultClearMil => 'चेक इंजन लाइट साफ़ करें?';
+
+  @override
+  String get faultClearDesc =>
+      'यह क्रिया फॉल्ट मेमोरी और फ्रीज फ्रेम को रीसेट कर देगी। सुनिश्चित करें कि इग्निशन चालू है और इंजन बंद है।';
+
+  @override
+  String get faultYesClear => 'हां, साफ़ करें!';
+
+  @override
+  String get faultAll => 'सभी';
+
+  @override
+  String get faultConfirmed => 'पुष्ट';
+
+  @override
+  String get faultPending => 'लंबित';
+
+  @override
+  String get faultPermanent => 'स्थायी';
+
+  @override
+  String get faultReading =>
+      'ECU मेमोरी और फ्रीज फ्रेम पढ़ा जा रहा है...\nकृपया प्रतीक्षा करें।';
+
+  @override
+  String get faultNone => 'कोई दोष नहीं मिला!';
+
+  @override
+  String get infoTitle => 'वाहन की जानकारी';
+
+  @override
+  String get infoConsulting =>
+      'ECU मॉड्यूल और कैलिब्रेशन की जांच की जा रही है...\nकृपया प्रतीक्षा करें।';
+
+  @override
+  String get infoNone =>
+      'कोई जानकारी नहीं मिली।\nवाहन संभवतः मोड 09 का समर्थन नहीं करता है।';
+
+  @override
+  String get setTitle => 'सिस्टम सेटिंग्स';
+
+  @override
+  String get setColor => 'कलर पैलेट';
+
+  @override
+  String get setThemeLight => 'लाइट थीम';
+
+  @override
+  String get setThemeDark => 'डार्क थीम';
+
+  @override
+  String get setMainColor => 'मुख्य रंग (थीम/तटस्थ)';
+
+  @override
+  String get setNormalColor => 'सामान्य स्थिति (स्वस्थ)';
+
+  @override
+  String get setWarningColor => 'चेतावनी स्थिति (अलर्ट)';
+
+  @override
+  String get setCriticalColor => 'महत्वपूर्ण स्थिति (खतरा)';
+
+  @override
+  String get setRestoreColors => 'डिफ़ॉल्ट रंग पुनर्स्थापित करें';
+
+  @override
+  String get setPerf => 'प्रदर्शन और बैटरी';
+
+  @override
+  String get setRate => 'सेंसर रिफ्रेश रेट';
+
+  @override
+  String get setRateDesc => 'यदि फोन गर्म हो रहा है तो समय बढ़ाएं';
+
+  @override
+  String get setRateMax => 'अधिकतम';
+
+  @override
+  String get setRateFast => 'तेज़ (250ms)';
+
+  @override
+  String get setRateNormal => 'सामान्य (0.5s)';
+
+  @override
+  String get setRateEco => 'इको (1s)';
+
+  @override
+  String get dbgTitle => 'डायग्नोस्टिक टर्मिनल';
+
+  @override
+  String get dbgHeader => 'Header (वैकल्पिक)';
+
+  @override
+  String get dbgCommand => 'कमांड (PID/AT)';
+
+  @override
+  String get dbgFormula => 'कस्टम फ़ॉर्मूला';
+
+  @override
+  String get dbgStop => 'स्कैन रोकें';
+
+  @override
+  String get dbgScan => 'ब्रूट फ़ोर्स स्कैन';
+
+  @override
+  String get dbgClear => 'टर्मिनल साफ़ करें';
+
+  @override
+  String get dbgExport => 'लॉग निर्यात करें';
+
+  @override
+  String get dbgEmpty => 'टर्मिनल खाली है। निर्यात करने के लिए कुछ नहीं है।';
+
+  @override
+  String get dbgSaved => 'फ़ाइल सफलतापूर्वक यहाँ सहेजी गई:';
+}

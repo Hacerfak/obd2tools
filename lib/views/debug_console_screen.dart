@@ -303,8 +303,9 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
     final formula = _formulaController.text.trim().toUpperCase();
     if (formula.isEmpty ||
         response.contains("NO DATA") ||
-        response.contains("ERROR"))
+        response.contains("ERROR")) {
       return;
+    }
 
     String cleanHex = response.replaceAll(RegExp(r'[^0-9A-Fa-f]'), '');
 
