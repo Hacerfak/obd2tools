@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '/l10n/app_localizations.dart';
 import '../state/obd_providers.dart';
 import 'home_screen.dart';
 import 'package:flutter/foundation.dart';
@@ -11,7 +12,6 @@ import '../widgets/admob_banner.dart';
 
 class ConnectionScreen extends ConsumerStatefulWidget {
   final bool attemptAutoConnect;
-
   const ConnectionScreen({super.key, this.attemptAutoConnect = true});
 
   @override
@@ -44,7 +44,6 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
   Future<void> _tryAutoConnect() async {
     final prefs = await SharedPreferences.getInstance();
     final lastMac = prefs.getString('last_mac_address');
-
     if (lastMac != null && lastMac.isNotEmpty) {
       _startConnection(lastMac, isAutoConnect: true);
     } else {
@@ -56,7 +55,6 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
     setState(() => _isLoadingPaired = true);
     final manager = ref.read(obdManagerProvider);
     final devices = await manager.connection.getPairedDevices();
-
     if (context.mounted) {
       setState(() {
         _pairedDevices = devices;
@@ -83,7 +81,6 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
             bool isAlreadyDiscovered = _discoveredDevices.any(
               (d) => d["mac"] == device["mac"],
             );
-
             if (!isAlreadyPaired && !isAlreadyDiscovered) {
               _discoveredDevices.add(device);
             }
@@ -106,6 +103,7 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
     ref
         .read(connectionStateProvider.notifier)
         .updateState(AppConnectionState.connectingBluetooth);
+
     final manager = ref.read(obdManagerProvider);
     await manager.connection.stopScan();
     await Future.delayed(const Duration(milliseconds: 50));
@@ -116,37 +114,33 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
           .connect(macAddress.trim())
           .timeout(const Duration(seconds: 10));
     } catch (e) {
-      if (kDebugMode) debugPrint("Erro ou tempo esgotado na conexão: $e");
+      if (kDebugMode) debugPrint("Error or timeout: $e");
       success = false;
     }
 
     if (success) {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('last_mac_address', macAddress.trim());
+
       manager.initializeScanner();
       manager.discoverSupportedSensors();
     } else {
       ref
           .read(connectionStateProvider.notifier)
           .updateState(AppConnectionState.disconnected);
+
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
+
         if (isAutoConnect) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                "O scanner salvo não foi encontrado. Selecione na lista.",
-              ),
-            ),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(l10n.connSnackSavedNotFound)));
           _loadPairedDevices();
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                "Falha ao conectar. Tente reiniciar o Bluetooth do PC.",
-              ),
-            ),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(l10n.connSnackConnFailed)));
         }
       }
     }
@@ -154,12 +148,13 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
 
   Widget _buildDeviceList(List<Map<String, String>> devices, IconData icon) {
     final onSurface = Theme.of(context).colorScheme.onSurface;
+    final l10n = AppLocalizations.of(context)!; // Acesso à tradução
 
     if (devices.isEmpty) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
         child: Text(
-          "Nenhum aparelho encontrado.",
+          l10n.connNoDevices,
           style: TextStyle(color: onSurface.withValues(alpha: 0.54)),
         ),
       );
@@ -198,6 +193,7 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
   Widget build(BuildContext context) {
     final connState = ref.watch(connectionStateProvider);
     final onSurface = Theme.of(context).colorScheme.onSurface;
+    final l10n = AppLocalizations.of(context)!; // Instância de traduções
 
     ref.listen(connectionStateProvider, (previous, next) {
       if (next == AppConnectionState.ready) {
@@ -226,7 +222,7 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                "Conectar ao Scanner",
+                l10n.connTitle,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 24,
@@ -246,7 +242,7 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              "Dispositivos Pareados",
+                              l10n.connPaired,
                               style: TextStyle(
                                 color: Theme.of(context).colorScheme.primary,
                                 fontWeight: FontWeight.bold,
@@ -264,6 +260,7 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                         ),
                         const SizedBox(height: 8),
                         _buildDeviceList(_pairedDevices, Icons.save),
+
                         if (Platform.isAndroid || Platform.isIOS) ...[
                           Divider(
                             color: onSurface.withValues(alpha: 0.1),
@@ -273,7 +270,7 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                "Dispositivos Próximos",
+                                l10n.connNearby,
                                 style: TextStyle(
                                   color: Theme.of(context).colorScheme.primary,
                                   fontWeight: FontWeight.bold,
@@ -304,9 +301,7 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                         ? const Icon(Icons.hourglass_bottom)
                         : const Icon(Icons.search),
                     label: Text(
-                      _isDiscovering
-                          ? "Buscando..."
-                          : "Buscar Novos Dispositivos",
+                      _isDiscovering ? l10n.connSearching : l10n.connSearchNew,
                     ),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -329,19 +324,13 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  "Estabelecendo conexão segura...",
+                  l10n.connEstablishing,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.primary,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "Isso pode levar alguns segundos.",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: onSurface.withValues(alpha: 0.54)),
                 ),
                 const Spacer(),
               ] else if (connState == AppConnectionState.waitingForEcu) ...[
@@ -350,10 +339,10 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                   child: Icon(Icons.key, size: 80, color: Colors.amberAccent),
                 ),
                 const SizedBox(height: 24),
-                const Text(
-                  "Gire a chave na ignição para ligar o painel.",
+                Text(
+                  l10n.connWaitKey,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.amberAccent,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -368,9 +357,9 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                   onPressed: () => ref
                       .read(connectionStateProvider.notifier)
                       .updateState(AppConnectionState.disconnected),
-                  child: const Text(
-                    "Cancelar",
-                    style: TextStyle(color: Colors.redAccent),
+                  child: Text(
+                    l10n.btnCancel,
+                    style: const TextStyle(color: Colors.redAccent),
                   ),
                 ),
               ] else if (connState ==
@@ -383,7 +372,7 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  "Mapeando sensores suportados pela ECU...",
+                  l10n.connMapping,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: onSurface.withValues(alpha: 0.7),
@@ -401,10 +390,10 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                const Text(
-                  "Conexão Bem-Sucedida!",
+                Text(
+                  l10n.connSuccess,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.greenAccent,
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -414,13 +403,11 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                 Builder(
                   builder: (context) {
                     final supported = ref.read(supportedPidsProvider);
-                    // Importe o '../parser/registries/mode_01_registry.dart' no topo se precisar!
                     final realCount = pidRegistry.values
                         .where((pid) => supported.contains(pid.id))
                         .length;
-
                     return Text(
-                      "$realCount sensores mapeados",
+                      l10n.connSensorsMapped(realCount),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: onSurface.withValues(alpha: 0.54),

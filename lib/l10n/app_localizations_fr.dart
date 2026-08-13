@@ -217,13 +217,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get setRateMax => 'Maximum';
 
   @override
-  String get setRateFast => 'Rapide (250ms)';
+  String get setRateFast => 'Rapide';
 
   @override
-  String get setRateNormal => 'Normal (0.5s)';
+  String get setRateNormal => 'Normal';
 
   @override
-  String get setRateEco => 'Éco (1s)';
+  String get setRateEco => 'Éco';
 
   @override
   String get dbgTitle => 'Terminal de Diagnostic';
@@ -254,4 +254,67 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get dbgSaved => 'Fichier enregistré avec succès sous :';
+
+  @override
+  String connSensorsMapped(int count) {
+    return '$count capteurs cartographiés';
+  }
+
+  @override
+  String get connSnackSavedNotFound =>
+      'Scanner enregistré introuvable. Veuillez sélectionner dans la liste.';
+
+  @override
+  String get connSnackConnFailed =>
+      'Échec de la connexion. Essayez de redémarrer le Bluetooth.';
+
+  @override
+  String get themeSystemTooltip => 'Thème : Système';
+
+  @override
+  String get themeLightTooltip => 'Thème : Clair';
+
+  @override
+  String get themeDarkTooltip => 'Thème : Sombre';
+
+  @override
+  String get statusDisconnected => 'Déconnecté';
+
+  @override
+  String get statusConnected => 'ECU en ligne';
+
+  @override
+  String get statusHibernating => 'ECU en veille (Contact coupé)';
+
+  @override
+  String get btnDisconnect => 'Déconnecter';
+
+  @override
+  String get moreMenuTitle => 'Plus d\'options';
+
+  @override
+  String get moreDiagSection => 'DIAGNOSTIC AVANCÉ';
+
+  @override
+  String get moreInfoDesc => 'VIN, CVN, Moniteurs Mode 09';
+
+  @override
+  String get moreTerminalDesc => 'Envoyer PIDs manuels et commandes AT';
+
+  @override
+  String get moreAppSection => 'APPLICATION';
+
+  @override
+  String get moreSettings => 'Paramètres';
+
+  @override
+  String get moreSettingsDesc => 'Connexion, Protocoles et Préférences';
+
+  @override
+  String setChooseColor(String colorName) {
+    return 'Choisir la couleur : $colorName';
+  }
+
+  @override
+  String get btnApply => 'Appliquer';
 }

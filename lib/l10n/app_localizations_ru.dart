@@ -217,13 +217,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get setRateMax => 'Максимальная';
 
   @override
-  String get setRateFast => 'Быстро (250мс)';
+  String get setRateFast => 'Быстро';
 
   @override
-  String get setRateNormal => 'Нормально (0.5с)';
+  String get setRateNormal => 'Нормально';
 
   @override
-  String get setRateEco => 'Эко (1с)';
+  String get setRateEco => 'Эко';
 
   @override
   String get dbgTitle => 'Диагностический терминал';
@@ -254,4 +254,67 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get dbgSaved => 'Файл успешно сохранен в:';
+
+  @override
+  String connSensorsMapped(int count) {
+    return 'Найдено датчиков: $count';
+  }
+
+  @override
+  String get connSnackSavedNotFound =>
+      'Сохраненный сканер не найден. Выберите из списка.';
+
+  @override
+  String get connSnackConnFailed =>
+      'Ошибка подключения. Попробуйте перезапустить Bluetooth.';
+
+  @override
+  String get themeSystemTooltip => 'Тема: Система';
+
+  @override
+  String get themeLightTooltip => 'Тема: Светлая';
+
+  @override
+  String get themeDarkTooltip => 'Тема: Темная';
+
+  @override
+  String get statusDisconnected => 'Отключено';
+
+  @override
+  String get statusConnected => 'ЭБУ в сети';
+
+  @override
+  String get statusHibernating => 'Спящий режим ЭБУ (Зажигание выкл)';
+
+  @override
+  String get btnDisconnect => 'Отключить';
+
+  @override
+  String get moreMenuTitle => 'Больше опций';
+
+  @override
+  String get moreDiagSection => 'РАСШИРЕННАЯ ДИАГНОСТИКА';
+
+  @override
+  String get moreInfoDesc => 'VIN, CVN, Мониторы Режима 09';
+
+  @override
+  String get moreTerminalDesc => 'Отправка ручных PID и AT-команд';
+
+  @override
+  String get moreAppSection => 'ПРИЛОЖЕНИЕ';
+
+  @override
+  String get moreSettings => 'Настройки';
+
+  @override
+  String get moreSettingsDesc => 'Подключение, Протоколы и Настройки';
+
+  @override
+  String setChooseColor(String colorName) {
+    return 'Выберите цвет: $colorName';
+  }
+
+  @override
+  String get btnApply => 'Применить';
 }

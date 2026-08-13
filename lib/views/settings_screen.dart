@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import '/l10n/app_localizations.dart';
 import '../state/obd_providers.dart';
 import '../widgets/admob_banner.dart';
 
@@ -33,13 +34,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     String key,
     Color currentColor,
     String title,
+    AppLocalizations l10n, // Recebendo as traduções aqui
   ) {
     Color pickerColor = currentColor;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          "Escolher cor: $title",
+          l10n.setChooseColor(title), // Usa a string com placeholder
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         content: SingleChildScrollView(
@@ -57,7 +60,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Cancelar"),
+            child: Text(l10n.btnCancel),
           ),
           FilledButton(
             onPressed: () {
@@ -66,7 +69,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   .updateColor(_isEditingLight, key, pickerColor);
               Navigator.pop(context);
             },
-            child: const Text("Aplicar"),
+            child: Text(l10n.btnApply),
           ),
         ],
       ),
@@ -77,6 +80,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget build(BuildContext context) {
     final onSurface = Theme.of(context).colorScheme.onSurface;
     final primaryColor = Theme.of(context).colorScheme.primary;
+    final l10n = AppLocalizations.of(context)!; // Instância de traduções
 
     // Captura as paletas e filtra baseada no segmento escolhido
     final palette = ref.watch(appColorsProvider);
@@ -89,7 +93,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Configurações do Sistema",
+              l10n.setTitle,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -102,7 +106,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 children: [
                   const SizedBox(height: 12),
                   Text(
-                    "Paleta de Cores",
+                    l10n.setColor,
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
@@ -114,16 +118,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   // SELETOR DE TEMA PARA EDIÇÃO
                   Center(
                     child: SegmentedButton<bool>(
-                      segments: const [
+                      segments: [
                         ButtonSegment(
                           value: true,
-                          icon: Icon(Icons.light_mode),
-                          label: Text("Tema Claro"),
+                          icon: const Icon(Icons.light_mode),
+                          label: Text(l10n.setThemeLight),
                         ),
                         ButtonSegment(
                           value: false,
-                          icon: Icon(Icons.dark_mode),
-                          label: Text("Tema Escuro"),
+                          icon: const Icon(Icons.dark_mode),
+                          label: Text(l10n.setThemeDark),
                         ),
                       ],
                       selected: {_isEditingLight},
@@ -133,48 +137,49 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-
                   _buildColorTile(
-                    "Cor Principal (Tema/Neutros)",
+                    l10n.setMainColor,
                     appColors.primary,
                     'primary',
                     onSurface,
+                    l10n,
                   ),
                   _buildColorTile(
-                    "Status Normal (Saudável)",
+                    l10n.setNormalColor,
                     appColors.normal,
                     'normal',
                     onSurface,
+                    l10n,
                   ),
                   _buildColorTile(
-                    "Status Atenção (Alerta)",
+                    l10n.setWarningColor,
                     appColors.warning,
                     'warning',
                     onSurface,
+                    l10n,
                   ),
                   _buildColorTile(
-                    "Status Crítico (Perigo)",
+                    l10n.setCriticalColor,
                     appColors.critical,
                     'critical',
                     onSurface,
+                    l10n,
                   ),
-
                   const SizedBox(height: 16),
                   ElevatedButton.icon(
                     onPressed: () =>
                         ref.read(appColorsProvider.notifier).resetToDefaults(),
                     icon: const Icon(Icons.restore),
-                    label: const Text("Restaurar Cores Padrão"),
+                    label: Text(l10n.setRestoreColors),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       foregroundColor: Colors.redAccent,
                       backgroundColor: Colors.redAccent.withValues(alpha: 0.1),
                     ),
                   ),
-
                   const SizedBox(height: 32),
                   Text(
-                    "Performance e Economia",
+                    l10n.setPerf,
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
@@ -186,26 +191,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     elevation: 0,
                     color: onSurface.withValues(alpha: 0.05),
                     child: ListTile(
-                      title: const Text("Taxa de Atualização dos Sensores"),
-                      subtitle: const Text(
-                        "Aumente o tempo se o celular estiver aquecendo",
-                      ),
+                      title: Text(l10n.setRate),
+                      subtitle: Text(l10n.setRateDesc),
                       trailing: DropdownButton<int>(
                         value: ref.watch(pollingIntervalProvider),
                         underline: const SizedBox(),
-                        items: const [
-                          DropdownMenuItem(value: 0, child: Text("Máxima")),
+                        items: [
                           DropdownMenuItem(
-                            value: 250,
-                            child: Text("Rápido (250ms)"),
+                            value: 0,
+                            child: Text(l10n.setRateMax),
+                          ),
+                          DropdownMenuItem(
+                            value: 25,
+                            child: Text(l10n.setRateFast),
+                          ),
+                          DropdownMenuItem(
+                            value: 100,
+                            child: Text(l10n.setRateNormal),
                           ),
                           DropdownMenuItem(
                             value: 500,
-                            child: Text("Normal (0.5s)"),
-                          ),
-                          DropdownMenuItem(
-                            value: 1000,
-                            child: Text("Econômico (1s)"),
+                            child: Text(l10n.setRateEco),
                           ),
                         ],
                         onChanged: (value) {
@@ -233,6 +239,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     Color color,
     String stateKey,
     Color onSurface,
+    AppLocalizations l10n,
   ) {
     return Card(
       elevation: 0,
@@ -262,7 +269,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ],
           ),
         ),
-        onTap: () => _showColorPicker(context, ref, stateKey, color, title),
+        onTap: () =>
+            _showColorPicker(context, ref, stateKey, color, title, l10n),
       ),
     );
   }

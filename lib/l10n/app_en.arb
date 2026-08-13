@@ -79,5 +79,38 @@
     "dbgClear": "Clear Terminal",
     "dbgExport": "Export Logs",
     "dbgEmpty": "The terminal is empty. Nothing to export.",
-    "dbgSaved": "File successfully saved at:"
+    "dbgSaved": "File successfully saved at:",
+    "connSensorsMapped": "{count} mapped sensors",
+    "@connSensorsMapped": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "connSnackSavedNotFound": "Saved scanner not found. Select from the list.",
+    "connSnackConnFailed": "Connection failed. Try restarting Bluetooth.",
+    "themeSystemTooltip": "Theme: System",
+    "themeLightTooltip": "Theme: Light",
+    "themeDarkTooltip": "Theme: Dark",
+    "statusDisconnected": "Disconnected",
+    "statusConnected": "ECU Online",
+    "statusHibernating": "ECU Hibernating (Ignition Off)",
+    "btnDisconnect": "Disconnect",
+    "moreMenuTitle": "More Options",
+    "moreDiagSection": "ADVANCED DIAGNOSTICS",
+    "moreInfoDesc": "VIN, CVN, Mode 09 Monitors",
+    "moreTerminalDesc": "Send manual PIDs and AT commands",
+    "moreAppSection": "APPLICATION",
+    "moreSettings": "Settings",
+    "moreSettingsDesc": "Connection, Protocols, and Preferences",
+    "setChooseColor": "Choose color: {colorName}",
+    "@setChooseColor": {
+        "placeholders": {
+            "colorName": {
+                "type": "String"
+            }
+        }
+    },
+    "btnApply": "Apply"
 }

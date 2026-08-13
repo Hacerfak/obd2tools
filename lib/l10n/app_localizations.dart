@@ -591,6 +591,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'File successfully saved at:'**
   String get dbgSaved;
+
+  /// No description provided for @connSensorsMapped.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} mapped sensors'**
+  String connSensorsMapped(int count);
+
+  /// No description provided for @connSnackSavedNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved scanner not found. Select from the list.'**
+  String get connSnackSavedNotFound;
+
+  /// No description provided for @connSnackConnFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection failed. Try restarting Bluetooth.'**
+  String get connSnackConnFailed;
+
+  /// No description provided for @themeSystemTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme: System'**
+  String get themeSystemTooltip;
+
+  /// No description provided for @themeLightTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme: Light'**
+  String get themeLightTooltip;
+
+  /// No description provided for @themeDarkTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme: Dark'**
+  String get themeDarkTooltip;
+
+  /// No description provided for @statusDisconnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnected'**
+  String get statusDisconnected;
+
+  /// No description provided for @statusConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'ECU Online'**
+  String get statusConnected;
+
+  /// No description provided for @statusHibernating.
+  ///
+  /// In en, this message translates to:
+  /// **'ECU Hibernating (Ignition Off)'**
+  String get statusHibernating;
+
+  /// No description provided for @btnDisconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
+  String get btnDisconnect;
+
+  /// No description provided for @moreMenuTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'More Options'**
+  String get moreMenuTitle;
+
+  /// No description provided for @moreDiagSection.
+  ///
+  /// In en, this message translates to:
+  /// **'ADVANCED DIAGNOSTICS'**
+  String get moreDiagSection;
+
+  /// No description provided for @moreInfoDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'VIN, CVN, Mode 09 Monitors'**
+  String get moreInfoDesc;
+
+  /// No description provided for @moreTerminalDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Send manual PIDs and AT commands'**
+  String get moreTerminalDesc;
+
+  /// No description provided for @moreAppSection.
+  ///
+  /// In en, this message translates to:
+  /// **'APPLICATION'**
+  String get moreAppSection;
+
+  /// No description provided for @moreSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get moreSettings;
+
+  /// No description provided for @moreSettingsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection, Protocols, and Preferences'**
+  String get moreSettingsDesc;
+
+  /// No description provided for @setChooseColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose color: {colorName}'**
+  String setChooseColor(String colorName);
+
+  /// No description provided for @btnApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get btnApply;
 }
 
 class _AppLocalizationsDelegate

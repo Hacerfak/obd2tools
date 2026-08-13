@@ -210,13 +210,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get setRateMax => '最大';
 
   @override
-  String get setRateFast => '快 (250毫秒)';
+  String get setRateFast => '快';
 
   @override
-  String get setRateNormal => '正常 (0.5秒)';
+  String get setRateNormal => '正常';
 
   @override
-  String get setRateEco => '节能 (1秒)';
+  String get setRateEco => '节能';
 
   @override
   String get dbgTitle => '诊断终端';
@@ -247,4 +247,65 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get dbgSaved => '文件已成功保存至：';
+
+  @override
+  String connSensorsMapped(int count) {
+    return '已映射 $count 个传感器';
+  }
+
+  @override
+  String get connSnackSavedNotFound => '未找到保存的扫描仪。请从列表中选择。';
+
+  @override
+  String get connSnackConnFailed => '连接失败。请尝试重新启动蓝牙。';
+
+  @override
+  String get themeSystemTooltip => '主题：系统';
+
+  @override
+  String get themeLightTooltip => '主题：浅色';
+
+  @override
+  String get themeDarkTooltip => '主题：深色';
+
+  @override
+  String get statusDisconnected => '已断开';
+
+  @override
+  String get statusConnected => 'ECU 在线';
+
+  @override
+  String get statusHibernating => 'ECU 休眠（点火关闭）';
+
+  @override
+  String get btnDisconnect => '断开连接';
+
+  @override
+  String get moreMenuTitle => '更多选项';
+
+  @override
+  String get moreDiagSection => '高级诊断';
+
+  @override
+  String get moreInfoDesc => 'VIN、CVN、模式 09 监视器';
+
+  @override
+  String get moreTerminalDesc => '发送手动 PID 和 AT 命令';
+
+  @override
+  String get moreAppSection => '应用';
+
+  @override
+  String get moreSettings => '设置';
+
+  @override
+  String get moreSettingsDesc => '连接、协议和偏好设置';
+
+  @override
+  String setChooseColor(String colorName) {
+    return '选择颜色：$colorName';
+  }
+
+  @override
+  String get btnApply => '应用';
 }

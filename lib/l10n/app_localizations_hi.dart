@@ -217,13 +217,13 @@ class AppLocalizationsHi extends AppLocalizations {
   String get setRateMax => 'अधिकतम';
 
   @override
-  String get setRateFast => 'तेज़ (250ms)';
+  String get setRateFast => 'तेज़';
 
   @override
-  String get setRateNormal => 'सामान्य (0.5s)';
+  String get setRateNormal => 'सामान्य';
 
   @override
-  String get setRateEco => 'इको (1s)';
+  String get setRateEco => 'इको';
 
   @override
   String get dbgTitle => 'डायग्नोस्टिक टर्मिनल';
@@ -254,4 +254,67 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get dbgSaved => 'फ़ाइल सफलतापूर्वक यहाँ सहेजी गई:';
+
+  @override
+  String connSensorsMapped(int count) {
+    return '$count मैप किए गए सेंसर';
+  }
+
+  @override
+  String get connSnackSavedNotFound =>
+      'सहेजा गया स्कैनर नहीं मिला। सूची से चुनें।';
+
+  @override
+  String get connSnackConnFailed =>
+      'कनेक्शन विफल। ब्लूटूथ को पुनरारंभ करने का प्रयास करें।';
+
+  @override
+  String get themeSystemTooltip => 'थीम: सिस्टम';
+
+  @override
+  String get themeLightTooltip => 'थीम: लाइट';
+
+  @override
+  String get themeDarkTooltip => 'थीम: डार्क';
+
+  @override
+  String get statusDisconnected => 'डिस्कनेक्ट हो गया';
+
+  @override
+  String get statusConnected => 'ECU ऑनलाइन';
+
+  @override
+  String get statusHibernating => 'ECU हाइबरनेटिंग (इग्निशन ऑफ)';
+
+  @override
+  String get btnDisconnect => 'डिस्कनेक्ट करें';
+
+  @override
+  String get moreMenuTitle => 'अधिक विकल्प';
+
+  @override
+  String get moreDiagSection => 'उन्नत डायग्नोस्टिक्स';
+
+  @override
+  String get moreInfoDesc => 'VIN, CVN, मोड 09 मॉनिटर';
+
+  @override
+  String get moreTerminalDesc => 'मैनुअल PID और AT कमांड भेजें';
+
+  @override
+  String get moreAppSection => 'एप्लिकेशन';
+
+  @override
+  String get moreSettings => 'सेटिंग्स';
+
+  @override
+  String get moreSettingsDesc => 'कनेक्शन, प्रोटोकॉल और प्राथमिकताएं';
+
+  @override
+  String setChooseColor(String colorName) {
+    return 'रंग चुनें: $colorName';
+  }
+
+  @override
+  String get btnApply => 'लागू करें';
 }

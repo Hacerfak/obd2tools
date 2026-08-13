@@ -211,13 +211,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get setRateMax => '最大';
 
   @override
-  String get setRateFast => '速い (250ms)';
+  String get setRateFast => '速い';
 
   @override
-  String get setRateNormal => '通常 (0.5s)';
+  String get setRateNormal => '通常';
 
   @override
-  String get setRateEco => 'エコ (1s)';
+  String get setRateEco => 'エコ';
 
   @override
   String get dbgTitle => '診断ターミナル';
@@ -248,4 +248,65 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get dbgSaved => 'ファイルが正常に保存されました：';
+
+  @override
+  String connSensorsMapped(int count) {
+    return '$count 個のセンサーをマッピングしました';
+  }
+
+  @override
+  String get connSnackSavedNotFound => '保存されたスキャナーが見つかりません。リストから選択してください。';
+
+  @override
+  String get connSnackConnFailed => '接続に失敗しました。Bluetoothを再起動してみてください。';
+
+  @override
+  String get themeSystemTooltip => 'テーマ: システム';
+
+  @override
+  String get themeLightTooltip => 'テーマ: ライト';
+
+  @override
+  String get themeDarkTooltip => 'テーマ: ダーク';
+
+  @override
+  String get statusDisconnected => '切断されました';
+
+  @override
+  String get statusConnected => 'ECU オンライン';
+
+  @override
+  String get statusHibernating => 'ECU 休止中 (イグニッション オフ)';
+
+  @override
+  String get btnDisconnect => '切断';
+
+  @override
+  String get moreMenuTitle => 'その他のオプション';
+
+  @override
+  String get moreDiagSection => '高度な診断';
+
+  @override
+  String get moreInfoDesc => 'VIN、CVN、モード09モニター';
+
+  @override
+  String get moreTerminalDesc => '手動PIDとATコマンドを送信';
+
+  @override
+  String get moreAppSection => 'アプリケーション';
+
+  @override
+  String get moreSettings => '設定';
+
+  @override
+  String get moreSettingsDesc => '接続、プロトコル、および設定';
+
+  @override
+  String setChooseColor(String colorName) {
+    return '色を選択: $colorName';
+  }
+
+  @override
+  String get btnApply => '適用する';
 }

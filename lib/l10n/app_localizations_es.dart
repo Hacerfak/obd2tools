@@ -216,19 +216,19 @@ class AppLocalizationsEs extends AppLocalizations {
   String get setRateMax => 'Máxima';
 
   @override
-  String get setRateFast => 'Rápido (250ms)';
+  String get setRateFast => 'Rápido';
 
   @override
-  String get setRateNormal => 'Normal (0.5s)';
+  String get setRateNormal => 'Normal';
 
   @override
-  String get setRateEco => 'Económico (1s)';
+  String get setRateEco => 'Económico';
 
   @override
   String get dbgTitle => 'Terminal de Diagnóstico';
 
   @override
-  String get dbgHeader => 'Header (Opc)';
+  String get dbgHeader => 'Header';
 
   @override
   String get dbgCommand => 'Comando (PID/AT)';
@@ -253,4 +253,67 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get dbgSaved => 'Archivo guardado exitosamente en:';
+
+  @override
+  String connSensorsMapped(int count) {
+    return '$count sensores mapeados';
+  }
+
+  @override
+  String get connSnackSavedNotFound =>
+      'No se encontró el escáner guardado. Seleccione de la lista.';
+
+  @override
+  String get connSnackConnFailed =>
+      'Fallo al conectar. Intente reiniciar el Bluetooth.';
+
+  @override
+  String get themeSystemTooltip => 'Tema: Sistema';
+
+  @override
+  String get themeLightTooltip => 'Tema: Claro';
+
+  @override
+  String get themeDarkTooltip => 'Tema: Oscuro';
+
+  @override
+  String get statusDisconnected => 'Desconectado';
+
+  @override
+  String get statusConnected => 'ECU en línea';
+
+  @override
+  String get statusHibernating => 'ECU Hibernando (Ignición apagada)';
+
+  @override
+  String get btnDisconnect => 'Desconectar';
+
+  @override
+  String get moreMenuTitle => 'Más Opciones';
+
+  @override
+  String get moreDiagSection => 'DIAGNÓSTICO AVANZADO';
+
+  @override
+  String get moreInfoDesc => 'VIN, CVN, Monitores Modo 09';
+
+  @override
+  String get moreTerminalDesc => 'Enviar PIDs manuales y comandos AT';
+
+  @override
+  String get moreAppSection => 'APLICACIÓN';
+
+  @override
+  String get moreSettings => 'Ajustes';
+
+  @override
+  String get moreSettingsDesc => 'Conexión, Protocolos y Preferencias';
+
+  @override
+  String setChooseColor(String colorName) {
+    return 'Elegir color: $colorName';
+  }
+
+  @override
+  String get btnApply => 'Aplicar';
 }

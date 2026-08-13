@@ -253,4 +253,67 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get dbgSaved => 'Arquivo salvo com sucesso em:';
+
+  @override
+  String connSensorsMapped(int count) {
+    return '$count sensores mapeados';
+  }
+
+  @override
+  String get connSnackSavedNotFound =>
+      'O scanner salvo não foi encontrado. Selecione na lista.';
+
+  @override
+  String get connSnackConnFailed =>
+      'Falha ao conectar. Tente reiniciar o Bluetooth.';
+
+  @override
+  String get themeSystemTooltip => 'Tema: Sistema';
+
+  @override
+  String get themeLightTooltip => 'Tema: Claro';
+
+  @override
+  String get themeDarkTooltip => 'Tema: Escuro';
+
+  @override
+  String get statusDisconnected => 'Desconectado';
+
+  @override
+  String get statusConnected => 'ECU Online';
+
+  @override
+  String get statusHibernating => 'ECU Hibernando (Chave Desligada)';
+
+  @override
+  String get btnDisconnect => 'Desconectar';
+
+  @override
+  String get moreMenuTitle => 'Mais Opções';
+
+  @override
+  String get moreDiagSection => 'DIAGNÓSTICO AVANÇADO';
+
+  @override
+  String get moreInfoDesc => 'Chassi, CVN, Monitores Modo 09';
+
+  @override
+  String get moreTerminalDesc => 'Envio de PIDs e Comandos AT manuais';
+
+  @override
+  String get moreAppSection => 'APLICATIVO';
+
+  @override
+  String get moreSettings => 'Ajustes';
+
+  @override
+  String get moreSettingsDesc => 'Conexão, Protocolos e Preferências';
+
+  @override
+  String setChooseColor(String colorName) {
+    return 'Escolher cor: $colorName';
+  }
+
+  @override
+  String get btnApply => 'Aplicar';
 }

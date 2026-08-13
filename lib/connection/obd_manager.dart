@@ -474,8 +474,8 @@ class ObdManager {
         _cooldownTimer?.cancel();
 
         if (_isFastInitialPass || delay == Duration.zero) {
-          // Mesmo no modo "Tempo Real", damos 15ms de respiro para o Flutter desenhar a tela e o celular não fritar
-          _cooldownTimer = Timer(const Duration(milliseconds: 15), () {
+          // Mesmo no modo "Tempo Real", damos 10ms de respiro para o Flutter desenhar a tela e o celular não fritar
+          _cooldownTimer = Timer(const Duration(milliseconds: 10), () {
             if (_isPollingEnabled && _commandQueue.isEmpty) {
               _triggerNextPollingRequest();
             }

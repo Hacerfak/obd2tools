@@ -253,4 +253,67 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dbgSaved => 'File successfully saved at:';
+
+  @override
+  String connSensorsMapped(int count) {
+    return '$count mapped sensors';
+  }
+
+  @override
+  String get connSnackSavedNotFound =>
+      'Saved scanner not found. Select from the list.';
+
+  @override
+  String get connSnackConnFailed =>
+      'Connection failed. Try restarting Bluetooth.';
+
+  @override
+  String get themeSystemTooltip => 'Theme: System';
+
+  @override
+  String get themeLightTooltip => 'Theme: Light';
+
+  @override
+  String get themeDarkTooltip => 'Theme: Dark';
+
+  @override
+  String get statusDisconnected => 'Disconnected';
+
+  @override
+  String get statusConnected => 'ECU Online';
+
+  @override
+  String get statusHibernating => 'ECU Hibernating (Ignition Off)';
+
+  @override
+  String get btnDisconnect => 'Disconnect';
+
+  @override
+  String get moreMenuTitle => 'More Options';
+
+  @override
+  String get moreDiagSection => 'ADVANCED DIAGNOSTICS';
+
+  @override
+  String get moreInfoDesc => 'VIN, CVN, Mode 09 Monitors';
+
+  @override
+  String get moreTerminalDesc => 'Send manual PIDs and AT commands';
+
+  @override
+  String get moreAppSection => 'APPLICATION';
+
+  @override
+  String get moreSettings => 'Settings';
+
+  @override
+  String get moreSettingsDesc => 'Connection, Protocols, and Preferences';
+
+  @override
+  String setChooseColor(String colorName) {
+    return 'Choose color: $colorName';
+  }
+
+  @override
+  String get btnApply => 'Apply';
 }
