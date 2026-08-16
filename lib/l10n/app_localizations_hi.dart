@@ -425,4 +425,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get dtcResolution => 'परीक्षण और समाधान कैसे करें';
+
+  @override
+  String get errBleDisconnected => 'ब्लूटूथ कनेक्शन टूट गया!';
 }

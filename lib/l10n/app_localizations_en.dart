@@ -424,4 +424,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dtcResolution => 'How to Test and Fix';
+
+  @override
+  String get errBleDisconnected => 'Bluetooth connection lost!';
 }

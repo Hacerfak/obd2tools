@@ -130,5 +130,6 @@
     "techImpact": "सिस्टम पर प्रभाव",
     "dtcSymptoms": "सामान्य लक्षण",
     "dtcCauses": "संभावित कारण",
-    "dtcResolution": "परीक्षण और समाधान कैसे करें"
+    "dtcResolution": "परीक्षण और समाधान कैसे करें",
+    "errBleDisconnected": "ब्लूटूथ कनेक्शन टूट गया!"
 }

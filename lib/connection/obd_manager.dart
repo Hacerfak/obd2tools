@@ -40,6 +40,16 @@ class ObdManager {
 
   ObdManager({required this.connection, required this.ref}) {
     connection.dataStream.listen(_onDataReceived);
+
+    // NOVO: Quando o ObdConnection gritar que caiu, a gente limpa a sujeira
+    // e avisa o Riverpod (que vai triggar a Snackbar na sua HomeScreen!)
+    connection.onDisconnected = () {
+      // Impede loops infinitos se já estiver desconectado
+      if (ref.read(connectionStateProvider) !=
+          AppConnectionState.disconnected) {
+        forceDisconnect();
+      }
+    };
   }
 
   // --- COMANDOS CUSTOMIZADOS (TERMINAL) ---

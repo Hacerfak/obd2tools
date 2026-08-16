@@ -897,6 +897,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'How to Test and Fix'**
   String get dtcResolution;
+
+  /// No description provided for @errBleDisconnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth connection lost!'**
+  String get errBleDisconnected;
 }
 
 class _AppLocalizationsDelegate

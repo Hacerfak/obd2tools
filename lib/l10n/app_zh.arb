@@ -130,5 +130,6 @@
     "techImpact": "系统影响",
     "dtcSymptoms": "常见症状",
     "dtcCauses": "可能原因",
-    "dtcResolution": "如何测试和解决"
+    "dtcResolution": "如何测试和解决",
+    "errBleDisconnected": "蓝牙连接丢失！"
 }

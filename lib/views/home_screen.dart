@@ -24,6 +24,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final GlobalKey<NavigatorState> _moreTabKey = GlobalKey<NavigatorState>();
   late final List<Widget> _pages;
 
+  // Flag para evitar snackbar de erro ao sair manualmente
+  bool _isManualDisconnect = false;
+
   @override
   void initState() {
     super.initState();
@@ -53,29 +56,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _disconnectAndExit() async {
+    _isManualDisconnect = true; // Avisa que a desconexão foi proposital
     final manager = ref.read(obdManagerProvider);
     manager.reset();
     await manager.connection.disconnect();
+
     ref
         .read(connectionStateProvider.notifier)
         .updateState(AppConnectionState.disconnected);
-
-    if (mounted) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (context) =>
-              const ConnectionScreen(attemptAutoConnect: false),
-        ),
-        (route) => false,
-      );
-    }
   }
 
   Widget _buildThemeToggle(BuildContext context) {
     final currentTheme = ref.watch(themeModeProvider);
     final l10n = AppLocalizations.of(context)!;
-
     IconData icon;
     String tooltip;
 
@@ -111,7 +104,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     BuildContext context,
   ) {
     final l10n = AppLocalizations.of(context)!;
-
     Color dotColor = Colors.grey;
     String tooltipText = l10n.statusDisconnected;
 
@@ -182,9 +174,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final isFullscreen = ref.watch(hudFullscreenProvider);
     final l10n = AppLocalizations.of(context)!;
 
+    // --- MÁGICA DO RIVERPOD: ESCUTA QUEDAS E MUDANÇAS ---
     ref.listen(connectionStateProvider, (previous, next) {
-      if (next == AppConnectionState.waitingForEcu ||
-          next == AppConnectionState.disconnected) {
+      // Se a conexão caiu ou a ECU hibernou
+      if (next == AppConnectionState.disconnected ||
+          next == AppConnectionState.waitingForEcu) {
+        // 1. DESATIVA O MODO TELA CHEIA CASO ESTEJA ATIVO
+        if (ref.read(hudFullscreenProvider)) {
+          ref.read(hudFullscreenProvider.notifier).toggle();
+        }
+
+        // 2. MOSTRA A MENSAGEM DE ERRO (Apenas se a queda não foi intencional)
+        if (next == AppConnectionState.disconnected) {
+          if (!_isManualDisconnect && mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(l10n.errBleDisconnected),
+                backgroundColor: Colors.redAccent,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+          _isManualDisconnect = false; // Reseta a flag
+        }
+
+        // 3. REDIRECIONA PARA O INÍCIO LIMPANDO A PILHA DE TELAS
         if (mounted) {
           Navigator.pushAndRemoveUntil(
             context,
@@ -201,7 +215,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return LayoutBuilder(
       builder: (context, constraints) {
         bool isDesktop = constraints.maxWidth > 600;
-
         return Scaffold(
           body: SafeArea(
             child: Row(
@@ -323,12 +336,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 }
 
 class MoreMenuScreen extends StatelessWidget {
-  final GlobalKey<NavigatorState> navigatorKey; // Recebe a chave
+  final GlobalKey<NavigatorState> navigatorKey;
   const MoreMenuScreen({super.key, required this.navigatorKey});
 
   @override
   Widget build(BuildContext context) {
-    // A MÁGICA: Este Navigator isolado impede que as telas cubram a barra lateral do Desktop!
     return Navigator(
       key: navigatorKey,
       onGenerateRoute: (settings) {
@@ -346,7 +358,6 @@ class MoreMenuListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-
     return Scaffold(
       appBar: AppBar(title: Text(l10n.moreMenuTitle)),
       body: ListView(

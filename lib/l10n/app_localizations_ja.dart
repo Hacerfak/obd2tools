@@ -412,4 +412,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get dtcResolution => 'テストと解決方法';
+
+  @override
+  String get errBleDisconnected => 'Bluetooth接続が失われました！';
 }

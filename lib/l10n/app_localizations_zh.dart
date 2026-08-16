@@ -410,4 +410,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get dtcResolution => '如何测试和解决';
+
+  @override
+  String get errBleDisconnected => '蓝牙连接丢失！';
 }

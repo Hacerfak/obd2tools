@@ -425,4 +425,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get dtcResolution => 'Prüfung und Behebung';
+
+  @override
+  String get errBleDisconnected => 'Bluetooth-Verbindung unterbrochen!';
 }

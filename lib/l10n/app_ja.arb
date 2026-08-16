@@ -130,5 +130,6 @@
     "techImpact": "システムへの影響",
     "dtcSymptoms": "一般的な症状",
     "dtcCauses": "考えられる原因",
-    "dtcResolution": "テストと解決方法"
+    "dtcResolution": "テストと解決方法",
+    "errBleDisconnected": "Bluetooth接続が失われました！"
 }

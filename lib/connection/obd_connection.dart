@@ -8,18 +8,19 @@ import 'package:flutter/foundation.dart';
 class ObdConnection {
   final _bluetooth = FlutterClassicBluetooth();
   BtcConnection? _activeConnection;
-
   final _dataStreamController = StreamController<String>.broadcast();
-  Stream<String> get dataStream => _dataStreamController.stream;
 
+  Stream<String> get dataStream => _dataStreamController.stream;
   StreamSubscription? _dataSubscription;
+
+  // NOVO: Callback para avisar o Manager que o Bluetooth caiu fisicamente
+  VoidCallback? onDisconnected;
 
   // --- BUSCA DE PAREADOS ---
   Future<List<Map<String, String>>> getPairedDevices() async {
     List<Map<String, String>> deviceList = [];
     bool hasPermission = true;
 
-    // Só pede permissão de tela se for Android ou iOS
     if (Platform.isAndroid || Platform.isIOS) {
       hasPermission = await Permission.bluetoothConnect.request().isGranted;
     }
@@ -34,9 +35,7 @@ class ObdConnection {
           });
         }
       } catch (e) {
-        if (kDebugMode) {
-          debugPrint("Erro ao buscar dispositivos pareados: $e");
-        }
+        if (kDebugMode) debugPrint("Erro ao buscar dispositivos pareados: $e");
       }
     }
     return deviceList;
@@ -45,14 +44,12 @@ class ObdConnection {
   // --- BUSCA DE NÃO PAREADOS (DISCOVERY) ---
   Stream<Map<String, String>> startDiscovery() async* {
     bool hasPermission = true;
-
     if (Platform.isAndroid || Platform.isIOS) {
       Map<Permission, PermissionStatus> statuses = await [
         Permission.bluetoothScan,
         Permission.bluetoothConnect,
         Permission.location,
       ].request();
-
       hasPermission =
           statuses[Permission.bluetoothScan]!.isGranted &&
           statuses[Permission.location]!.isGranted;
@@ -61,7 +58,6 @@ class ObdConnection {
     if (hasPermission) {
       try {
         await _bluetooth.startDiscovery();
-
         await for (var device in _bluetooth.discoveryResults) {
           yield {
             "name": device.name ?? "Aparelho sem nome",
@@ -69,15 +65,7 @@ class ObdConnection {
           };
         }
       } catch (e) {
-        if (kDebugMode) {
-          debugPrint("Erro ao escanear novos dispositivos: $e");
-        }
-      }
-    } else {
-      if (kDebugMode) {
-        debugPrint(
-          "Permissões de localização/scan negadas pelo usuário no mobile.",
-        );
+        if (kDebugMode) debugPrint("Erro ao escanear novos dispositivos: $e");
       }
     }
   }
@@ -85,21 +73,32 @@ class ObdConnection {
   /// Conecta ao scanner usando o endereço MAC
   Future<bool> connect(String macAddress) async {
     try {
-      // Conecta usando o parâmetro nomeado correto
       _activeConnection = await _bluetooth.connect(address: macAddress);
 
-      // Lê os dados a partir do getter 'input'
-      _dataSubscription = _activeConnection!.input.listen((data) {
-        // O input retorna um Uint8List, então fazemos o decode para texto
-        String decodedText = ascii.decode(data);
-        _dataStreamController.add(decodedText);
-      });
+      // NOVO: Escutando ativamente as quedas e erros!
+      _dataSubscription = _activeConnection!.input.listen(
+        (data) {
+          String decodedText = ascii.decode(data);
+          _dataStreamController.add(decodedText);
+        },
+        onDone: () {
+          // O adaptador OBD2 foi desligado ou o Bluetooth do celular fechou
+          if (kDebugMode) debugPrint("Conexão Bluetooth fechada (onDone).");
+          onDisconnected?.call();
+        },
+        onError: (error) {
+          // Perda de sinal, interferência grave, etc.
+          if (kDebugMode) {
+            debugPrint("Erro na conexão Bluetooth (onError): $error");
+          }
+          onDisconnected?.call();
+        },
+        cancelOnError: true,
+      );
 
       return true;
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('Erro ao conectar ao veículo: $e');
-      }
+      if (kDebugMode) debugPrint('Erro ao conectar ao veículo: $e');
       return false;
     }
   }
@@ -107,19 +106,13 @@ class ObdConnection {
   /// Envia comandos AT para o chip ou PIDs para a ECU
   void sendCommand(String command) async {
     if (_activeConnection == null) return;
-
-    //print("=== Command: '$command' ===");
-
     try {
-      // O ELM327 exige que todo comando termine com Carriage Return (\r)
       String fullCommand = "$command\r";
-
-      // Usamos a propriedade 'output' e o método facilitador 'writeString'
       await _activeConnection!.output.writeString(fullCommand);
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('Erro ao enviar comando: $e');
-      }
+      if (kDebugMode) debugPrint('Erro ao enviar comando: $e');
+      // Se não conseguir enviar, também forçamos a queda
+      onDisconnected?.call();
     }
   }
 
@@ -133,9 +126,7 @@ class ObdConnection {
         _activeConnection = null;
       }
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('Aviso ao desconectar (ignorado): $e');
-      }
+      if (kDebugMode) debugPrint('Aviso ao desconectar (ignorado): $e');
     }
   }
 
@@ -143,9 +134,7 @@ class ObdConnection {
     try {
       await _bluetooth.stopDiscovery();
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint("Aviso ao parar scan: $e");
-      }
+      if (kDebugMode) debugPrint("Aviso ao parar scan: $e");
     }
   }
 }

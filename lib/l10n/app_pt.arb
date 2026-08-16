@@ -130,5 +130,6 @@
     "techImpact": "Impacto no Sistema",
     "dtcSymptoms": "Sintomas Comuns",
     "dtcCauses": "Possíveis Causas",
-    "dtcResolution": "Como Testar e Resolver"
+    "dtcResolution": "Como Testar e Resolver",
+    "errBleDisconnected": "Conexão Bluetooth perdida!"
 }

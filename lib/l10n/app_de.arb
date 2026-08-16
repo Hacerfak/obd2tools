@@ -130,5 +130,6 @@
     "techImpact": "Systemauswirkung",
     "dtcSymptoms": "Häufige Symptome",
     "dtcCauses": "Mögliche Ursachen",
-    "dtcResolution": "Prüfung und Behebung"
+    "dtcResolution": "Prüfung und Behebung",
+    "errBleDisconnected": "Bluetooth-Verbindung unterbrochen!"
 }

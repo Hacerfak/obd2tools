@@ -168,5 +168,6 @@
     "techImpact": "System Impact",
     "dtcSymptoms": "Common Symptoms",
     "dtcCauses": "Possible Causes",
-    "dtcResolution": "How to Test and Fix"
+    "dtcResolution": "How to Test and Fix",
+    "errBleDisconnected": "Bluetooth connection lost!"
 }

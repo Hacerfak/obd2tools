@@ -68,6 +68,7 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
         _consoleLogs.add("$prefix$text");
       }
     });
+
     Future.delayed(const Duration(milliseconds: 100), () {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
@@ -81,6 +82,7 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
 
   void _sendCommand() {
     if (_isScanning) return; // Bloqueia envio manual durante a varredura
+
     final obdManager = ref.read(obdManagerProvider);
     final header = _headerController.text.trim().toUpperCase();
     final command = _commandController.text.trim().toUpperCase();
@@ -91,7 +93,6 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
       _printToConsole("AT SH $header", isCommand: true);
       obdManager.sendCustomCommand("AT SH $header");
     }
-
     _printToConsole(command, isCommand: true);
     obdManager.sendCustomCommand(command);
   }
@@ -99,14 +100,12 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
   // --- EXPORTAR LOGS PARA ARQUIVO TXT ---
   Future<void> _exportLogs() async {
     final l10n = AppLocalizations.of(context)!;
-
     if (_consoleLogs.isEmpty) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(l10n.dbgEmpty)));
       return;
     }
-
     try {
       final text = _consoleLogs.join('\n');
       if (Platform.isAndroid || Platform.isIOS) {
@@ -142,7 +141,6 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
   // --- LÓGICA DA VARREDURA FORÇA BRUTA ---
   void _showScanDialog() {
     final l10n = AppLocalizations.of(context)!;
-
     final headerCtrl = TextEditingController(text: _headerController.text);
     final prefixCtrl = TextEditingController(text: "22");
     final startCtrl = TextEditingController(text: "1100");
@@ -252,7 +250,6 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
     if (!_isScanning || !mounted) return;
 
     final l10n = AppLocalizations.of(context)!;
-
     if (_scanCurrent > _scanEnd) {
       setState(() => _isScanning = false);
       _printToConsole(l10n.dbgScanComplete, isSuccess: true);
@@ -264,7 +261,6 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
         .padLeft(4, '0')
         .toUpperCase();
     String command = "$_scanPrefix$hexSuffix";
-
     ref.read(obdManagerProvider).sendCustomCommand(command);
   }
 
@@ -281,10 +277,10 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
         _printToConsole(response, isSuccess: true);
       }
 
-      // IMPORTANTE: Atualiza o estado para a barra de progresso andar!
       setState(() {
         _scanCurrent++;
       });
+
       Future.delayed(const Duration(milliseconds: 50), () {
         if (_isScanning) _sendNextScanCommand();
       });
@@ -302,7 +298,6 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
 
     String cleanHex = response.replaceAll(RegExp(r'[^0-9A-Fa-f]'), '');
     int headerLength = 4;
-
     if (cleanHex.startsWith("62") ||
         cleanHex.startsWith("49") ||
         cleanHex.startsWith("42")) {
@@ -315,8 +310,8 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
         Parser p = Parser();
         Expression exp = p.parse(formula);
         ContextModel cm = ContextModel();
-
         List<String> variableNames = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+
         for (var v in variableNames) {
           cm.bindVariable(Variable(v), Number(0.0));
         }
@@ -342,7 +337,6 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
         String formattedResult = result == result.truncateToDouble()
             ? result.toInt().toString()
             : result.toStringAsFixed(2);
-
         _printToConsole(
           l10n.dbgFormulaResult(formattedResult),
           isSuccess: true,
@@ -381,6 +375,8 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
               ),
             ),
             const SizedBox(height: 16),
+
+            // CARD DE CONTROLES OTIMIZADO PARA RESPONSIVIDADE
             Card(
               elevation: 0,
               color: colorScheme.surfaceContainer,
@@ -390,7 +386,9 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    // LINHA 1: Header e Comando
                     Row(
                       children: [
                         Expanded(
@@ -431,66 +429,74 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    Row(
+
+                    // LINHA 2: Fórmula (Isolada para não espremer)
+                    TextField(
+                      controller: _formulaController,
+                      enabled: !_isScanning,
+                      decoration: InputDecoration(
+                        labelText: l10n.dbgFormula,
+                        hintText: "Ex: (A*256+B)/10",
+                        filled: true,
+                        fillColor: colorScheme.surface,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // LINHA 3: Botões de Ação com WRAP (Quebram linha se não couberem)
+                    Wrap(
+                      alignment: WrapAlignment.spaceBetween,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 8,
+                      runSpacing: 12,
                       children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _formulaController,
-                            enabled: !_isScanning,
-                            decoration: InputDecoration(
-                              labelText: l10n.dbgFormula,
-                              hintText: "Ex: (A*256+B)/10",
-                              filled: true,
-                              fillColor: colorScheme.surface,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide.none,
+                        // Grupo Esquerdo (Ícones)
+                        Wrap(
+                          spacing: 8,
+                          children: [
+                            if (_isScanning)
+                              IconButton.filledTonal(
+                                onPressed: () {
+                                  setState(() => _isScanning = false);
+                                  _printToConsole(
+                                    l10n.dbgScanCancelled,
+                                    isSuccess: true,
+                                  );
+                                },
+                                icon: const Icon(Icons.stop),
+                                tooltip: l10n.dbgStop,
+                                style: IconButton.styleFrom(
+                                  backgroundColor: Colors.redAccent.withValues(
+                                    alpha: 0.2,
+                                  ),
+                                  foregroundColor: Colors.redAccent,
+                                ),
+                              )
+                            else
+                              IconButton.filledTonal(
+                                icon: const Icon(Icons.radar),
+                                tooltip: l10n.dbgScan,
+                                onPressed: _showScanDialog,
                               ),
+                            IconButton.filledTonal(
+                              icon: const Icon(Icons.delete_outline),
+                              tooltip: l10n.dbgClear,
+                              onPressed: _isScanning
+                                  ? null
+                                  : () => setState(() => _consoleLogs.clear()),
                             ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        if (_isScanning)
-                          IconButton.filledTonal(
-                            onPressed: () {
-                              setState(() => _isScanning = false);
-                              _printToConsole(
-                                l10n.dbgScanCancelled,
-                                isSuccess: true,
-                              );
-                            },
-                            icon: const Icon(Icons.stop),
-                            tooltip: l10n.dbgStop,
-                            style: IconButton.styleFrom(
-                              backgroundColor: Colors.redAccent.withValues(
-                                alpha: 0.2,
-                              ),
-                              foregroundColor: Colors.redAccent,
+                            IconButton.filledTonal(
+                              icon: const Icon(Icons.save_alt),
+                              tooltip: l10n.dbgExport,
+                              onPressed: _isScanning ? null : _exportLogs,
                             ),
-                          )
-                        else
-                          IconButton.filledTonal(
-                            icon: const Icon(Icons.radar),
-                            tooltip: l10n.dbgScan,
-                            onPressed: _showScanDialog,
-                          ),
-                        const SizedBox(width: 8),
-                        // Botão desabilitado se estiver escaneando
-                        IconButton.filledTonal(
-                          icon: const Icon(Icons.delete_outline),
-                          tooltip: l10n.dbgClear,
-                          onPressed: _isScanning
-                              ? null
-                              : () => setState(() => _consoleLogs.clear()),
+                          ],
                         ),
-                        const SizedBox(width: 8),
-                        // Botão desabilitado se estiver escaneando
-                        IconButton.filledTonal(
-                          icon: const Icon(Icons.save_alt),
-                          tooltip: l10n.dbgExport,
-                          onPressed: _isScanning ? null : _exportLogs,
-                        ),
-                        const SizedBox(width: 16),
+                        // Grupo Direito (Botão Enviar)
                         FilledButton.icon(
                           onPressed: _isScanning ? null : _sendCommand,
                           icon: const Icon(Icons.send_rounded),
@@ -507,6 +513,7 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
                         ),
                       ],
                     ),
+
                     // BARRA DE PROGRESSO VISÍVEL APENAS DURANTE O SCAN
                     if (_isScanning) ...[
                       const SizedBox(height: 16),
@@ -542,6 +549,8 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
               ),
             ),
             const SizedBox(height: 16),
+
+            // TERMINAL (Expandido)
             Expanded(
               child: Container(
                 width: double.infinity,
