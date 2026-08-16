@@ -1,0 +1,40 @@
+{
+    "P0118": {
+        "title": "Sensor de Temperatura del Refrigerante - Circuito Alto",
+        "description": "La ECU detectó un voltaje superior a 4.91V en el sensor ECT.",
+        "symptoms": [
+            "Luz de motor encendida",
+            "Arranque difícil",
+            "Alto consumo de combustible"
+        ],
+        "causes": [
+            "Cable roto",
+            "Conector oxidado",
+            "Sensor defectuoso"
+        ],
+        "howToTestAndFix": [
+            "Probar resistencia del sensor",
+            "Revisar cableado",
+            "Reemplazar sensor ECT"
+        ]
+    },
+    "P0300": {
+        "title": "Falla de Encendido Múltiple/Aleatoria",
+        "description": "La ECU detectó que uno o más cilindros no están quemando el combustible correctamente.",
+        "symptoms": [
+            "Motor temblando",
+            "Luz de motor parpadeando",
+            "Pérdida de potencia"
+        ],
+        "causes": [
+            "Bujías desgastadas",
+            "Bobinas defectuosas",
+            "Baja presión de combustible"
+        ],
+        "howToTestAndFix": [
+            "Inspeccionar bujías",
+            "Probar bobinas de encendido",
+            "Medir presión de combustible"
+        ]
+    }
+}

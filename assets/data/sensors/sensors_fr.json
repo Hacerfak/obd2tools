@@ -1,0 +1,14 @@
+{
+    "05": {
+        "name": "Température du Liquide de Refroidissement (ECT)",
+        "whatIsIt": "Une thermistance située dans le bloc moteur ou le boîtier du thermostat.",
+        "function": "Mesure la température du liquide de refroidissement du moteur.",
+        "impact": "L'ECU l'utilise pour calculer l'injection de carburant et déclencher les ventilateurs."
+    },
+    "0C": {
+        "name": "Régime Moteur (RPM)",
+        "whatIsIt": "Signal généré par le capteur de position du vilebrequin (CKP).",
+        "function": "Mesure le nombre de tours par minute du moteur.",
+        "impact": "Crucial pour synchroniser l'injection de carburant et l'allumage."
+    }
+}

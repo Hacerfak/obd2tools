@@ -21,5 +21,24 @@
             "Replace the ECT sensor if its internal resistance is out of factory specifications.",
             "Clear the trouble codes with the scanner and perform a test drive to verify the repair."
         ]
+    },
+    "P0300": {
+        "title": "Random/Multiple Cylinder Misfire Detected",
+        "description": "The ECU detected that one or more cylinders are not burning fuel properly.",
+        "symptoms": [
+            "Engine hesitation/shaking",
+            "Flashing Check Engine Light",
+            "Lack of power"
+        ],
+        "causes": [
+            "Worn spark plugs",
+            "Faulty ignition coils",
+            "Low fuel pressure"
+        ],
+        "howToTestAndFix": [
+            "Inspect spark plugs",
+            "Test ignition coils",
+            "Measure fuel pump pressure"
+        ]
     }
 }

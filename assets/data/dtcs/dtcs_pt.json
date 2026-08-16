@@ -21,5 +21,24 @@
             "Substitua o sensor ECT caso os valores estejam fora da especificação técnica do fabricante.",
             "Apague os códigos com o scanner e realize um ciclo de condução para validar."
         ]
+    },
+    "P0300": {
+        "title": "Falha de Ignição Múltipla/Aleatória (Misfire)",
+        "description": "A ECU detectou que um ou mais cilindros não estão queimando o combustível corretamente.",
+        "symptoms": [
+            "Motor vibrando/falhando",
+            "Luz da injeção piscando",
+            "Falta de potência"
+        ],
+        "causes": [
+            "Velas de ignição gastas",
+            "Bobinas defeituosas",
+            "Baixa pressão de combustível"
+        ],
+        "howToTestAndFix": [
+            "Inspecionar velas",
+            "Testar bobinas de ignição",
+            "Medir pressão da bomba de combustível"
+        ]
     }
 }

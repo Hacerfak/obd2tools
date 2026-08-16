@@ -1,0 +1,14 @@
+{
+    "05": {
+        "name": "Temperatura del Refrigerante (ECT)",
+        "whatIsIt": "Un termistor ubicado en el bloque del motor o la carcasa del termostato.",
+        "function": "Mide la temperatura del líquido refrigerante del motor.",
+        "impact": "La ECU lo usa para calcular la inyección de combustible y encender los ventiladores."
+    },
+    "0C": {
+        "name": "Revoluciones del Motor (RPM)",
+        "whatIsIt": "Señal generada por el sensor de posición del cigüeñal (CKP).",
+        "function": "Mide cuántas revoluciones por minuto da el motor.",
+        "impact": "Fundamental para sincronizar el tiempo de inyección y la chispa de encendido."
+    }
+}

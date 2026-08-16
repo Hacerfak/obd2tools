@@ -1,0 +1,14 @@
+{
+    "05": {
+        "name": "Kühlmitteltemperatur (ECT)",
+        "whatIsIt": "Ein Thermistor, der sich im Motorblock oder Thermostatgehäuse befindet.",
+        "function": "Misst die Temperatur des Motorkühlmittels.",
+        "impact": "Die ECU nutzt dies zur Berechnung der Kraftstoffeinspritzung und Lüftersteuerung."
+    },
+    "0C": {
+        "name": "Motordrehzahl (RPM)",
+        "whatIsIt": "Signal des Kurbelwellenpositionssensors (CKP).",
+        "function": "Misst die Umdrehungen pro Minute des Motors.",
+        "impact": "Wichtig zur Synchronisierung von Einspritzung und Zündung."
+    }
+}

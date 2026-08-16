@@ -1,0 +1,40 @@
+{
+    "P0118": {
+        "title": "Capteur de Température du Liquide de Refroidissement - Circuit Haut",
+        "description": "L'ECU a détecté une tension supérieure à 4,91 V sur le capteur ECT.",
+        "symptoms": [
+            "Voyant moteur allumé",
+            "Démarrage difficile",
+            "Surconsommation de carburant"
+        ],
+        "causes": [
+            "Fil cassé",
+            "Connecteur corrodé",
+            "Capteur défectueux"
+        ],
+        "howToTestAndFix": [
+            "Tester la résistance du capteur",
+            "Inspecter le faisceau",
+            "Remplacer le capteur ECT"
+        ]
+    },
+    "P0300": {
+        "title": "Ratés d'Allumage Multiples/Aléatoires",
+        "description": "L'ECU a détecté qu'un ou plusieurs cylindres ne brûlent pas le carburant correctement.",
+        "symptoms": [
+            "Moteur qui broute",
+            "Voyant moteur clignotant",
+            "Perte de puissance"
+        ],
+        "causes": [
+            "Bougies usées",
+            "Bobines défectueuses",
+            "Faible pression de carburant"
+        ],
+        "howToTestAndFix": [
+            "Inspecter les bougies",
+            "Tester les bobines",
+            "Mesurer la pression de carburant"
+        ]
+    }
+}

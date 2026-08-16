@@ -1,0 +1,40 @@
+{
+    "P0118": {
+        "title": "Kühlmitteltemperatursensor - Stromkreis zu hoch",
+        "description": "Die ECU hat eine Spannung von über 4,91 V am ECT-Sensor erkannt.",
+        "symptoms": [
+            "Motorkontrollleuchte an",
+            "Startschwierigkeiten",
+            "Hoher Kraftstoffverbrauch"
+        ],
+        "causes": [
+            "Kabelbruch",
+            "Korrodierter Stecker",
+            "Defekter Sensor"
+        ],
+        "howToTestAndFix": [
+            "Sensorwiderstand prüfen",
+            "Kabelbaum prüfen",
+            "ECT-Sensor austauschen"
+        ]
+    },
+    "P0300": {
+        "title": "Zufällige/Mehrere Zylinder-Fehlzündungen",
+        "description": "Die ECU hat erkannt, dass ein oder mehrere Zylinder nicht richtig zünden.",
+        "symptoms": [
+            "Motor ruckelt",
+            "Blinkende Motorkontrollleuchte",
+            "Leistungsverlust"
+        ],
+        "causes": [
+            "Verschlissene Zündkerzen",
+            "Defekte Zündspulen",
+            "Niedriger Kraftstoffdruck"
+        ],
+        "howToTestAndFix": [
+            "Zündkerzen prüfen",
+            "Zündspulen testen",
+            "Kraftstoffdruck messen"
+        ]
+    }
+}
