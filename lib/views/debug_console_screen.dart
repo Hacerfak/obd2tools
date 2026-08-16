@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '/l10n/app_localizations.dart';
 import 'package:math_expressions/math_expressions.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -18,7 +19,6 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
   final TextEditingController _headerController = TextEditingController();
   final TextEditingController _commandController = TextEditingController();
   final TextEditingController _formulaController = TextEditingController();
-
   final List<String> _consoleLogs = [];
   final ScrollController _scrollController = ScrollController();
   StreamSubscription? _rawSubscription;
@@ -34,7 +34,6 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
   @override
   void initState() {
     super.initState();
-
     // Assume o controle da comunicação e limpa a fila do painel
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(obdManagerProvider).setPollingPids([]);
@@ -60,6 +59,7 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
     bool isCommand = false,
     bool isSuccess = false,
   }) {
+    if (!mounted) return;
     setState(() {
       if (isSuccess) {
         _consoleLogs.add("[OK] $text");
@@ -68,7 +68,6 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
         _consoleLogs.add("$prefix$text");
       }
     });
-
     Future.delayed(const Duration(milliseconds: 100), () {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
@@ -82,7 +81,6 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
 
   void _sendCommand() {
     if (_isScanning) return; // Bloqueia envio manual durante a varredura
-
     final obdManager = ref.read(obdManagerProvider);
     final header = _headerController.text.trim().toUpperCase();
     final command = _commandController.text.trim().toUpperCase();
@@ -100,23 +98,21 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
 
   // --- EXPORTAR LOGS PARA ARQUIVO TXT ---
   Future<void> _exportLogs() async {
+    final l10n = AppLocalizations.of(context)!;
+
     if (_consoleLogs.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("O terminal está vazio. Nada para exportar."),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.dbgEmpty)));
       return;
     }
 
     try {
       final text = _consoleLogs.join('\n');
-
       if (Platform.isAndroid || Platform.isIOS) {
         final directory = await getTemporaryDirectory();
         final file = File('${directory.path}/obd2_terminal_log.txt');
         await file.writeAsString(text);
-
         await Share.shareXFiles([
           XFile(file.path),
         ], text: 'Logs do Terminal OBD2 Tools');
@@ -124,11 +120,10 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
         final directory = await getApplicationDocumentsDirectory();
         final file = File('${directory.path}/obd2_terminal_log.txt');
         await file.writeAsString(text);
-
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text("Arquivo salvo com sucesso em:\n${file.path}"),
+              content: Text("${l10n.dbgSaved}\n${file.path}"),
               duration: const Duration(seconds: 5),
               backgroundColor: Colors.green,
             ),
@@ -137,15 +132,17 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("Erro ao exportar: $e")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.dbgExportError(e.toString()))),
+        );
       }
     }
   }
 
   // --- LÓGICA DA VARREDURA FORÇA BRUTA ---
   void _showScanDialog() {
+    final l10n = AppLocalizations.of(context)!;
+
     final headerCtrl = TextEditingController(text: _headerController.text);
     final prefixCtrl = TextEditingController(text: "22");
     final startCtrl = TextEditingController(text: "1100");
@@ -154,7 +151,7 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Varredura de PIDs (Força Bruta)"),
+        title: Text(l10n.dbgScanTitle),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -162,32 +159,24 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
             children: [
               TextField(
                 controller: headerCtrl,
-                decoration: const InputDecoration(
-                  labelText: "Header (Opcional, ex: 7E0)",
-                ),
+                decoration: InputDecoration(labelText: l10n.dbgScanHeaderHint),
               ),
               TextField(
                 controller: prefixCtrl,
-                decoration: const InputDecoration(
-                  labelText: "Modo/Prefixo (ex: 22)",
-                ),
+                decoration: InputDecoration(labelText: l10n.dbgScanPrefixHint),
               ),
               TextField(
                 controller: startCtrl,
-                decoration: const InputDecoration(
-                  labelText: "Início Hex (ex: 1100)",
-                ),
+                decoration: InputDecoration(labelText: l10n.dbgScanStartHint),
               ),
               TextField(
                 controller: endCtrl,
-                decoration: const InputDecoration(
-                  labelText: "Fim Hex (ex: 11FF)",
-                ),
+                decoration: InputDecoration(labelText: l10n.dbgScanEndHint),
               ),
               const SizedBox(height: 16),
-              const Text(
-                "⚠️ Atenção: A varredura enviará requisições sequenciais contínuas. Faixas muito grandes podem demorar vários minutos.",
-                style: TextStyle(fontSize: 12, color: Colors.amber),
+              Text(
+                l10n.dbgScanWarning,
+                style: const TextStyle(fontSize: 12, color: Colors.amber),
               ),
             ],
           ),
@@ -195,7 +184,7 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Cancelar"),
+            child: Text(l10n.btnCancel),
           ),
           FilledButton(
             onPressed: () {
@@ -205,9 +194,10 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
                 prefixCtrl.text,
                 startCtrl.text,
                 endCtrl.text,
+                l10n,
               );
             },
-            child: const Text("Iniciar"),
+            child: Text(l10n.btnStart),
           ),
         ],
       ),
@@ -219,6 +209,7 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
     String prefix,
     String startHex,
     String endHex,
+    AppLocalizations l10n,
   ) {
     try {
       _scanHeader = header.trim().toUpperCase();
@@ -227,7 +218,7 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
       _scanCurrent = _scanStart;
       _scanEnd = int.parse(endHex.trim(), radix: 16);
 
-      if (_scanCurrent > _scanEnd) throw Exception("Início maior que o fim");
+      if (_scanCurrent > _scanEnd) throw Exception(l10n.dbgErrorBounds);
 
       setState(() {
         _isScanning = true;
@@ -235,7 +226,10 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
       });
 
       _printToConsole(
-        "Iniciando varredura de $_scanPrefix${startHex.toUpperCase()} até $_scanPrefix${endHex.toUpperCase()}...",
+        l10n.dbgScanStarting(
+          "$_scanPrefix${startHex.toUpperCase()}",
+          "$_scanPrefix${endHex.toUpperCase()}",
+        ),
         isSuccess: true,
       );
 
@@ -248,22 +242,20 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
         _sendNextScanCommand();
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            "Erro nos parâmetros hexadecimais! Verifique a digitação.",
-          ),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.dbgErrorHex)));
     }
   }
 
   void _sendNextScanCommand() {
-    if (!_isScanning) return;
+    if (!_isScanning || !mounted) return;
+
+    final l10n = AppLocalizations.of(context)!;
 
     if (_scanCurrent > _scanEnd) {
       setState(() => _isScanning = false);
-      _printToConsole("Varredura Concluída!", isSuccess: true);
+      _printToConsole(l10n.dbgScanComplete, isSuccess: true);
       return;
     }
 
@@ -278,9 +270,11 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
 
   // --- PROCESSAMENTO DE RESPOSTA ---
   void _processResponse(String response) {
+    if (!mounted) return;
+    final l10n = AppLocalizations.of(context)!;
+
     if (_isScanning) {
       String cleanHex = response.replaceAll(RegExp(r'[^0-9A-Fa-f]'), '');
-
       if (!response.contains("NO DATA") &&
           !response.contains("ERROR") &&
           !cleanHex.startsWith("7F")) {
@@ -291,7 +285,6 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
       setState(() {
         _scanCurrent++;
       });
-
       Future.delayed(const Duration(milliseconds: 50), () {
         if (_isScanning) _sendNextScanCommand();
       });
@@ -308,8 +301,8 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
     }
 
     String cleanHex = response.replaceAll(RegExp(r'[^0-9A-Fa-f]'), '');
-
     int headerLength = 4;
+
     if (cleanHex.startsWith("62") ||
         cleanHex.startsWith("49") ||
         cleanHex.startsWith("42")) {
@@ -324,7 +317,6 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
         ContextModel cm = ContextModel();
 
         List<String> variableNames = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
-
         for (var v in variableNames) {
           cm.bindVariable(Variable(v), Number(0.0));
         }
@@ -347,19 +339,16 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
         }
 
         double result = exp.evaluate(EvaluationType.REAL, cm);
-
         String formattedResult = result == result.truncateToDouble()
             ? result.toInt().toString()
             : result.toStringAsFixed(2);
 
         _printToConsole(
-          "Resultado (Fórmula): $formattedResult",
+          l10n.dbgFormulaResult(formattedResult),
           isSuccess: true,
         );
       } catch (e) {
-        _printToConsole(
-          "Erro: Falha ao interpretar a fórmula. Verifique a sintaxe.",
-        );
+        _printToConsole(l10n.dbgFormulaError);
       }
     }
   }
@@ -368,6 +357,7 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final onSurface = colorScheme.onSurface;
+    final l10n = AppLocalizations.of(context)!;
 
     // Calcula o progresso dinamicamente
     double progress = 0.0;
@@ -383,7 +373,7 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Terminal de Diagnóstico",
+              l10n.dbgTitle,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -391,7 +381,6 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
               ),
             ),
             const SizedBox(height: 16),
-
             Card(
               elevation: 0,
               color: colorScheme.surfaceContainer,
@@ -410,7 +399,7 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
                             controller: _headerController,
                             enabled: !_isScanning,
                             decoration: InputDecoration(
-                              labelText: "Header (Opc)",
+                              labelText: l10n.dbgHeader,
                               hintText: "7E0",
                               filled: true,
                               fillColor: colorScheme.surface,
@@ -428,7 +417,7 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
                             controller: _commandController,
                             enabled: !_isScanning,
                             decoration: InputDecoration(
-                              labelText: "Comando (PID/AT)",
+                              labelText: l10n.dbgCommand,
                               hintText: "2211A1",
                               filled: true,
                               fillColor: colorScheme.surface,
@@ -449,7 +438,7 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
                             controller: _formulaController,
                             enabled: !_isScanning,
                             decoration: InputDecoration(
-                              labelText: "Fórmula Customizada",
+                              labelText: l10n.dbgFormula,
                               hintText: "Ex: (A*256+B)/10",
                               filled: true,
                               fillColor: colorScheme.surface,
@@ -461,18 +450,17 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
                           ),
                         ),
                         const SizedBox(width: 16),
-
                         if (_isScanning)
                           IconButton.filledTonal(
                             onPressed: () {
                               setState(() => _isScanning = false);
                               _printToConsole(
-                                "Varredura cancelada pelo usuário.",
+                                l10n.dbgScanCancelled,
                                 isSuccess: true,
                               );
                             },
                             icon: const Icon(Icons.stop),
-                            tooltip: "Parar Varredura",
+                            tooltip: l10n.dbgStop,
                             style: IconButton.styleFrom(
                               backgroundColor: Colors.redAccent.withValues(
                                 alpha: 0.2,
@@ -483,33 +471,30 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
                         else
                           IconButton.filledTonal(
                             icon: const Icon(Icons.radar),
-                            tooltip: "Varredura Força Bruta",
+                            tooltip: l10n.dbgScan,
                             onPressed: _showScanDialog,
                           ),
                         const SizedBox(width: 8),
-
                         // Botão desabilitado se estiver escaneando
                         IconButton.filledTonal(
                           icon: const Icon(Icons.delete_outline),
-                          tooltip: "Limpar Terminal",
+                          tooltip: l10n.dbgClear,
                           onPressed: _isScanning
                               ? null
                               : () => setState(() => _consoleLogs.clear()),
                         ),
                         const SizedBox(width: 8),
-
                         // Botão desabilitado se estiver escaneando
                         IconButton.filledTonal(
                           icon: const Icon(Icons.save_alt),
-                          tooltip: "Exportar Logs",
+                          tooltip: l10n.dbgExport,
                           onPressed: _isScanning ? null : _exportLogs,
                         ),
                         const SizedBox(width: 16),
-
                         FilledButton.icon(
                           onPressed: _isScanning ? null : _sendCommand,
                           icon: const Icon(Icons.send_rounded),
-                          label: const Text("Enviar"),
+                          label: Text(l10n.btnSend),
                           style: FilledButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
                               vertical: 18,
@@ -522,7 +507,6 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
                         ),
                       ],
                     ),
-
                     // BARRA DE PROGRESSO VISÍVEL APENAS DURANTE O SCAN
                     if (_isScanning) ...[
                       const SizedBox(height: 16),
@@ -557,9 +541,7 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
                 ),
               ),
             ),
-
             const SizedBox(height: 16),
-
             Expanded(
               child: Container(
                 width: double.infinity,

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+import '/l10n/app_localizations.dart'; // IMPORT DA TRADUÇÃO
 import '../parser/registries/mode_01_registry.dart';
 import '../state/obd_providers.dart';
 import '../widgets/obd_gauge.dart';
@@ -36,7 +37,6 @@ class _HudScreenState extends ConsumerState<HudScreen> {
     super.initState();
     _obdManager = ref.read(obdManagerProvider);
     _loadPreferences();
-
     WakelockPlus.enable();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   }
@@ -103,6 +103,7 @@ class _HudScreenState extends ConsumerState<HudScreen> {
     final onSurface = Theme.of(context).colorScheme.onSurface;
     final isFullscreen = ref.watch(hudFullscreenProvider);
     final isDesktop = MediaQuery.of(context).size.width > 600;
+    final l10n = AppLocalizations.of(context)!; // Instância de traduções
 
     return Scaffold(
       // FOCUS ESCUTA EVENTOS DO TECLADO NO DESKTOP (EX: TECLA ESC)
@@ -140,7 +141,7 @@ class _HudScreenState extends ConsumerState<HudScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            "HUD (${_activeGaugesPids.length}/12)",
+                            "${l10n.tabHud} (${_activeGaugesPids.length}/12)", // Texto Traduzido + Contador
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -177,7 +178,7 @@ class _HudScreenState extends ConsumerState<HudScreen> {
                                 },
                                 icon: const Icon(Icons.edit_rounded),
                                 color: Theme.of(context).colorScheme.primary,
-                                tooltip: 'Gerenciar Sensores',
+                                tooltip: l10n.hudManage, // Tooltip Traduzido
                               ),
                               const SizedBox(width: 8),
                               SegmentedButton<GaugeStyle>(
@@ -216,7 +217,6 @@ class _HudScreenState extends ConsumerState<HudScreen> {
                                   ).colorScheme.primary,
                                 ),
                               ),
-
                               // BOTÃO DE TELA CHEIA (APENAS PARA DESKTOP)
                               if (isDesktop) ...[
                                 const SizedBox(width: 8),
@@ -226,7 +226,8 @@ class _HudScreenState extends ConsumerState<HudScreen> {
                                       .toggle(),
                                   icon: const Icon(Icons.fullscreen),
                                   color: Theme.of(context).colorScheme.primary,
-                                  tooltip: 'Tela Cheia',
+                                  tooltip:
+                                      l10n.hudFullscreen, // Tooltip Traduzido
                                 ),
                               ],
                             ],
@@ -234,7 +235,6 @@ class _HudScreenState extends ConsumerState<HudScreen> {
                         ],
                       ),
                     ),
-
                   // GAUGES
                   Expanded(
                     child: Padding(
@@ -286,7 +286,6 @@ class _HudScreenState extends ConsumerState<HudScreen> {
                 ],
               ),
             ),
-
             // OVERLAY TRANSLÚCIDO DE TUTORIAL (APARECE APENAS NA 1ª VEZ NO MOBILE)
             if (_showTutorial)
               Positioned.fill(
@@ -304,9 +303,9 @@ class _HudScreenState extends ConsumerState<HudScreen> {
                             color: Colors.white,
                           ),
                           const SizedBox(height: 24),
-                          const Text(
-                            "Modo Imersivo",
-                            style: TextStyle(
+                          Text(
+                            l10n.hudImmersive, // Título do Tutorial
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -314,7 +313,7 @@ class _HudScreenState extends ConsumerState<HudScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            "Dê dois toques na tela para\nentrar ou sair da Tela Cheia.",
+                            l10n.hudImmersiveDesc, // Descrição do Tutorial
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Colors.white.withValues(alpha: 0.8),
@@ -334,7 +333,7 @@ class _HudScreenState extends ConsumerState<HudScreen> {
                                 vertical: 12,
                               ),
                             ),
-                            child: const Text("Entendi"),
+                            child: Text(l10n.hudGotIt), // Botão Entendi
                           ),
                         ],
                       ),

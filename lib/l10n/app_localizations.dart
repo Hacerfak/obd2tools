@@ -705,6 +705,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Apply'**
   String get btnApply;
+
+  /// No description provided for @testValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Value'**
+  String get testValue;
+
+  /// No description provided for @testMin.
+  ///
+  /// In en, this message translates to:
+  /// **'Min'**
+  String get testMin;
+
+  /// No description provided for @testMax.
+  ///
+  /// In en, this message translates to:
+  /// **'Max'**
+  String get testMax;
+
+  /// No description provided for @sensWaitGraph.
+  ///
+  /// In en, this message translates to:
+  /// **'(Wait for the graph to populate)'**
+  String get sensWaitGraph;
+
+  /// No description provided for @faultDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fault Details'**
+  String get faultDetailsTitle;
+
+  /// No description provided for @faultDescConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Turns on the check engine light. The problem is occurring or occurred recently.'**
+  String get faultDescConfirmed;
+
+  /// No description provided for @faultDescPending.
+  ///
+  /// In en, this message translates to:
+  /// **'ECU detected an anomaly but needs more drive cycles to confirm.'**
+  String get faultDescPending;
+
+  /// No description provided for @faultDescPermanent.
+  ///
+  /// In en, this message translates to:
+  /// **'Serious fault. Only clears after repair and driving the vehicle.'**
+  String get faultDescPermanent;
+
+  /// No description provided for @faultFreezeFrameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Freeze Frame Data:'**
+  String get faultFreezeFrameTitle;
+
+  /// No description provided for @dbgExportError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error exporting: {error}'**
+  String dbgExportError(String error);
+
+  /// No description provided for @dbgScanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'PID Brute Force Scan'**
+  String get dbgScanTitle;
+
+  /// No description provided for @dbgScanHeaderHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Header (Optional, e.g., 7E0)'**
+  String get dbgScanHeaderHint;
+
+  /// No description provided for @dbgScanPrefixHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Mode/Prefix (e.g., 22)'**
+  String get dbgScanPrefixHint;
+
+  /// No description provided for @dbgScanStartHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Hex (e.g., 1100)'**
+  String get dbgScanStartHint;
+
+  /// No description provided for @dbgScanEndHint.
+  ///
+  /// In en, this message translates to:
+  /// **'End Hex (e.g., 11FF)'**
+  String get dbgScanEndHint;
+
+  /// No description provided for @dbgScanWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'⚠️ Warning: The scan will send continuous sequential requests. Large ranges may take several minutes.'**
+  String get dbgScanWarning;
+
+  /// No description provided for @btnStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get btnStart;
+
+  /// No description provided for @dbgErrorBounds.
+  ///
+  /// In en, this message translates to:
+  /// **'Start is greater than end'**
+  String get dbgErrorBounds;
+
+  /// No description provided for @dbgScanStarting.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting scan from {start} to {end}...'**
+  String dbgScanStarting(String start, String end);
+
+  /// No description provided for @dbgErrorHex.
+  ///
+  /// In en, this message translates to:
+  /// **'Error in hexadecimal parameters! Check your input.'**
+  String get dbgErrorHex;
+
+  /// No description provided for @dbgScanComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan Complete!'**
+  String get dbgScanComplete;
+
+  /// No description provided for @dbgFormulaResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Result (Formula): {result}'**
+  String dbgFormulaResult(String result);
+
+  /// No description provided for @dbgFormulaError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: Failed to interpret formula. Check syntax.'**
+  String get dbgFormulaError;
+
+  /// No description provided for @dbgScanCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan cancelled by user.'**
+  String get dbgScanCancelled;
 }
 
 class _AppLocalizationsDelegate

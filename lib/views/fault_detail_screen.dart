@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '/l10n/app_localizations.dart';
 import '../models/dtc_fault.dart';
 import '../parser/registries/dtc_dictionary.dart';
 import '../widgets/admob_banner.dart';
 
 class FaultDetailScreen extends ConsumerWidget {
   final DtcFault fault;
-
   const FaultDetailScreen({super.key, required this.fault});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final onSurface = Theme.of(context).colorScheme.onSurface;
     final primary = Theme.of(context).colorScheme.primary;
+    final l10n = AppLocalizations.of(context)!; // Instância de traduções
 
-    // Busca as informações do Dicionário
+    // Busca as informações do Dicionário (Isso será migrado pro JSON depois!)
     final dtcInfo = getDtcExplanation(fault.code);
     final hasFreezeFrame = fault.freezeFrame.isNotEmpty;
 
@@ -23,7 +24,7 @@ class FaultDetailScreen extends ConsumerWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: IconThemeData(color: onSurface),
-        title: Text("Detalhes da Falha", style: TextStyle(color: onSurface)),
+        title: Text(l10n.faultDetailsTitle, style: TextStyle(color: onSurface)),
       ),
       body: Column(
         children: [
@@ -56,7 +57,7 @@ class FaultDetailScreen extends ConsumerWidget {
                   alignment: WrapAlignment.center,
                   spacing: 8,
                   children: fault.statuses
-                      .map((s) => _buildExplanatoryBadge(s))
+                      .map((s) => _buildExplanatoryBadge(s, l10n))
                       .toList(),
                 ),
                 const SizedBox(height: 32),
@@ -94,7 +95,7 @@ class FaultDetailScreen extends ConsumerWidget {
                   Divider(color: onSurface.withValues(alpha: 0.1)),
                   const SizedBox(height: 16),
                   Text(
-                    "Dados Congelados (Freeze Frame):",
+                    l10n.faultFreezeFrameTitle,
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -141,30 +142,29 @@ class FaultDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildExplanatoryBadge(DtcStatus status) {
+  Widget _buildExplanatoryBadge(DtcStatus status, AppLocalizations l10n) {
     Color color;
     String text;
     String description;
+
     switch (status) {
       case DtcStatus.confirmed:
         color = Colors.redAccent;
-        text = "Confirmada";
-        description =
-            "Acende a luz. O problema está ocorrendo ou ocorreu agora.";
+        text = l10n.faultConfirmed;
+        description = l10n.faultDescConfirmed;
         break;
       case DtcStatus.pending:
         color = Colors.orangeAccent;
-        text = "Em avaliação";
-        description =
-            "ECU detectou anomalia, mas precisa de mais ciclos para confirmar.";
+        text = l10n.faultPending;
+        description = l10n.faultDescPending;
         break;
       case DtcStatus.permanent:
         color = Colors.purpleAccent;
-        text = "Monitorada pela ECU";
-        description =
-            "Falha grave. Só apaga após o conserto e rodagem do veículo.";
+        text = l10n.faultPermanent;
+        description = l10n.faultDescPermanent;
         break;
     }
+
     return Tooltip(
       message: description,
       triggerMode: TooltipTriggerMode.tap,

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '/l10n/app_localizations.dart';
 import '../state/obd_providers.dart';
 import '../models/dtc_fault.dart';
 import 'fault_detail_screen.dart';
-import '../widgets/admob_banner.dart'; // IMPORT DO BANNER
+import '../widgets/admob_banner.dart';
 
 class FaultsScreen extends ConsumerStatefulWidget {
   const FaultsScreen({super.key});
@@ -27,24 +28,22 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
     });
   }
 
-  // --- MUDAMOS O DIÁLOGO PARA CÁ ---
   void _showClearDialog(BuildContext context, WidgetRef ref, Color onSurface) {
+    final l10n = AppLocalizations.of(context)!; // Instância de traduções
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(
-          "Apagar Luz de Injeção?",
-          style: TextStyle(color: onSurface),
-        ),
+        title: Text(l10n.faultClearMil, style: TextStyle(color: onSurface)),
         content: Text(
-          "Esta ação vai resetar a memória de falhas e o Freeze Frame da injeção eletrônica. Certifique-se de estar com a CHAVE LIGADA e o MOTOR DESLIGADO.",
+          l10n.faultClearDesc,
           style: TextStyle(color: onSurface.withValues(alpha: 0.7)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              "Cancelar",
+              l10n.btnCancel,
               style: TextStyle(color: onSurface.withValues(alpha: 0.54)),
             ),
           ),
@@ -54,9 +53,9 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
               Navigator.pop(context);
             },
             style: FilledButton.styleFrom(backgroundColor: Colors.redAccent),
-            child: const Text(
-              "Sim, Apagar!",
-              style: TextStyle(color: Colors.white),
+            child: Text(
+              l10n.faultYesClear,
+              style: const TextStyle(color: Colors.white),
             ),
           ),
         ],
@@ -69,12 +68,13 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
     Color onSurface,
     bool isScreenLoading,
     bool hasFaults,
+    AppLocalizations l10n,
   ) {
     return Row(
       children: [
         Expanded(
           child: Text(
-            "Diagnóstico (DTC)",
+            l10n.faultTitle,
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -82,15 +82,14 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
             ),
           ),
         ),
-
-        // SÓ MOSTRA AÇÕES SE A VARREDURA TIVER CONCLUÍDA!
+        // SÓ MOSTRA AÇÕES SE A VARREDURA TIVER CONCLUÍDO
         if (!isScreenLoading) ...[
           // BOTÃO DE APAGAR (SÓ APARECE SE HOUVER ALGUMA FALHA GRAVADA!)
           if (hasFaults) ...[
             IconButton.filled(
               onPressed: () => _showClearDialog(context, ref, onSurface),
               icon: const Icon(Icons.delete_forever),
-              tooltip: "Apagar todas as falhas",
+              tooltip: l10n.faultClearMil,
               style: IconButton.styleFrom(
                 backgroundColor: Colors.redAccent.withValues(alpha: 0.2),
                 foregroundColor: Colors.redAccent,
@@ -98,13 +97,12 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
             ),
             const SizedBox(width: 12),
           ],
-
           // BOTÃO DE ATUALIZAR (SEMPRE DISPONÍVEL APÓS O LOADING)
           IconButton.filledTonal(
             onPressed: () => ref.read(obdManagerProvider).scanAllFaults(),
             icon: const Icon(Icons.refresh),
             color: primaryColor,
-            tooltip: "Refazer Leitura",
+            tooltip: l10n.btnRefresh,
           ),
         ],
       ],
@@ -118,6 +116,7 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
     final bool hasFaults = dtcState.faults.isNotEmpty;
     final onSurface = Theme.of(context).colorScheme.onSurface;
     final primaryColor = Theme.of(context).colorScheme.primary;
+    final l10n = AppLocalizations.of(context)!; // Instância de traduções
 
     List<DtcFault> filteredFaults = dtcState.faults.values.where((fault) {
       if (_selectedFilter == null) return true;
@@ -130,29 +129,35 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(primaryColor, onSurface, isScreenLoading, hasFaults),
+            _buildHeader(
+              primaryColor,
+              onSurface,
+              isScreenLoading,
+              hasFaults,
+              l10n,
+            ),
             const SizedBox(height: 16),
             if (!isScreenLoading) ...[
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    _buildFilterChip("Todas", null, onSurface),
+                    _buildFilterChip(l10n.faultAll, null, onSurface),
                     const SizedBox(width: 8),
                     _buildFilterChip(
-                      "Confirmadas",
+                      l10n.faultConfirmed,
                       DtcStatus.confirmed,
                       onSurface,
                     ),
                     const SizedBox(width: 8),
                     _buildFilterChip(
-                      "Em avaliação",
+                      l10n.faultPending,
                       DtcStatus.pending,
                       onSurface,
                     ),
                     const SizedBox(width: 8),
                     _buildFilterChip(
-                      "Monitoradas pela ECU",
+                      l10n.faultPermanent,
                       DtcStatus.permanent,
                       onSurface,
                     ),
@@ -161,7 +166,6 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
               ),
               const SizedBox(height: 24),
             ],
-
             Expanded(
               child: isScreenLoading
                   ? Center(
@@ -171,7 +175,7 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
                           CircularProgressIndicator(color: primaryColor),
                           const SizedBox(height: 16),
                           Text(
-                            "Lendo memória da ECU e dados congelados...\nPor favor, aguarde.",
+                            l10n.faultReading,
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: onSurface.withValues(alpha: 0.7),
@@ -191,9 +195,9 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
                             color: Colors.greenAccent.withValues(alpha: 0.5),
                           ),
                           const SizedBox(height: 16),
-                          const Text(
-                            "Nenhuma falha encontrada!",
-                            style: TextStyle(
+                          Text(
+                            l10n.faultNone,
+                            style: const TextStyle(
                               color: Colors.greenAccent,
                               fontSize: 18,
                             ),
@@ -207,6 +211,7 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
                         return _buildFaultCard(
                           filteredFaults[index],
                           onSurface,
+                          l10n,
                         );
                       },
                     ),
@@ -222,6 +227,7 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
   Widget _buildFilterChip(String label, DtcStatus? status, Color onSurface) {
     bool isSelected = _selectedFilter == status;
     final primaryColor = Theme.of(context).colorScheme.primary;
+
     return ChoiceChip(
       label: Text(label),
       selected: isSelected,
@@ -237,7 +243,11 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
     );
   }
 
-  Widget _buildFaultCard(DtcFault fault, Color onSurface) {
+  Widget _buildFaultCard(
+    DtcFault fault,
+    Color onSurface,
+    AppLocalizations l10n,
+  ) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: InkWell(
@@ -276,7 +286,7 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
                       spacing: 8,
                       runSpacing: 4,
                       children: fault.statuses
-                          .map((s) => _buildStatusBadge(s))
+                          .map((s) => _buildStatusBadge(s, l10n))
                           .toList(),
                     ),
                   ],
@@ -293,23 +303,25 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
     );
   }
 
-  Widget _buildStatusBadge(DtcStatus status) {
+  Widget _buildStatusBadge(DtcStatus status, AppLocalizations l10n) {
     Color color;
     String text;
+
     switch (status) {
       case DtcStatus.confirmed:
         color = Colors.redAccent;
-        text = "Confirmada";
+        text = l10n.faultConfirmed;
         break;
       case DtcStatus.pending:
         color = Colors.orangeAccent;
-        text = "Em avaliação";
+        text = l10n.faultPending;
         break;
       case DtcStatus.permanent:
         color = Colors.purpleAccent;
-        text = "Monitorada pela ECU";
+        text = l10n.faultPermanent;
         break;
     }
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(

@@ -317,4 +317,88 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get btnApply => 'Anwenden';
+
+  @override
+  String get testValue => 'Wert';
+
+  @override
+  String get testMin => 'Min';
+
+  @override
+  String get testMax => 'Max';
+
+  @override
+  String get sensWaitGraph => '(Warten Sie, bis das Diagramm gefüllt ist)';
+
+  @override
+  String get faultDetailsTitle => 'Fehlerdetails';
+
+  @override
+  String get faultDescConfirmed =>
+      'Schaltet die Motorkontrollleuchte ein. Das Problem tritt auf oder ist kürzlich aufgetreten.';
+
+  @override
+  String get faultDescPending =>
+      'ECU hat eine Anomalie erkannt, benötigt aber weitere Fahrzyklen zur Bestätigung.';
+
+  @override
+  String get faultDescPermanent =>
+      'Schwerwiegender Fehler. Wird erst nach Reparatur und Fahrt gelöscht.';
+
+  @override
+  String get faultFreezeFrameTitle => 'Freeze Frame Daten:';
+
+  @override
+  String dbgExportError(String error) {
+    return 'Fehler beim Exportieren: $error';
+  }
+
+  @override
+  String get dbgScanTitle => 'PID Brute-Force-Scan';
+
+  @override
+  String get dbgScanHeaderHint => 'Header (Optional, z.B. 7E0)';
+
+  @override
+  String get dbgScanPrefixHint => 'Modus/Präfix (z.B. 22)';
+
+  @override
+  String get dbgScanStartHint => 'Start Hex (z.B. 1100)';
+
+  @override
+  String get dbgScanEndHint => 'Ende Hex (z.B. 11FF)';
+
+  @override
+  String get dbgScanWarning =>
+      '⚠️ Warnung: Der Scan sendet kontinuierliche sequentielle Anfragen. Große Bereiche können mehrere Minuten dauern.';
+
+  @override
+  String get btnStart => 'Starten';
+
+  @override
+  String get dbgErrorBounds => 'Start ist größer als das Ende';
+
+  @override
+  String dbgScanStarting(String start, String end) {
+    return 'Starte Scan von $start bis $end...';
+  }
+
+  @override
+  String get dbgErrorHex =>
+      'Fehler in hexadezimalen Parametern! Überprüfen Sie Ihre Eingabe.';
+
+  @override
+  String get dbgScanComplete => 'Scan abgeschlossen!';
+
+  @override
+  String dbgFormulaResult(String result) {
+    return 'Ergebnis (Formel): $result';
+  }
+
+  @override
+  String get dbgFormulaError =>
+      'Fehler: Formel konnte nicht interpretiert werden. Überprüfen Sie die Syntax.';
+
+  @override
+  String get dbgScanCancelled => 'Scan vom Benutzer abgebrochen.';
 }

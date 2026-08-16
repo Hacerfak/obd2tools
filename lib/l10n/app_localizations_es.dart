@@ -316,4 +316,88 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get btnApply => 'Aplicar';
+
+  @override
+  String get testValue => 'Valor';
+
+  @override
+  String get testMin => 'Mín';
+
+  @override
+  String get testMax => 'Máx';
+
+  @override
+  String get sensWaitGraph => '(Espere a que se llene el gráfico)';
+
+  @override
+  String get faultDetailsTitle => 'Detalles de la Falla';
+
+  @override
+  String get faultDescConfirmed =>
+      'Enciende la luz del motor. El problema está ocurriendo o acaba de ocurrir.';
+
+  @override
+  String get faultDescPending =>
+      'La ECU detectó una anomalía, pero necesita más ciclos para confirmar.';
+
+  @override
+  String get faultDescPermanent =>
+      'Falla grave. Solo se borra después de reparar y conducir el vehículo.';
+
+  @override
+  String get faultFreezeFrameTitle => 'Datos Congelados (Freeze Frame):';
+
+  @override
+  String dbgExportError(String error) {
+    return 'Error al exportar: $error';
+  }
+
+  @override
+  String get dbgScanTitle => 'Búsqueda de PIDs (Fuerza Bruta)';
+
+  @override
+  String get dbgScanHeaderHint => 'Header (Opcional, ej: 7E0)';
+
+  @override
+  String get dbgScanPrefixHint => 'Modo/Prefijo (ej: 22)';
+
+  @override
+  String get dbgScanStartHint => 'Inicio Hex (ej: 1100)';
+
+  @override
+  String get dbgScanEndHint => 'Fin Hex (ej: 11FF)';
+
+  @override
+  String get dbgScanWarning =>
+      '⚠️ Atención: La búsqueda enviará solicitudes secuenciales continuas. Rangos grandes pueden tardar varios minutos.';
+
+  @override
+  String get btnStart => 'Iniciar';
+
+  @override
+  String get dbgErrorBounds => 'El inicio es mayor que el fin';
+
+  @override
+  String dbgScanStarting(String start, String end) {
+    return 'Iniciando búsqueda de $start hasta $end...';
+  }
+
+  @override
+  String get dbgErrorHex =>
+      '¡Error en los parámetros hexadecimales! Verifique su entrada.';
+
+  @override
+  String get dbgScanComplete => '¡Búsqueda completada!';
+
+  @override
+  String dbgFormulaResult(String result) {
+    return 'Resultado (Fórmula): $result';
+  }
+
+  @override
+  String get dbgFormulaError =>
+      'Error: Fallo al interpretar la fórmula. Verifique la sintaxis.';
+
+  @override
+  String get dbgScanCancelled => 'Búsqueda cancelada por el usuario.';
 }

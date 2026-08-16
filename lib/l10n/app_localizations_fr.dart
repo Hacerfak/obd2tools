@@ -317,4 +317,88 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get btnApply => 'Appliquer';
+
+  @override
+  String get testValue => 'Valeur';
+
+  @override
+  String get testMin => 'Min';
+
+  @override
+  String get testMax => 'Max';
+
+  @override
+  String get sensWaitGraph => '(Attendez que le graphique se remplisse)';
+
+  @override
+  String get faultDetailsTitle => 'Détails du Défaut';
+
+  @override
+  String get faultDescConfirmed =>
+      'Allume le voyant moteur. Le problème est en cours ou vient de se produire.';
+
+  @override
+  String get faultDescPending =>
+      'L\'ECU a détecté une anomalie mais nécessite plus de cycles pour confirmer.';
+
+  @override
+  String get faultDescPermanent =>
+      'Défaut grave. Ne s\'efface qu\'après réparation et conduite du véhicule.';
+
+  @override
+  String get faultFreezeFrameTitle => 'Données Figées (Freeze Frame) :';
+
+  @override
+  String dbgExportError(String error) {
+    return 'Erreur d\'exportation : $error';
+  }
+
+  @override
+  String get dbgScanTitle => 'Recherche de PIDs (Force Brute)';
+
+  @override
+  String get dbgScanHeaderHint => 'En-tête (Optionnel, ex: 7E0)';
+
+  @override
+  String get dbgScanPrefixHint => 'Mode/Préfixe (ex: 22)';
+
+  @override
+  String get dbgScanStartHint => 'Début Hex (ex: 1100)';
+
+  @override
+  String get dbgScanEndHint => 'Fin Hex (ex: 11FF)';
+
+  @override
+  String get dbgScanWarning =>
+      '⚠️ Attention : La recherche enverra des requêtes séquentielles continues. Les grandes plages peuvent prendre plusieurs minutes.';
+
+  @override
+  String get btnStart => 'Démarrer';
+
+  @override
+  String get dbgErrorBounds => 'Le début est supérieur à la fin';
+
+  @override
+  String dbgScanStarting(String start, String end) {
+    return 'Démarrage de la recherche de $start à $end...';
+  }
+
+  @override
+  String get dbgErrorHex =>
+      'Erreur dans les paramètres hexadécimaux ! Vérifiez votre saisie.';
+
+  @override
+  String get dbgScanComplete => 'Recherche terminée !';
+
+  @override
+  String dbgFormulaResult(String result) {
+    return 'Résultat (Formule) : $result';
+  }
+
+  @override
+  String get dbgFormulaError =>
+      'Erreur : Échec de l\'interprétation de la formule. Vérifiez la syntaxe.';
+
+  @override
+  String get dbgScanCancelled => 'Recherche annulée par l\'utilisateur.';
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '/l10n/app_localizations.dart'; // IMPORT DA TRADUÇÃO
 import '../state/obd_providers.dart';
 import '../widgets/admob_banner.dart';
 
@@ -38,6 +39,7 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
     final vehicleInfo = ref.watch(vehicleInfoStateProvider);
     final onSurface = Theme.of(context).colorScheme.onSurface;
     final primaryColor = Theme.of(context).colorScheme.primary;
+    final l10n = AppLocalizations.of(context)!; // Instância de traduções
 
     return Scaffold(
       body: Padding(
@@ -49,7 +51,7 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "Informações do Veículo",
+                  l10n.infoTitle,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -61,7 +63,8 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
                     onPressed: _requestData,
                     icon: const Icon(Icons.refresh),
                     color: primaryColor,
-                    tooltip: "Atualizar Dados",
+                    tooltip:
+                        l10n.btnRefresh, // Usando a chave geral de atualizar
                   ),
               ],
             ),
@@ -75,7 +78,7 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
                           CircularProgressIndicator(color: primaryColor),
                           const SizedBox(height: 16),
                           Text(
-                            "Consultando módulos e calibrações da ECU...\nPor favor, aguarde.",
+                            l10n.infoConsulting,
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: onSurface.withValues(alpha: 0.54),
@@ -87,7 +90,7 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
                   : vehicleInfo.isEmpty
                   ? Center(
                       child: Text(
-                        "Nenhuma informação encontrada.\nO veículo pode não suportar o Modo 09.",
+                        l10n.infoNone,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: onSurface.withValues(alpha: 0.54),
@@ -99,6 +102,7 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
                       itemBuilder: (context, index) {
                         String key = vehicleInfo.keys.elementAt(index);
                         String value = vehicleInfo[key]!;
+
                         return Card(
                           margin: const EdgeInsets.only(bottom: 12),
                           child: ListTile(

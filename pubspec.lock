@@ -218,10 +218,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_classic_bluetooth
-      sha256: d546aa9bb653fb84244dfdaf438ff5a5b60e6eee70014c76fd8090027d4cf2c8
+      sha256: "337c7b424682c8c8b074578a236a4c04f2bf03c324ef0f370a9a437bfed455a5"
       url: "https://pub.dev"
     source: hosted
-    version: "0.1.8"
+    version: "0.1.9"
   flutter_colorpicker:
     dependency: "direct main"
     description:

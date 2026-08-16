@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '/l10n/app_localizations.dart';
 import '../state/obd_providers.dart';
 import '../parser/parsers/mode_06_parser.dart';
 import '../widgets/admob_banner.dart';
@@ -38,6 +39,7 @@ class _TestResultsScreenState extends ConsumerState<TestResultsScreen> {
     final resultsList = ref.watch(testResultsProvider);
     final onSurface = Theme.of(context).colorScheme.onSurface;
     final appColors = ref.watch(appColorsProvider).current(context);
+    final l10n = AppLocalizations.of(context)!; // Instância de traduções
 
     return Scaffold(
       body: Padding(
@@ -49,7 +51,7 @@ class _TestResultsScreenState extends ConsumerState<TestResultsScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "Resultados de testes da ECU",
+                  l10n.testTitle,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -61,7 +63,7 @@ class _TestResultsScreenState extends ConsumerState<TestResultsScreen> {
                     onPressed: _runScan,
                     icon: const Icon(Icons.refresh),
                     color: appColors.primary,
-                    tooltip: "Atualizar",
+                    tooltip: l10n.btnRefresh, // Usando a chave geral de Refresh
                   ),
               ],
             ),
@@ -75,7 +77,7 @@ class _TestResultsScreenState extends ConsumerState<TestResultsScreen> {
                           CircularProgressIndicator(color: appColors.primary),
                           const SizedBox(height: 16),
                           Text(
-                            "Consultando monitores e limites de testes ...\nPor favor, aguarde.",
+                            l10n.testConsulting,
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: onSurface.withValues(alpha: 0.54),
@@ -87,7 +89,7 @@ class _TestResultsScreenState extends ConsumerState<TestResultsScreen> {
                   : resultsList.isEmpty
                   ? Center(
                       child: Text(
-                        "Nenhum teste interno encontrado.",
+                        l10n.testNone,
                         style: TextStyle(
                           color: onSurface.withValues(alpha: 0.54),
                         ),
@@ -105,15 +107,15 @@ class _TestResultsScreenState extends ConsumerState<TestResultsScreen> {
                         if (!test.hasData) {
                           statusColor = onSurface.withValues(alpha: 0.3);
                           statusIcon = Icons.pending_actions;
-                          statusText = "Aguardando Ciclo de Condução";
+                          statusText = l10n.testWaiting;
                         } else if (test.isPass) {
                           statusColor = appColors.normal;
                           statusIcon = Icons.check_circle;
-                          statusText = "Aprovado";
+                          statusText = l10n.testPassed;
                         } else {
                           statusColor = appColors.critical;
                           statusIcon = Icons.cancel;
-                          statusText = "Falha no Limite";
+                          statusText = l10n.testFailed;
                         }
 
                         return Card(
@@ -139,7 +141,7 @@ class _TestResultsScreenState extends ConsumerState<TestResultsScreen> {
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        "Teste: 0x${test.tid.toRadixString(16).padLeft(2, '0').toUpperCase()} | Comp: 0x${test.cid.toRadixString(16).padLeft(2, '0').toUpperCase()} • $statusText",
+                                        "TID: 0x${test.tid.toRadixString(16).padLeft(2, '0').toUpperCase()} | CID: 0x${test.cid.toRadixString(16).padLeft(2, '0').toUpperCase()} — $statusText",
                                         style: TextStyle(
                                           color: statusColor,
                                           fontWeight: FontWeight.w600,
@@ -152,17 +154,17 @@ class _TestResultsScreenState extends ConsumerState<TestResultsScreen> {
                                             MainAxisAlignment.spaceBetween,
                                         children: [
                                           _buildMiniBox(
-                                            "Valor",
+                                            l10n.testValue,
                                             test.value.toString(),
                                             onSurface,
                                           ),
                                           _buildMiniBox(
-                                            "Min",
+                                            l10n.testMin,
                                             test.min.toString(),
                                             onSurface,
                                           ),
                                           _buildMiniBox(
-                                            "Max",
+                                            l10n.testMax,
                                             test.max.toString(),
                                             onSurface,
                                           ),

@@ -316,4 +316,88 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get btnApply => 'Apply';
+
+  @override
+  String get testValue => 'Value';
+
+  @override
+  String get testMin => 'Min';
+
+  @override
+  String get testMax => 'Max';
+
+  @override
+  String get sensWaitGraph => '(Wait for the graph to populate)';
+
+  @override
+  String get faultDetailsTitle => 'Fault Details';
+
+  @override
+  String get faultDescConfirmed =>
+      'Turns on the check engine light. The problem is occurring or occurred recently.';
+
+  @override
+  String get faultDescPending =>
+      'ECU detected an anomaly but needs more drive cycles to confirm.';
+
+  @override
+  String get faultDescPermanent =>
+      'Serious fault. Only clears after repair and driving the vehicle.';
+
+  @override
+  String get faultFreezeFrameTitle => 'Freeze Frame Data:';
+
+  @override
+  String dbgExportError(String error) {
+    return 'Error exporting: $error';
+  }
+
+  @override
+  String get dbgScanTitle => 'PID Brute Force Scan';
+
+  @override
+  String get dbgScanHeaderHint => 'Header (Optional, e.g., 7E0)';
+
+  @override
+  String get dbgScanPrefixHint => 'Mode/Prefix (e.g., 22)';
+
+  @override
+  String get dbgScanStartHint => 'Start Hex (e.g., 1100)';
+
+  @override
+  String get dbgScanEndHint => 'End Hex (e.g., 11FF)';
+
+  @override
+  String get dbgScanWarning =>
+      '⚠️ Warning: The scan will send continuous sequential requests. Large ranges may take several minutes.';
+
+  @override
+  String get btnStart => 'Start';
+
+  @override
+  String get dbgErrorBounds => 'Start is greater than end';
+
+  @override
+  String dbgScanStarting(String start, String end) {
+    return 'Starting scan from $start to $end...';
+  }
+
+  @override
+  String get dbgErrorHex =>
+      'Error in hexadecimal parameters! Check your input.';
+
+  @override
+  String get dbgScanComplete => 'Scan Complete!';
+
+  @override
+  String dbgFormulaResult(String result) {
+    return 'Result (Formula): $result';
+  }
+
+  @override
+  String get dbgFormulaError =>
+      'Error: Failed to interpret formula. Check syntax.';
+
+  @override
+  String get dbgScanCancelled => 'Scan cancelled by user.';
 }

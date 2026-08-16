@@ -317,4 +317,88 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get btnApply => 'लागू करें';
+
+  @override
+  String get testValue => 'मूल्य';
+
+  @override
+  String get testMin => 'न्यूनतम';
+
+  @override
+  String get testMax => 'अधिकतम';
+
+  @override
+  String get sensWaitGraph => '(ग्राफ़ के भरने की प्रतीक्षा करें)';
+
+  @override
+  String get faultDetailsTitle => 'दोष विवरण';
+
+  @override
+  String get faultDescConfirmed =>
+      'चेक इंजन लाइट चालू करता है। समस्या अभी हो रही है या हाल ही में हुई है।';
+
+  @override
+  String get faultDescPending =>
+      'ECU ने विसंगति का पता लगाया लेकिन पुष्टि के लिए अधिक ड्राइव साइकिल की आवश्यकता है।';
+
+  @override
+  String get faultDescPermanent =>
+      'गंभीर दोष। मरम्मत और वाहन चलाने के बाद ही मिटता है।';
+
+  @override
+  String get faultFreezeFrameTitle => 'फ़्रीज़ फ़्रेम डेटा:';
+
+  @override
+  String dbgExportError(String error) {
+    return 'निर्यात त्रुटि: $error';
+  }
+
+  @override
+  String get dbgScanTitle => 'PID ब्रूट फोर्स स्कैन';
+
+  @override
+  String get dbgScanHeaderHint => 'हेडर (वैकल्पिक, उदाहरण: 7E0)';
+
+  @override
+  String get dbgScanPrefixHint => 'मोड/उपसर्ग (उदाहरण: 22)';
+
+  @override
+  String get dbgScanStartHint => 'प्रारंभ Hex (उदाहरण: 1100)';
+
+  @override
+  String get dbgScanEndHint => 'अंत Hex (उदाहरण: 11FF)';
+
+  @override
+  String get dbgScanWarning =>
+      '⚠️ चेतावनी: स्कैन लगातार अनुक्रमिक अनुरोध भेजेगा। बड़ी श्रेणियों में कई मिनट लग सकते हैं।';
+
+  @override
+  String get btnStart => 'शुरू';
+
+  @override
+  String get dbgErrorBounds => 'प्रारंभ अंत से बड़ा है';
+
+  @override
+  String dbgScanStarting(String start, String end) {
+    return '$start से $end तक स्कैन शुरू हो रहा है...';
+  }
+
+  @override
+  String get dbgErrorHex =>
+      'हेक्साडेसिमल मापदंडों में त्रुटि! अपना इनपुट जांचें।';
+
+  @override
+  String get dbgScanComplete => 'स्कैन पूर्ण!';
+
+  @override
+  String dbgFormulaResult(String result) {
+    return 'परिणाम (फ़ॉर्मूला): $result';
+  }
+
+  @override
+  String get dbgFormulaError =>
+      'त्रुटि: फ़ॉर्मूला की व्याख्या करने में विफल। सिंटैक्स जांचें।';
+
+  @override
+  String get dbgScanCancelled => 'उपयोगकर्ता द्वारा स्कैन रद्द किया गया।';
 }

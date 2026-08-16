@@ -317,4 +317,88 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get btnApply => 'Применить';
+
+  @override
+  String get testValue => 'Значение';
+
+  @override
+  String get testMin => 'Мин';
+
+  @override
+  String get testMax => 'Макс';
+
+  @override
+  String get sensWaitGraph => '(Подождите заполнения графика)';
+
+  @override
+  String get faultDetailsTitle => 'Детали ошибки';
+
+  @override
+  String get faultDescConfirmed =>
+      'Включает Check Engine. Проблема возникает сейчас или возникла недавно.';
+
+  @override
+  String get faultDescPending =>
+      'ЭБУ обнаружил аномалию, но нужно больше циклов для подтверждения.';
+
+  @override
+  String get faultDescPermanent =>
+      'Серьезная ошибка. Сбрасывается только после ремонта и поездки.';
+
+  @override
+  String get faultFreezeFrameTitle => 'Сохраненные данные (Freeze Frame):';
+
+  @override
+  String dbgExportError(String error) {
+    return 'Ошибка экспорта: $error';
+  }
+
+  @override
+  String get dbgScanTitle => 'Brute-Force сканирование PID';
+
+  @override
+  String get dbgScanHeaderHint => 'Header (Опционально, напр. 7E0)';
+
+  @override
+  String get dbgScanPrefixHint => 'Режим/Префикс (напр. 22)';
+
+  @override
+  String get dbgScanStartHint => 'Начало Hex (напр. 1100)';
+
+  @override
+  String get dbgScanEndHint => 'Конец Hex (напр. 11FF)';
+
+  @override
+  String get dbgScanWarning =>
+      '⚠️ Внимание: Сканирование отправляет непрерывные запросы. Большие диапазоны могут занять несколько минут.';
+
+  @override
+  String get btnStart => 'Начать';
+
+  @override
+  String get dbgErrorBounds => 'Начало больше конца';
+
+  @override
+  String dbgScanStarting(String start, String end) {
+    return 'Запуск сканирования от $start до $end...';
+  }
+
+  @override
+  String get dbgErrorHex =>
+      'Ошибка в шестнадцатеричных параметрах! Проверьте ввод.';
+
+  @override
+  String get dbgScanComplete => 'Сканирование завершено!';
+
+  @override
+  String dbgFormulaResult(String result) {
+    return 'Результат (Формула): $result';
+  }
+
+  @override
+  String get dbgFormulaError =>
+      'Ошибка: Не удалось интерпретировать формулу. Проверьте синтаксис.';
+
+  @override
+  String get dbgScanCancelled => 'Сканирование отменено пользователем.';
 }

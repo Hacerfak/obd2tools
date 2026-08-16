@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '/l10n/app_localizations.dart'; // IMPORT DA TRADUÇÃO
 import '../parser/registries/mode_01_registry.dart';
 import '../state/obd_providers.dart';
 import '../widgets/sensor_tile.dart';
@@ -55,7 +56,9 @@ class _SensorsDashboardScreenState
     final availablePids = pidRegistry.values
         .where((pid) => supportedPids.contains(pid.id))
         .toList();
+
     final onSurface = Theme.of(context).colorScheme.onSurface;
+    final l10n = AppLocalizations.of(context)!; // Instância de traduções
 
     return Scaffold(
       body: Column(
@@ -64,7 +67,7 @@ class _SensorsDashboardScreenState
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              "Sensores Mapeados (${availablePids.length})",
+              "${l10n.sensTitle} (${availablePids.length})", // Tradução + Contador Dinâmico
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -72,12 +75,11 @@ class _SensorsDashboardScreenState
               ),
             ),
           ),
-
           Expanded(
             child: availablePids.isEmpty
                 ? Center(
                     child: Text(
-                      "Nenhum sensor encontrado.",
+                      l10n.sensNone, // String traduzida
                       style: TextStyle(
                         color: onSurface.withValues(alpha: 0.54),
                       ),
@@ -90,6 +92,7 @@ class _SensorsDashboardScreenState
                         int crossAxisCount = constraints.maxWidth > 900
                             ? 4
                             : (constraints.maxWidth > 600 ? 3 : 2);
+
                         // No mobile (<= 600), deixamos o bloco mais alto (1.6) para caber o texto
                         double aspectRatio = constraints.maxWidth > 600
                             ? 2.2

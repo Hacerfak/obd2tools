@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '/l10n/app_localizations.dart';
 import '../parser/obd_pid.dart';
 import '../state/obd_providers.dart';
 import '../connection/obd_manager.dart';
@@ -50,6 +51,7 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
     final liveData = ref.watch(realTimeStateProvider);
     final sensorData = liveData[widget.pid.name];
     final onSurface = Theme.of(context).colorScheme.onSurface;
+    final l10n = AppLocalizations.of(context)!; // Instância de traduções
 
     // Puxa a paleta de cores automática para o tema atual!
     final appColors = ref.watch(appColorsProvider).current(context);
@@ -63,6 +65,7 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
 
     double minY = 0;
     double maxY = 100;
+
     if (widget.pid.unit.isNotEmpty &&
         sensorData != null &&
         sensorData.history.isNotEmpty) {
@@ -94,7 +97,7 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Valor Instantâneo",
+              l10n.sensInstant,
               style: TextStyle(
                 color: onSurface.withValues(alpha: 0.54),
                 fontSize: 16,
@@ -141,7 +144,7 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
             const SizedBox(height: 48),
             if (widget.pid.unit.isNotEmpty) ...[
               Text(
-                "Comportamento Recente",
+                l10n.sensRecent,
                 style: TextStyle(
                   color: onSurface.withValues(alpha: 0.54),
                   fontSize: 16,
@@ -152,7 +155,7 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
                 child: (sensorData == null || sensorData.history.length < 2)
                     ? Center(
                         child: Text(
-                          "Lendo dados do CAN Bus...\n(Aguarde o preenchimento do gráfico)",
+                          "${l10n.sensReading}\n${l10n.sensWaitGraph}",
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: onSurface.withValues(alpha: 0.38),
@@ -245,7 +248,6 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
                                   .entries
                                   .map((e) => FlSpot(e.key.toDouble(), e.value))
                                   .toList(),
-
                               // A MÁGICA DA SUAVIZAÇÃO AQUI!
                               isCurved: true,
                               curveSmoothness: 0.2,
@@ -276,7 +278,7 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        "Histórico não aplicável para status em texto.",
+                        l10n.sensNoHistory,
                         style: TextStyle(
                           color: onSurface.withValues(alpha: 0.38),
                         ),

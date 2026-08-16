@@ -112,5 +112,53 @@
             }
         }
     },
-    "btnApply": "Apply"
+    "btnApply": "Apply",
+    "testValue": "Value",
+    "testMin": "Min",
+    "testMax": "Max",
+    "sensWaitGraph": "(Wait for the graph to populate)",
+    "faultDetailsTitle": "Fault Details",
+    "faultDescConfirmed": "Turns on the check engine light. The problem is occurring or occurred recently.",
+    "faultDescPending": "ECU detected an anomaly but needs more drive cycles to confirm.",
+    "faultDescPermanent": "Serious fault. Only clears after repair and driving the vehicle.",
+    "faultFreezeFrameTitle": "Freeze Frame Data:",
+    "dbgExportError": "Error exporting: {error}",
+    "@dbgExportError": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "dbgScanTitle": "PID Brute Force Scan",
+    "dbgScanHeaderHint": "Header (Optional, e.g., 7E0)",
+    "dbgScanPrefixHint": "Mode/Prefix (e.g., 22)",
+    "dbgScanStartHint": "Start Hex (e.g., 1100)",
+    "dbgScanEndHint": "End Hex (e.g., 11FF)",
+    "dbgScanWarning": "⚠️ Warning: The scan will send continuous sequential requests. Large ranges may take several minutes.",
+    "btnStart": "Start",
+    "dbgErrorBounds": "Start is greater than end",
+    "dbgScanStarting": "Starting scan from {start} to {end}...",
+    "@dbgScanStarting": {
+        "placeholders": {
+            "start": {
+                "type": "String"
+            },
+            "end": {
+                "type": "String"
+            }
+        }
+    },
+    "dbgErrorHex": "Error in hexadecimal parameters! Check your input.",
+    "dbgScanComplete": "Scan Complete!",
+    "dbgFormulaResult": "Result (Formula): {result}",
+    "@dbgFormulaResult": {
+        "placeholders": {
+            "result": {
+                "type": "String"
+            }
+        }
+    },
+    "dbgFormulaError": "Error: Failed to interpret formula. Check syntax.",
+    "dbgScanCancelled": "Scan cancelled by user."
 }

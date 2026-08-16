@@ -308,4 +308,82 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get btnApply => '应用';
+
+  @override
+  String get testValue => '值';
+
+  @override
+  String get testMin => '最小';
+
+  @override
+  String get testMax => '最大';
+
+  @override
+  String get sensWaitGraph => '（等待图表填充）';
+
+  @override
+  String get faultDetailsTitle => '故障详情';
+
+  @override
+  String get faultDescConfirmed => '点亮发动机故障灯。问题正在发生或最近发生过。';
+
+  @override
+  String get faultDescPending => 'ECU 检测到异常，但需要更多驾驶循环来确认。';
+
+  @override
+  String get faultDescPermanent => '严重故障。仅在维修和驾驶车辆后才会清除。';
+
+  @override
+  String get faultFreezeFrameTitle => '冻结帧数据 (Freeze Frame)：';
+
+  @override
+  String dbgExportError(String error) {
+    return '导出错误：$error';
+  }
+
+  @override
+  String get dbgScanTitle => 'PID 暴力扫描';
+
+  @override
+  String get dbgScanHeaderHint => 'Header（可选，例：7E0）';
+
+  @override
+  String get dbgScanPrefixHint => '模式/前缀（例：22）';
+
+  @override
+  String get dbgScanStartHint => '开始 Hex（例：1100）';
+
+  @override
+  String get dbgScanEndHint => '结束 Hex（例：11FF）';
+
+  @override
+  String get dbgScanWarning => '⚠️ 警告：扫描将发送连续的顺序请求。大范围可能需要几分钟的时间。';
+
+  @override
+  String get btnStart => '开始';
+
+  @override
+  String get dbgErrorBounds => '开始大于结束';
+
+  @override
+  String dbgScanStarting(String start, String end) {
+    return '正在开始扫描从 $start 到 $end...';
+  }
+
+  @override
+  String get dbgErrorHex => '十六进制参数错误！请检查您的输入。';
+
+  @override
+  String get dbgScanComplete => '扫描完成！';
+
+  @override
+  String dbgFormulaResult(String result) {
+    return '结果（公式）：$result';
+  }
+
+  @override
+  String get dbgFormulaError => '错误：无法解释公式。请检查语法。';
+
+  @override
+  String get dbgScanCancelled => '扫描已由用户取消。';
 }

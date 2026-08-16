@@ -309,4 +309,83 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get btnApply => '適用する';
+
+  @override
+  String get testValue => '値';
+
+  @override
+  String get testMin => '最小';
+
+  @override
+  String get testMax => '最大';
+
+  @override
+  String get sensWaitGraph => '（グラフが入力されるのをお待ちください）';
+
+  @override
+  String get faultDetailsTitle => 'エラーの詳細';
+
+  @override
+  String get faultDescConfirmed => 'エンジンチェックランプを点灯させます。問題が現在発生しているか、最近発生しました。';
+
+  @override
+  String get faultDescPending => 'ECUが異常を検知しましたが、確認にはさらに運転サイクルが必要です。';
+
+  @override
+  String get faultDescPermanent => '重大なエラー。修理して車両を運転した後にのみクリアされます。';
+
+  @override
+  String get faultFreezeFrameTitle => 'フリーズフレームデータ：';
+
+  @override
+  String dbgExportError(String error) {
+    return 'エクスポートエラー: $error';
+  }
+
+  @override
+  String get dbgScanTitle => 'PID ブルートフォーススキャン';
+
+  @override
+  String get dbgScanHeaderHint => 'ヘッダー（任意、例: 7E0）';
+
+  @override
+  String get dbgScanPrefixHint => 'モード/プレフィックス（例: 22）';
+
+  @override
+  String get dbgScanStartHint => '開始 Hex（例: 1100）';
+
+  @override
+  String get dbgScanEndHint => '終了 Hex（例: 11FF）';
+
+  @override
+  String get dbgScanWarning =>
+      '⚠️ 警告：スキャンは連続した順次リクエストを送信します。範囲が広いと数分かかる場合があります。';
+
+  @override
+  String get btnStart => '開始';
+
+  @override
+  String get dbgErrorBounds => '開始が終了より大きいです';
+
+  @override
+  String dbgScanStarting(String start, String end) {
+    return '$start から $end へのスキャンを開始しています...';
+  }
+
+  @override
+  String get dbgErrorHex => '16進数パラメーターにエラーがあります！入力内容を確認してください。';
+
+  @override
+  String get dbgScanComplete => 'スキャン完了！';
+
+  @override
+  String dbgFormulaResult(String result) {
+    return '結果 (数式): $result';
+  }
+
+  @override
+  String get dbgFormulaError => 'エラー: 数式の解釈に失敗しました。構文を確認してください。';
+
+  @override
+  String get dbgScanCancelled => 'スキャンがユーザーによってキャンセルされました。';
 }

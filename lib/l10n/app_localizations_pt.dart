@@ -316,4 +316,88 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get btnApply => 'Aplicar';
+
+  @override
+  String get testValue => 'Valor';
+
+  @override
+  String get testMin => 'Mín';
+
+  @override
+  String get testMax => 'Máx';
+
+  @override
+  String get sensWaitGraph => '(Aguarde o preenchimento do gráfico)';
+
+  @override
+  String get faultDetailsTitle => 'Detalhes da Falha';
+
+  @override
+  String get faultDescConfirmed =>
+      'Acende a luz. O problema está ocorrendo ou ocorreu agora.';
+
+  @override
+  String get faultDescPending =>
+      'ECU detectou anomalia, mas precisa de mais ciclos para confirmar.';
+
+  @override
+  String get faultDescPermanent =>
+      'Falha grave. Só apaga após o conserto e rodagem do veículo.';
+
+  @override
+  String get faultFreezeFrameTitle => 'Dados Congelados (Freeze Frame):';
+
+  @override
+  String dbgExportError(String error) {
+    return 'Erro ao exportar: $error';
+  }
+
+  @override
+  String get dbgScanTitle => 'Varredura de PIDs (Força Bruta)';
+
+  @override
+  String get dbgScanHeaderHint => 'Header (Opcional, ex: 7E0)';
+
+  @override
+  String get dbgScanPrefixHint => 'Modo/Prefixo (ex: 22)';
+
+  @override
+  String get dbgScanStartHint => 'Início Hex (ex: 1100)';
+
+  @override
+  String get dbgScanEndHint => 'Fim Hex (ex: 11FF)';
+
+  @override
+  String get dbgScanWarning =>
+      '⚠️ Atenção: A varredura enviará requisições sequenciais contínuas. Faixas muito grandes podem demorar vários minutos.';
+
+  @override
+  String get btnStart => 'Iniciar';
+
+  @override
+  String get dbgErrorBounds => 'Início maior que o fim';
+
+  @override
+  String dbgScanStarting(String start, String end) {
+    return 'Iniciando varredura de $start até $end...';
+  }
+
+  @override
+  String get dbgErrorHex =>
+      'Erro nos parâmetros hexadecimais! Verifique a digitação.';
+
+  @override
+  String get dbgScanComplete => 'Varredura Concluída!';
+
+  @override
+  String dbgFormulaResult(String result) {
+    return 'Resultado (Fórmula): $result';
+  }
+
+  @override
+  String get dbgFormulaError =>
+      'Erro: Falha ao interpretar a fórmula. Verifique a sintaxe.';
+
+  @override
+  String get dbgScanCancelled => 'Varredura cancelada pelo usuário.';
 }
