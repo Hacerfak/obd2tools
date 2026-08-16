@@ -16,6 +16,7 @@ class ZoneGradient {
 class ObdGauge extends ConsumerWidget {
   final ObdPid pid;
   final GaugeStyle style;
+
   const ObdGauge({super.key, required this.pid, required this.style});
 
   double _getMaxValue() {
@@ -69,6 +70,7 @@ class ObdGauge extends ConsumerWidget {
       if (pid.evaluateHealth == null) {
         return ZoneGradient([defaultColor, defaultColor], [0.0, 1.0]);
       }
+
       List<Color> colors = [];
       List<double> stops = [];
       SensorHealth? lastHealth;
@@ -101,7 +103,6 @@ class ObdGauge extends ConsumerWidget {
     SensorHealth? currentHealth = pid.evaluateHealth != null
         ? pid.evaluateHealth!(currentValue)
         : null;
-
     Color activeColor = getColorForHealth(currentHealth, appColors.primary);
     ZoneGradient zones = buildZoneGradient(0, maxValue, appColors.primary);
 
@@ -109,88 +110,110 @@ class ObdGauge extends ConsumerWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Theme.of(context).dividerColor),
+        // REMOVIDA A BORDA DAQUI!
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.08), // Sombra suavizada
+            blurRadius: 8,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Column(
         children: [
           Expanded(
-            child: Stack(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(
-                    top: 16.0,
-                    left: 16.0,
-                    right: 16.0,
-                  ),
-                  child: style == GaugeStyle.lineChart
-                      ? _buildLineChart(
-                          context,
-                          sensorData?.history ?? [],
-                          maxValue,
-                          onSurface,
-                          activeColor,
-                        )
-                      : CustomPaint(
-                          size: const Size.square(double.infinity),
-                          painter: style == GaugeStyle.digital
-                              ? DigitalGaugePainter(
-                                  percent: percent,
-                                  baseColor: onSurface,
-                                  zones: zones,
-                                )
-                              : AnalogGaugePainter(
-                                  percent: percent,
-                                  baseColor: onSurface,
-                                  activeColor: activeColor,
-                                  zones: zones,
+            child: Padding(
+              padding: const EdgeInsets.only(
+                top: 12.0,
+                left: 12.0,
+                right: 12.0,
+              ),
+              child: style == GaugeStyle.lineChart
+                  ? _buildLineChart(
+                      context,
+                      sensorData?.history ?? [],
+                      maxValue,
+                      onSurface,
+                      activeColor,
+                    )
+                  : LayoutBuilder(
+                      builder: (context, constraints) {
+                        // Calcula o quadrado perfeito exato disponível para o gauge
+                        double size = min(
+                          constraints.maxWidth,
+                          constraints.maxHeight,
+                        );
+
+                        return Center(
+                          child: SizedBox(
+                            width: size,
+                            height: size,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                CustomPaint(
+                                  size: Size(size, size),
+                                  painter: style == GaugeStyle.digital
+                                      ? DigitalGaugePainter(
+                                          percent: percent,
+                                          baseColor: onSurface,
+                                          zones: zones,
+                                        )
+                                      : AnalogGaugePainter(
+                                          percent: percent,
+                                          baseColor: onSurface,
+                                          activeColor: activeColor,
+                                          zones: zones,
+                                        ),
                                 ),
-                        ),
-                ),
-                if (style != GaugeStyle.lineChart)
-                  Positioned(
-                    bottom: 12,
-                    left: 20,
-                    right: 20,
-                    // ALINHAMENTO DESLOCADO PARA NÃO SOBREPOR!
-                    child: Align(
-                      alignment: const Alignment(0, 0.4),
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              currentValue.toStringAsFixed(
-                                pid.unit == "RPM" ? 0 : 1,
-                              ),
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w900,
-                                color: activeColor,
-                                fontFamily: 'Monospace',
-                              ),
+                                // TEXTO ALINHADO DE FORMA RELATIVA AO TAMANHO
+                                Positioned(
+                                  bottom: size * 0.12, // 12% da base do círculo
+                                  child: SizedBox(
+                                    width:
+                                        size *
+                                        0.7, // Evita vazar pelas laterais
+                                    child: FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            currentValue.toStringAsFixed(
+                                              pid.unit == "RPM" ? 0 : 1,
+                                            ),
+                                            style: TextStyle(
+                                              fontSize:
+                                                  size *
+                                                  0.25, // Tamanho dinâmico
+                                              fontWeight: FontWeight.w900,
+                                              color: activeColor,
+                                              fontFamily: 'Monospace',
+                                            ),
+                                          ),
+                                          Text(
+                                            pid.unit,
+                                            style: TextStyle(
+                                              color: activeColor.withValues(
+                                                alpha: 0.7,
+                                              ),
+                                              fontSize:
+                                                  size *
+                                                  0.1, // Tamanho dinâmico
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                            Text(
-                              pid.unit,
-                              style: TextStyle(
-                                color: activeColor.withValues(alpha: 0.7),
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                          ),
+                        );
+                      },
                     ),
-                  ),
-              ],
             ),
           ),
           Padding(
@@ -201,7 +224,7 @@ class ObdGauge extends ConsumerWidget {
               top: 8.0,
             ),
             child: Text(
-              _getShortName(pid.name).toUpperCase(), // NOME ABREVIADO
+              _getShortName(pid.name).toUpperCase(),
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -218,7 +241,6 @@ class ObdGauge extends ConsumerWidget {
     );
   }
 
-  // GRÁFICO SUAVIZADO (BEZIER) SEM PONTOS (PARA NÃO TREMER NO MOBILE)
   Widget _buildLineChart(
     BuildContext context,
     List<double> history,
@@ -234,6 +256,7 @@ class ObdGauge extends ConsumerWidget {
         ),
       );
     }
+
     return Column(
       children: [
         Expanded(
@@ -246,9 +269,7 @@ class ObdGauge extends ConsumerWidget {
               gridData: const FlGridData(show: false),
               titlesData: const FlTitlesData(show: false),
               borderData: FlBorderData(show: false),
-              lineTouchData: LineTouchData(
-                enabled: false,
-              ), // Desliga touch no HUD
+              lineTouchData: LineTouchData(enabled: false),
               lineBarsData: [
                 LineChartBarData(
                   spots: history
@@ -256,13 +277,13 @@ class ObdGauge extends ConsumerWidget {
                       .entries
                       .map((e) => FlSpot(e.key.toDouble(), e.value))
                       .toList(),
-                  isCurved: true, // SUAVIZAÇÃO ATIVADA
-                  curveSmoothness: 0.2, // Curva leve
+                  isCurved: true,
+                  curveSmoothness: 0.2,
                   preventCurveOverShooting: true,
                   color: activeColor,
                   barWidth: 3,
                   isStrokeCapRound: true,
-                  dotData: const FlDotData(show: false), // ESCONDE OS PONTOS
+                  dotData: const FlDotData(show: false),
                   belowBarData: BarAreaData(
                     show: true,
                     color: activeColor.withValues(alpha: 0.15),
@@ -294,6 +315,7 @@ Shader _createSmartSweepShader(
   double sweepAngle,
 ) {
   final double sweepFraction = sweepAngle / (2 * pi);
+
   List<Color> mappedColors = [];
   List<double> mappedStops = [];
 
@@ -304,7 +326,6 @@ Shader _createSmartSweepShader(
 
   Color firstColor = colors.first;
   Color lastColor = colors.last;
-
   mappedColors.add(lastColor);
   mappedStops.add(sweepFraction + 0.05);
   mappedColors.add(firstColor);
@@ -321,6 +342,7 @@ Shader _createSmartSweepShader(
   ).createShader(rect);
 }
 
+// OS PINTORES AGORA USAM O CENTRO EXATO (sem margens fixas)
 class DigitalGaugePainter extends CustomPainter {
   final double percent;
   final Color baseColor;
@@ -334,8 +356,8 @@ class DigitalGaugePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2 - 10);
-    final radius = min(size.width / 2, size.height / 2) - 8;
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2 - 8;
     final rect = Rect.fromCircle(center: center, radius: radius);
 
     const startAngle = 0.8 * pi;
@@ -402,8 +424,8 @@ class AnalogGaugePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2 - 10);
-    final radius = min(size.width / 2, size.height / 2) - 8;
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2 - 8;
     final rect = Rect.fromCircle(center: center, radius: radius);
 
     const startAngle = 0.8 * pi;

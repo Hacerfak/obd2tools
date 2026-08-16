@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
-import '/l10n/app_localizations.dart'; // IMPORT DA TRADUÇÃO
+import '/l10n/app_localizations.dart';
 import '../parser/registries/mode_01_registry.dart';
 import '../state/obd_providers.dart';
 import '../widgets/obd_gauge.dart';
@@ -25,11 +25,9 @@ class _HudScreenState extends ConsumerState<HudScreen> {
   final List<int> _activeGaugesPids = [];
   GaugeStyle _currentStyle = GaugeStyle.digital;
 
-  // Controles do tutorial e teclado
   bool _showTutorial = false;
   final FocusNode _focusNode = FocusNode();
 
-  // Função auxiliar segura para detectar mobile
   bool get _isMobile => !kIsWeb && (Platform.isAndroid || Platform.isIOS);
 
   @override
@@ -45,7 +43,7 @@ class _HudScreenState extends ConsumerState<HudScreen> {
   void dispose() {
     WakelockPlus.disable();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    _focusNode.dispose(); // Limpamos o nó de foco do teclado
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -53,8 +51,6 @@ class _HudScreenState extends ConsumerState<HudScreen> {
     final prefs = await SharedPreferences.getInstance();
     final savedPids = prefs.getStringList('hud_pids');
     final savedStyleIndex = prefs.getInt('hud_style') ?? 0;
-
-    // Verifica se já mostramos o tutorial no Mobile
     final tutorialShown = prefs.getBool('hud_tutorial_shown') ?? false;
 
     setState(() {
@@ -68,7 +64,6 @@ class _HudScreenState extends ConsumerState<HudScreen> {
         _activeGaugesPids.addAll([0x0C, 0x0D, 0x05, 0x04, 0x0F, 0x11]);
       }
 
-      // Se for mobile e o tutorial nunca foi visto, ativa o overlay
       if (_isMobile && !tutorialShown) {
         _showTutorial = true;
       }
@@ -91,29 +86,30 @@ class _HudScreenState extends ConsumerState<HudScreen> {
     await prefs.setBool('hud_tutorial_shown', true);
   }
 
-  int _getCrossAxisCount(int totalItems, bool isDesktop) {
-    if (isDesktop) return totalItems > 6 ? 4 : (totalItems > 3 ? 3 : 2);
-    if (totalItems <= 2) return 1;
-    if (totalItems <= 6) return 2;
-    return 3;
-  }
-
   @override
   Widget build(BuildContext context) {
     final onSurface = Theme.of(context).colorScheme.onSurface;
     final isFullscreen = ref.watch(hudFullscreenProvider);
-    final isDesktop = MediaQuery.of(context).size.width > 600;
-    final l10n = AppLocalizations.of(context)!; // Instância de traduções
+    final l10n = AppLocalizations.of(context)!;
+
+    // MELHORIA: Detecta com precisão se é um celular pelo lado mais curto
+    final isPhone = MediaQuery.of(context).size.shortestSide < 600;
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+
+    // A MÁGICA DA SUA IDEIA: Corta a lista para 6 itens na horizontal no celular!
+    List<int> displayPids = _activeGaugesPids;
+    if (isPhone && isLandscape && displayPids.length > 6) {
+      displayPids = displayPids.take(6).toList();
+    }
 
     return Scaffold(
-      // FOCUS ESCUTA EVENTOS DO TECLADO NO DESKTOP (EX: TECLA ESC)
       body: Focus(
         focusNode: _focusNode,
         autofocus: true,
         onKeyEvent: (node, event) {
           if (event is KeyDownEvent &&
               event.logicalKey == LogicalKeyboardKey.escape) {
-            // Se apertar ESC e estiver em tela cheia, sai da tela cheia
             if (ref.read(hudFullscreenProvider)) {
               ref.read(hudFullscreenProvider.notifier).toggle();
               return KeyEventResult.handled;
@@ -123,25 +119,23 @@ class _HudScreenState extends ConsumerState<HudScreen> {
         },
         child: Stack(
           children: [
-            // CONTEÚDO PRINCIPAL (GESTURE PARA DUPLO TOQUE NO FUNDO)
             GestureDetector(
               behavior: HitTestBehavior.opaque,
               onDoubleTap: () {
                 ref.read(hudFullscreenProvider.notifier).toggle();
-                // O foco precisa ser requisitado novamente após o clique para o ESC continuar funcionando
-                if (!isDesktop) _focusNode.requestFocus();
+                if (!isPhone) _focusNode.requestFocus();
               },
               child: Column(
                 children: [
-                  // CABEÇALHO (SOME NO FULLSCREEN)
                   if (!isFullscreen)
                     Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
+                          // Exibe quantos estão na tela vs Total em memória
                           Text(
-                            "${l10n.tabHud} (${_activeGaugesPids.length}/12)", // Texto Traduzido + Contador
+                            "${l10n.tabHud} (${displayPids.length}/${_activeGaugesPids.length})",
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -178,7 +172,7 @@ class _HudScreenState extends ConsumerState<HudScreen> {
                                 },
                                 icon: const Icon(Icons.edit_rounded),
                                 color: Theme.of(context).colorScheme.primary,
-                                tooltip: l10n.hudManage, // Tooltip Traduzido
+                                tooltip: l10n.hudManage,
                               ),
                               const SizedBox(width: 8),
                               SegmentedButton<GaugeStyle>(
@@ -217,8 +211,8 @@ class _HudScreenState extends ConsumerState<HudScreen> {
                                   ).colorScheme.primary,
                                 ),
                               ),
-                              // BOTÃO DE TELA CHEIA (APENAS PARA DESKTOP)
-                              if (isDesktop) ...[
+                              // Botão de fullscreen disponível no Desktop e no Mobile Landscape
+                              if (!isPhone || isLandscape) ...[
                                 const SizedBox(width: 8),
                                 IconButton.filledTonal(
                                   onPressed: () => ref
@@ -226,8 +220,7 @@ class _HudScreenState extends ConsumerState<HudScreen> {
                                       .toggle(),
                                   icon: const Icon(Icons.fullscreen),
                                   color: Theme.of(context).colorScheme.primary,
-                                  tooltip:
-                                      l10n.hudFullscreen, // Tooltip Traduzido
+                                  tooltip: l10n.hudFullscreen,
                                 ),
                               ],
                             ],
@@ -235,25 +228,54 @@ class _HudScreenState extends ConsumerState<HudScreen> {
                         ],
                       ),
                     ),
-                  // GAUGES
+
+                  // GRID DE SENSORES ESTÁTICO E RESPONSIVO
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: LayoutBuilder(
                         builder: (context, constraints) {
-                          int crossAxisCount = _getCrossAxisCount(
-                            _activeGaugesPids.length,
-                            isDesktop,
-                          );
-                          int rowCount =
-                              (_activeGaugesPids.length / crossAxisCount)
-                                  .ceil();
-                          if (rowCount == 0) rowCount = 1;
+                          int totalItems = displayPids.length;
+                          if (totalItems == 0) return const SizedBox();
 
+                          int crossAxisCount;
+
+                          // LÓGICA DE DISTRIBUIÇÃO
+                          if (!isPhone) {
+                            // Tablets e PCs: Aguentam muitas colunas
+                            crossAxisCount = totalItems > 6
+                                ? 4
+                                : (totalItems > 3 ? 3 : 2);
+                          } else if (isLandscape) {
+                            // Celular Deitado: Máximo 6 itens (Sempre até 2 linhas)
+                            if (totalItems <= 2) {
+                              crossAxisCount = totalItems;
+                            } else if (totalItems <= 4) {
+                              crossAxisCount = 2;
+                            } // 2x2
+                            else {
+                              crossAxisCount = 3;
+                            } // 3x2 (6 itens)
+                          } else {
+                            // Celular em Pé: Máximo 12 itens (Até 4 linhas)
+                            if (totalItems <= 2) {
+                              crossAxisCount = 1;
+                            } else if (totalItems <= 6) {
+                              crossAxisCount = 2;
+                            } else {
+                              crossAxisCount = 3;
+                            }
+                          }
+
+                          // CÁLCULO EXATO PARA PREENCHER 100% DA TELA SEM SCROLL
+                          int rowCount = (totalItems / crossAxisCount).ceil();
                           double totalSpacingWidth =
                               (crossAxisCount - 1) * 12.0;
-                          double totalSpacingHeight = (rowCount - 1) * 12.0;
-                          if (isFullscreen) totalSpacingHeight += 16.0;
+
+                          // Ajusta o padding dinamicamente (com fullscreen ativado removemos margens extras)
+                          double extraBottomPadding = isFullscreen ? 16.0 : 0.0;
+                          double totalSpacingHeight =
+                              (rowCount - 1) * 12.0 + extraBottomPadding;
 
                           double itemWidth =
                               (constraints.maxWidth - totalSpacingWidth) /
@@ -261,10 +283,20 @@ class _HudScreenState extends ConsumerState<HudScreen> {
                           double itemHeight =
                               (constraints.maxHeight - totalSpacingHeight) /
                               rowCount;
+
+                          // Proteção contra divisões por zero durante redimensionamento
+                          if (itemWidth <= 0 || itemHeight <= 0) {
+                            return const SizedBox();
+                          }
+
                           double childAspectRatio = itemWidth / itemHeight;
 
                           return GridView.builder(
+                            // PAINEL DE VOLTA AO MODO ESTÁTICO (Sem rolagem)
                             physics: const NeverScrollableScrollPhysics(),
+                            padding: EdgeInsets.only(
+                              bottom: extraBottomPadding,
+                            ),
                             gridDelegate:
                                 SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: crossAxisCount,
@@ -272,9 +304,9 @@ class _HudScreenState extends ConsumerState<HudScreen> {
                                   mainAxisSpacing: 12,
                                   childAspectRatio: childAspectRatio,
                                 ),
-                            itemCount: _activeGaugesPids.length,
+                            itemCount: totalItems,
                             itemBuilder: (context, index) {
-                              final pidCode = _activeGaugesPids[index];
+                              final pidCode = displayPids[index];
                               final pid = pidRegistry[pidCode]!;
                               return ObdGauge(pid: pid, style: _currentStyle);
                             },
@@ -286,7 +318,8 @@ class _HudScreenState extends ConsumerState<HudScreen> {
                 ],
               ),
             ),
-            // OVERLAY TRANSLÚCIDO DE TUTORIAL (APARECE APENAS NA 1ª VEZ NO MOBILE)
+
+            // OVERLAY TRANSLÚCIDO DE TUTORIAL
             if (_showTutorial)
               Positioned.fill(
                 child: GestureDetector(
@@ -304,7 +337,7 @@ class _HudScreenState extends ConsumerState<HudScreen> {
                           ),
                           const SizedBox(height: 24),
                           Text(
-                            l10n.hudImmersive, // Título do Tutorial
+                            l10n.hudImmersive,
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 24,
@@ -313,7 +346,7 @@ class _HudScreenState extends ConsumerState<HudScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            l10n.hudImmersiveDesc, // Descrição do Tutorial
+                            l10n.hudImmersiveDesc,
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Colors.white.withValues(alpha: 0.8),
@@ -333,7 +366,7 @@ class _HudScreenState extends ConsumerState<HudScreen> {
                                 vertical: 12,
                               ),
                             ),
-                            child: Text(l10n.hudGotIt), // Botão Entendi
+                            child: Text(l10n.hudGotIt),
                           ),
                         ],
                       ),

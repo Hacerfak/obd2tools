@@ -223,40 +223,59 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   Container(
                     width: 85,
                     color: Theme.of(context).appBarTheme.backgroundColor,
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: NavigationRail(
-                            selectedIndex: _selectedIndex,
-                            onDestinationSelected: _onTabTapped,
-                            labelType: NavigationRailLabelType.all,
-                            backgroundColor: Colors.transparent,
-                            destinations: [
-                              NavigationRailDestination(
-                                icon: const Icon(Icons.grid_view),
-                                label: Text(l10n.tabSensors),
+                    child: LayoutBuilder(
+                      builder: (context, railConstraints) {
+                        return SingleChildScrollView(
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minHeight: railConstraints.maxHeight,
+                            ),
+                            child: IntrinsicHeight(
+                              child: Column(
+                                children: [
+                                  Expanded(
+                                    child: NavigationRail(
+                                      selectedIndex: _selectedIndex,
+                                      onDestinationSelected: _onTabTapped,
+                                      labelType: NavigationRailLabelType.all,
+                                      backgroundColor: Colors.transparent,
+                                      destinations: [
+                                        NavigationRailDestination(
+                                          icon: const Icon(Icons.grid_view),
+                                          label: Text(l10n.tabSensors),
+                                        ),
+                                        NavigationRailDestination(
+                                          icon: const Icon(Icons.speed),
+                                          label: Text(l10n.tabHud),
+                                        ),
+                                        NavigationRailDestination(
+                                          icon: const Icon(
+                                            Icons.fact_check_outlined,
+                                          ),
+                                          label: Text(l10n.tabTests),
+                                        ),
+                                        NavigationRailDestination(
+                                          icon: const Icon(Icons.warning_amber),
+                                          label: Text(l10n.tabFaults),
+                                        ),
+                                        NavigationRailDestination(
+                                          icon: const Icon(Icons.menu),
+                                          label: Text(l10n.tabMore),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  _buildStatusAndDisconnect(
+                                    connState,
+                                    true,
+                                    context,
+                                  ),
+                                ],
                               ),
-                              NavigationRailDestination(
-                                icon: const Icon(Icons.speed),
-                                label: Text(l10n.tabHud),
-                              ),
-                              NavigationRailDestination(
-                                icon: const Icon(Icons.fact_check_outlined),
-                                label: Text(l10n.tabTests),
-                              ),
-                              NavigationRailDestination(
-                                icon: const Icon(Icons.warning_amber),
-                                label: Text(l10n.tabFaults),
-                              ),
-                              NavigationRailDestination(
-                                icon: const Icon(Icons.menu),
-                                label: Text(l10n.tabMore),
-                              ),
-                            ],
+                            ),
                           ),
-                        ),
-                        _buildStatusAndDisconnect(connState, true, context),
-                      ],
+                        );
+                      },
                     ),
                   ),
                 Expanded(
