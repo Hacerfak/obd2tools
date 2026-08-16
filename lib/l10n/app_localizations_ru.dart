@@ -401,4 +401,28 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get dbgScanCancelled => 'Сканирование отменено пользователем.';
+
+  @override
+  String get techLibTitle => 'Техническая библиотека';
+
+  @override
+  String get techHowItWorks => 'Как работает этот датчик?';
+
+  @override
+  String get techWhatIsIt => 'Что это?';
+
+  @override
+  String get techFunction => 'Функция';
+
+  @override
+  String get techImpact => 'Влияние на систему';
+
+  @override
+  String get dtcSymptoms => 'Общие симптомы';
+
+  @override
+  String get dtcCauses => 'Возможные причины';
+
+  @override
+  String get dtcResolution => 'Как проверить и исправить';
 }

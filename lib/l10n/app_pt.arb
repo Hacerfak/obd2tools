@@ -122,5 +122,13 @@
     "dbgScanComplete": "Varredura Concluída!",
     "dbgFormulaResult": "Resultado (Fórmula): {result}",
     "dbgFormulaError": "Erro: Falha ao interpretar a fórmula. Verifique a sintaxe.",
-    "dbgScanCancelled": "Varredura cancelada pelo usuário."
+    "dbgScanCancelled": "Varredura cancelada pelo usuário.",
+    "techLibTitle": "Biblioteca Técnica",
+    "techHowItWorks": "Como este sensor funciona?",
+    "techWhatIsIt": "O que é?",
+    "techFunction": "Função",
+    "techImpact": "Impacto no Sistema",
+    "dtcSymptoms": "Sintomas Comuns",
+    "dtcCauses": "Possíveis Causas",
+    "dtcResolution": "Como Testar e Resolver"
 }

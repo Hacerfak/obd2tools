@@ -160,5 +160,13 @@
         }
     },
     "dbgFormulaError": "Error: Failed to interpret formula. Check syntax.",
-    "dbgScanCancelled": "Scan cancelled by user."
+    "dbgScanCancelled": "Scan cancelled by user.",
+    "techLibTitle": "Technical Library",
+    "techHowItWorks": "How does this sensor work?",
+    "techWhatIsIt": "What is it?",
+    "techFunction": "Function",
+    "techImpact": "System Impact",
+    "dtcSymptoms": "Common Symptoms",
+    "dtcCauses": "Possible Causes",
+    "dtcResolution": "How to Test and Fix"
 }

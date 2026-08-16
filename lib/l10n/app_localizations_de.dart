@@ -401,4 +401,28 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get dbgScanCancelled => 'Scan vom Benutzer abgebrochen.';
+
+  @override
+  String get techLibTitle => 'Technische Bibliothek';
+
+  @override
+  String get techHowItWorks => 'Wie funktioniert dieser Sensor?';
+
+  @override
+  String get techWhatIsIt => 'Was ist das?';
+
+  @override
+  String get techFunction => 'Funktion';
+
+  @override
+  String get techImpact => 'Systemauswirkung';
+
+  @override
+  String get dtcSymptoms => 'Häufige Symptome';
+
+  @override
+  String get dtcCauses => 'Mögliche Ursachen';
+
+  @override
+  String get dtcResolution => 'Prüfung und Behebung';
 }

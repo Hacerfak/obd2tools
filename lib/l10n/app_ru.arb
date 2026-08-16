@@ -122,5 +122,13 @@
     "dbgScanComplete": "Сканирование завершено!",
     "dbgFormulaResult": "Результат (Формула): {result}",
     "dbgFormulaError": "Ошибка: Не удалось интерпретировать формулу. Проверьте синтаксис.",
-    "dbgScanCancelled": "Сканирование отменено пользователем."
+    "dbgScanCancelled": "Сканирование отменено пользователем.",
+    "techLibTitle": "Техническая библиотека",
+    "techHowItWorks": "Как работает этот датчик?",
+    "techWhatIsIt": "Что это?",
+    "techFunction": "Функция",
+    "techImpact": "Влияние на систему",
+    "dtcSymptoms": "Общие симптомы",
+    "dtcCauses": "Возможные причины",
+    "dtcResolution": "Как проверить и исправить"
 }

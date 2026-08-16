@@ -122,5 +122,13 @@
     "dbgScanComplete": "Recherche terminée !",
     "dbgFormulaResult": "Résultat (Formule) : {result}",
     "dbgFormulaError": "Erreur : Échec de l'interprétation de la formule. Vérifiez la syntaxe.",
-    "dbgScanCancelled": "Recherche annulée par l'utilisateur."
+    "dbgScanCancelled": "Recherche annulée par l'utilisateur.",
+    "techLibTitle": "Bibliothèque Technique",
+    "techHowItWorks": "Comment fonctionne ce capteur ?",
+    "techWhatIsIt": "Qu'est-ce que c'est ?",
+    "techFunction": "Fonction",
+    "techImpact": "Impact sur le Système",
+    "dtcSymptoms": "Symptômes Courants",
+    "dtcCauses": "Causes Possibles",
+    "dtcResolution": "Comment Tester et Résoudre"
 }

@@ -386,4 +386,28 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get dbgScanCancelled => '扫描已由用户取消。';
+
+  @override
+  String get techLibTitle => '技术资料库';
+
+  @override
+  String get techHowItWorks => '这个传感器是如何工作的？';
+
+  @override
+  String get techWhatIsIt => '这是什么？';
+
+  @override
+  String get techFunction => '功能';
+
+  @override
+  String get techImpact => '系统影响';
+
+  @override
+  String get dtcSymptoms => '常见症状';
+
+  @override
+  String get dtcCauses => '可能原因';
+
+  @override
+  String get dtcResolution => '如何测试和解决';
 }

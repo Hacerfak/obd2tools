@@ -1,0 +1,8 @@
+{
+    "05": {
+        "name": "Engine Coolant Temperature (ECT)",
+        "whatIsIt": "It is a thermistor (a resistor that changes its electrical resistance based on temperature) located in the engine block, cylinder head, or thermostat housing.",
+        "function": "It measures the temperature of the coolant fluid refrigerating the engine and sends this data as a voltage signal to the ECU.",
+        "impact": "The ECU uses this information as a primary parameter to calculate the required fuel injection (enriching the mixture when the engine is cold), adjust ignition timing, and engage the radiator cooling fans."
+    }
+}

@@ -10,6 +10,7 @@ import 'vehicle_info_screen.dart';
 import 'test_results_screen.dart';
 import 'settings_screen.dart';
 import 'debug_console_screen.dart';
+import '../state/technical_data_service.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -35,6 +36,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         navigatorKey: _moreTabKey,
       ), // 4: Passando a chave com segurança
     ];
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final languageCode = Localizations.localeOf(context).languageCode;
+      await ref.read(technicalDataProvider).loadData(languageCode);
+    });
   }
 
   void _onTabTapped(int index) {

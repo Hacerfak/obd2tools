@@ -401,4 +401,28 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get dbgScanCancelled => 'उपयोगकर्ता द्वारा स्कैन रद्द किया गया।';
+
+  @override
+  String get techLibTitle => 'तकनीकी लाइब्रेरी';
+
+  @override
+  String get techHowItWorks => 'यह सेंसर कैसे काम करता है?';
+
+  @override
+  String get techWhatIsIt => 'यह क्या है?';
+
+  @override
+  String get techFunction => 'कार्य';
+
+  @override
+  String get techImpact => 'सिस्टम पर प्रभाव';
+
+  @override
+  String get dtcSymptoms => 'सामान्य लक्षण';
+
+  @override
+  String get dtcCauses => 'संभावित कारण';
+
+  @override
+  String get dtcResolution => 'परीक्षण और समाधान कैसे करें';
 }

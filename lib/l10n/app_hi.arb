@@ -122,5 +122,13 @@
     "dbgScanComplete": "स्कैन पूर्ण!",
     "dbgFormulaResult": "परिणाम (फ़ॉर्मूला): {result}",
     "dbgFormulaError": "त्रुटि: फ़ॉर्मूला की व्याख्या करने में विफल। सिंटैक्स जांचें।",
-    "dbgScanCancelled": "उपयोगकर्ता द्वारा स्कैन रद्द किया गया।"
+    "dbgScanCancelled": "उपयोगकर्ता द्वारा स्कैन रद्द किया गया।",
+    "techLibTitle": "तकनीकी लाइब्रेरी",
+    "techHowItWorks": "यह सेंसर कैसे काम करता है?",
+    "techWhatIsIt": "यह क्या है?",
+    "techFunction": "कार्य",
+    "techImpact": "सिस्टम पर प्रभाव",
+    "dtcSymptoms": "सामान्य लक्षण",
+    "dtcCauses": "संभावित कारण",
+    "dtcResolution": "परीक्षण और समाधान कैसे करें"
 }

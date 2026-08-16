@@ -849,6 +849,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Scan cancelled by user.'**
   String get dbgScanCancelled;
+
+  /// No description provided for @techLibTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Technical Library'**
+  String get techLibTitle;
+
+  /// No description provided for @techHowItWorks.
+  ///
+  /// In en, this message translates to:
+  /// **'How does this sensor work?'**
+  String get techHowItWorks;
+
+  /// No description provided for @techWhatIsIt.
+  ///
+  /// In en, this message translates to:
+  /// **'What is it?'**
+  String get techWhatIsIt;
+
+  /// No description provided for @techFunction.
+  ///
+  /// In en, this message translates to:
+  /// **'Function'**
+  String get techFunction;
+
+  /// No description provided for @techImpact.
+  ///
+  /// In en, this message translates to:
+  /// **'System Impact'**
+  String get techImpact;
+
+  /// No description provided for @dtcSymptoms.
+  ///
+  /// In en, this message translates to:
+  /// **'Common Symptoms'**
+  String get dtcSymptoms;
+
+  /// No description provided for @dtcCauses.
+  ///
+  /// In en, this message translates to:
+  /// **'Possible Causes'**
+  String get dtcCauses;
+
+  /// No description provided for @dtcResolution.
+  ///
+  /// In en, this message translates to:
+  /// **'How to Test and Fix'**
+  String get dtcResolution;
 }
 
 class _AppLocalizationsDelegate

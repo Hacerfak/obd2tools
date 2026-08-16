@@ -401,4 +401,28 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get dbgScanCancelled => 'Recherche annulée par l\'utilisateur.';
+
+  @override
+  String get techLibTitle => 'Bibliothèque Technique';
+
+  @override
+  String get techHowItWorks => 'Comment fonctionne ce capteur ?';
+
+  @override
+  String get techWhatIsIt => 'Qu\'est-ce que c\'est ?';
+
+  @override
+  String get techFunction => 'Fonction';
+
+  @override
+  String get techImpact => 'Impact sur le Système';
+
+  @override
+  String get dtcSymptoms => 'Symptômes Courants';
+
+  @override
+  String get dtcCauses => 'Causes Possibles';
+
+  @override
+  String get dtcResolution => 'Comment Tester et Résoudre';
 }

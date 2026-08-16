@@ -122,5 +122,13 @@
     "dbgScanComplete": "Scan abgeschlossen!",
     "dbgFormulaResult": "Ergebnis (Formel): {result}",
     "dbgFormulaError": "Fehler: Formel konnte nicht interpretiert werden. Überprüfen Sie die Syntax.",
-    "dbgScanCancelled": "Scan vom Benutzer abgebrochen."
+    "dbgScanCancelled": "Scan vom Benutzer abgebrochen.",
+    "techLibTitle": "Technische Bibliothek",
+    "techHowItWorks": "Wie funktioniert dieser Sensor?",
+    "techWhatIsIt": "Was ist das?",
+    "techFunction": "Funktion",
+    "techImpact": "Systemauswirkung",
+    "dtcSymptoms": "Häufige Symptome",
+    "dtcCauses": "Mögliche Ursachen",
+    "dtcResolution": "Prüfung und Behebung"
 }

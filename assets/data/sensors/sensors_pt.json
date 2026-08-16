@@ -1,0 +1,8 @@
+{
+    "05": {
+        "name": "Temperatura do Líquido de Arrefecimento (ECT)",
+        "whatIsIt": "É um termistor (um resistor que altera sua resistência elétrica de acordo com a temperatura) localizado no bloco do motor, cabeçote ou na carcaça da válvula termostática.",
+        "function": "Mede a temperatura da água ou aditivo que refrigera o motor e envia esse dado em formato de voltagem constante para a ECU.",
+        "impact": "A ECU utiliza essa informação como parâmetro principal para calcular a quantidade de combustível injetada (enriquecendo a mistura com o motor frio), ajustar o avanço da ignição e acionar os eletroventiladores do radiador."
+    }
+}

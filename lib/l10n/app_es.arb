@@ -122,5 +122,13 @@
     "dbgScanComplete": "¡Búsqueda completada!",
     "dbgFormulaResult": "Resultado (Fórmula): {result}",
     "dbgFormulaError": "Error: Fallo al interpretar la fórmula. Verifique la sintaxis.",
-    "dbgScanCancelled": "Búsqueda cancelada por el usuario."
+    "dbgScanCancelled": "Búsqueda cancelada por el usuario.",
+    "techLibTitle": "Biblioteca Técnica",
+    "techHowItWorks": "¿Cómo funciona este sensor?",
+    "techWhatIsIt": "¿Qué es?",
+    "techFunction": "Función",
+    "techImpact": "Impacto en el Sistema",
+    "dtcSymptoms": "Síntomas Comunes",
+    "dtcCauses": "Posibles Causas",
+    "dtcResolution": "Cómo Probar y Resolver"
 }

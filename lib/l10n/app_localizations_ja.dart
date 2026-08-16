@@ -388,4 +388,28 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get dbgScanCancelled => 'スキャンがユーザーによってキャンセルされました。';
+
+  @override
+  String get techLibTitle => '技術ライブラリ';
+
+  @override
+  String get techHowItWorks => 'このセンサーはどのように機能しますか？';
+
+  @override
+  String get techWhatIsIt => 'これは何ですか？';
+
+  @override
+  String get techFunction => '機能';
+
+  @override
+  String get techImpact => 'システムへの影響';
+
+  @override
+  String get dtcSymptoms => '一般的な症状';
+
+  @override
+  String get dtcCauses => '考えられる原因';
+
+  @override
+  String get dtcResolution => 'テストと解決方法';
 }

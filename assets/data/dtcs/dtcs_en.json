@@ -1,0 +1,25 @@
+{
+    "P0118": {
+        "title": "Engine Coolant Temperature (ECT) Sensor - Circuit High",
+        "description": "The Engine Control Unit (ECU) has detected that the ECT sensor signal is indicating a voltage above 4.91 V (which corresponds to a temperature below -40°C / -40°F).",
+        "symptoms": [
+            "The Check Engine Light (MIL) will illuminate.",
+            "Hard starting, especially when the engine is cold.",
+            "Poor fuel economy and rich exhaust smell.",
+            "Radiator cooling fans may run continuously as a fail-safe measure."
+        ],
+        "causes": [
+            "Open or shorted wire in the ECT sensor circuit.",
+            "Poor electrical connection or severe corrosion at the ECT connector.",
+            "Faulty ECT sensor (internal open circuit).",
+            "Extremely low engine coolant level (air pocket at the sensor)."
+        ],
+        "howToTestAndFix": [
+            "Visually inspect the sensor's wiring harness and connector for damage or loose pins.",
+            "Use a multimeter to check the sensor's resistance: it should be high when cold and drop as the engine warms up.",
+            "Check the harness connector to ensure it is receiving a 5V reference signal from the ECU.",
+            "Replace the ECT sensor if its internal resistance is out of factory specifications.",
+            "Clear the trouble codes with the scanner and perform a test drive to verify the repair."
+        ]
+    }
+}

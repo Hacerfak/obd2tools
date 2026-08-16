@@ -122,5 +122,13 @@
     "dbgScanComplete": "扫描完成！",
     "dbgFormulaResult": "结果（公式）：{result}",
     "dbgFormulaError": "错误：无法解释公式。请检查语法。",
-    "dbgScanCancelled": "扫描已由用户取消。"
+    "dbgScanCancelled": "扫描已由用户取消。",
+    "techLibTitle": "技术资料库",
+    "techHowItWorks": "这个传感器是如何工作的？",
+    "techWhatIsIt": "这是什么？",
+    "techFunction": "功能",
+    "techImpact": "系统影响",
+    "dtcSymptoms": "常见症状",
+    "dtcCauses": "可能原因",
+    "dtcResolution": "如何测试和解决"
 }

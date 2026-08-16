@@ -1,0 +1,25 @@
+{
+    "P0118": {
+        "title": "Sensor de Temperatura do Líquido de Arrefecimento (ECT) - Circuito Alto",
+        "description": "O módulo de controle do motor (ECU) detectou que o sinal do sensor ECT está indicando uma voltagem acima de 4,91 V (o que corresponde a uma temperatura inferior a -40°C).",
+        "symptoms": [
+            "A luz de anomalia do motor (Check Engine) acenderá.",
+            "Dificuldade na partida, especialmente a frio.",
+            "Consumo excessivo de combustível.",
+            "O ventilador do radiador pode funcionar continuamente como medida de segurança da ECU."
+        ],
+        "causes": [
+            "Fio rompido, desconectado ou em curto no circuito do sensor ECT.",
+            "Conector do sensor ECT com mau contato ou oxidação severa.",
+            "O próprio sensor ECT está defeituoso (circuito interno aberto).",
+            "Nível de líquido de arrefecimento extremamente baixo (ar no sistema)."
+        ],
+        "howToTestAndFix": [
+            "Verifique visualmente o chicote e o conector em busca de fios soltos ou danos.",
+            "Use um multímetro para testar a resistência do sensor: com o motor frio a resistência deve ser alta; ao esquentar, deve cair.",
+            "Verifique se o conector do chicote está recebendo a voltagem de referência de 5V da ECU.",
+            "Substitua o sensor ECT caso os valores estejam fora da especificação técnica do fabricante.",
+            "Apague os códigos com o scanner e realize um ciclo de condução para validar."
+        ]
+    }
+}

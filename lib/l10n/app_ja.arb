@@ -122,5 +122,13 @@
     "dbgScanComplete": "スキャン完了！",
     "dbgFormulaResult": "結果 (数式): {result}",
     "dbgFormulaError": "エラー: 数式の解釈に失敗しました。構文を確認してください。",
-    "dbgScanCancelled": "スキャンがユーザーによってキャンセルされました。"
+    "dbgScanCancelled": "スキャンがユーザーによってキャンセルされました。",
+    "techLibTitle": "技術ライブラリ",
+    "techHowItWorks": "このセンサーはどのように機能しますか？",
+    "techWhatIsIt": "これは何ですか？",
+    "techFunction": "機能",
+    "techImpact": "システムへの影響",
+    "dtcSymptoms": "一般的な症状",
+    "dtcCauses": "考えられる原因",
+    "dtcResolution": "テストと解決方法"
 }
