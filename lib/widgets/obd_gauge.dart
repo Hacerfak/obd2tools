@@ -110,10 +110,9 @@ class ObdGauge extends ConsumerWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
-        // REMOVIDA A BORDA DAQUI!
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08), // Sombra suavizada
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -138,7 +137,6 @@ class ObdGauge extends ConsumerWidget {
                     )
                   : LayoutBuilder(
                       builder: (context, constraints) {
-                        // Calcula o quadrado perfeito exato disponível para o gauge
                         double size = min(
                           constraints.maxWidth,
                           constraints.maxHeight,
@@ -151,6 +149,7 @@ class ObdGauge extends ConsumerWidget {
                             child: Stack(
                               alignment: Alignment.center,
                               children: [
+                                // O PINTOR DO MEDIDOR
                                 CustomPaint(
                                   size: Size(size, size),
                                   painter: style == GaugeStyle.digital
@@ -166,13 +165,11 @@ class ObdGauge extends ConsumerWidget {
                                           zones: zones,
                                         ),
                                 ),
-                                // TEXTO ALINHADO DE FORMA RELATIVA AO TAMANHO
-                                Positioned(
-                                  bottom: size * 0.12, // 12% da base do círculo
-                                  child: SizedBox(
-                                    width:
-                                        size *
-                                        0.7, // Evita vazar pelas laterais
+
+                                // TEXTO DIGITAL (Exatamente no meio do anel)
+                                if (style == GaugeStyle.digital)
+                                  SizedBox(
+                                    width: size * 0.55,
                                     child: FittedBox(
                                       fit: BoxFit.scaleDown,
                                       child: Column(
@@ -183,9 +180,7 @@ class ObdGauge extends ConsumerWidget {
                                               pid.unit == "RPM" ? 0 : 1,
                                             ),
                                             style: TextStyle(
-                                              fontSize:
-                                                  size *
-                                                  0.25, // Tamanho dinâmico
+                                              fontSize: size * 0.28,
                                               fontWeight: FontWeight.w900,
                                               color: activeColor,
                                               fontFamily: 'Monospace',
@@ -197,9 +192,7 @@ class ObdGauge extends ConsumerWidget {
                                               color: activeColor.withValues(
                                                 alpha: 0.7,
                                               ),
-                                              fontSize:
-                                                  size *
-                                                  0.1, // Tamanho dinâmico
+                                              fontSize: size * 0.1,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
@@ -207,7 +200,46 @@ class ObdGauge extends ConsumerWidget {
                                       ),
                                     ),
                                   ),
-                                ),
+
+                                // TEXTO ANALÓGICO (Deslocado para a abertura inferior do arco)
+                                if (style == GaugeStyle.analog)
+                                  Positioned(
+                                    bottom:
+                                        size *
+                                        0.01, // Encaixado no "gap" sem sobrepor a base
+                                    child: SizedBox(
+                                      width: size * 0.5,
+                                      child: FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              currentValue.toStringAsFixed(
+                                                pid.unit == "RPM" ? 0 : 1,
+                                              ),
+                                              style: TextStyle(
+                                                fontSize: size * 0.20,
+                                                fontWeight: FontWeight.w900,
+                                                color: activeColor,
+                                                fontFamily: 'Monospace',
+                                              ),
+                                            ),
+                                            Text(
+                                              pid.unit,
+                                              style: TextStyle(
+                                                color: activeColor.withValues(
+                                                  alpha: 0.7,
+                                                ),
+                                                fontSize: size * 0.08,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                               ],
                             ),
                           ),
@@ -342,7 +374,6 @@ Shader _createSmartSweepShader(
   ).createShader(rect);
 }
 
-// OS PINTORES AGORA USAM O CENTRO EXATO (sem margens fixas)
 class DigitalGaugePainter extends CustomPainter {
   final double percent;
   final Color baseColor;

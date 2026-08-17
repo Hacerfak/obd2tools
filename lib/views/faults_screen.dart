@@ -29,8 +29,7 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
   }
 
   void _showClearDialog(BuildContext context, WidgetRef ref, Color onSurface) {
-    final l10n = AppLocalizations.of(context)!; // Instância de traduções
-
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -69,6 +68,7 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
     bool isScreenLoading,
     bool hasFaults,
     AppLocalizations l10n,
+    bool isLandscape,
   ) {
     return Row(
       children: [
@@ -82,14 +82,13 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
             ),
           ),
         ),
-        // SÓ MOSTRA AÇÕES SE A VARREDURA TIVER CONCLUÍDO
         if (!isScreenLoading) ...[
-          // BOTÃO DE APAGAR (SÓ APARECE SE HOUVER ALGUMA FALHA GRAVADA!)
           if (hasFaults) ...[
             IconButton.filled(
               onPressed: () => _showClearDialog(context, ref, onSurface),
               icon: const Icon(Icons.delete_forever),
               tooltip: l10n.faultClearMil,
+              visualDensity: isLandscape ? VisualDensity.compact : null,
               style: IconButton.styleFrom(
                 backgroundColor: Colors.redAccent.withValues(alpha: 0.2),
                 foregroundColor: Colors.redAccent,
@@ -97,12 +96,12 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
             ),
             const SizedBox(width: 12),
           ],
-          // BOTÃO DE ATUALIZAR (SEMPRE DISPONÍVEL APÓS O LOADING)
           IconButton.filledTonal(
             onPressed: () => ref.read(obdManagerProvider).scanAllFaults(),
             icon: const Icon(Icons.refresh),
             color: primaryColor,
             tooltip: l10n.btnRefresh,
+            visualDensity: isLandscape ? VisualDensity.compact : null,
           ),
         ],
       ],
@@ -116,7 +115,11 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
     final bool hasFaults = dtcState.faults.isNotEmpty;
     final onSurface = Theme.of(context).colorScheme.onSurface;
     final primaryColor = Theme.of(context).colorScheme.primary;
-    final l10n = AppLocalizations.of(context)!; // Instância de traduções
+    final l10n = AppLocalizations.of(context)!;
+
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+    final double vPadding = isLandscape ? 8.0 : 16.0;
 
     List<DtcFault> filteredFaults = dtcState.faults.values.where((fault) {
       if (_selectedFilter == null) return true;
@@ -124,102 +127,110 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
     }).toList();
 
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(
-              primaryColor,
-              onSurface,
-              isScreenLoading,
-              hasFaults,
-              l10n,
-            ),
-            const SizedBox(height: 16),
-            if (!isScreenLoading) ...[
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    _buildFilterChip(l10n.faultAll, null, onSurface),
-                    const SizedBox(width: 8),
-                    _buildFilterChip(
-                      l10n.faultConfirmed,
-                      DtcStatus.confirmed,
-                      onSurface,
-                    ),
-                    const SizedBox(width: 8),
-                    _buildFilterChip(
-                      l10n.faultPending,
-                      DtcStatus.pending,
-                      onSurface,
-                    ),
-                    const SizedBox(width: 8),
-                    _buildFilterChip(
-                      l10n.faultPermanent,
-                      DtcStatus.permanent,
-                      onSurface,
-                    ),
-                  ],
+      body: Center(
+        // O SEGREDO ESTÁ AQUI: Trava a largura máxima em 800px!
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(16.0, vPadding, 16.0, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(
+                  primaryColor,
+                  onSurface,
+                  isScreenLoading,
+                  hasFaults,
+                  l10n,
+                  isLandscape,
                 ),
-              ),
-              const SizedBox(height: 24),
-            ],
-            Expanded(
-              child: isScreenLoading
-                  ? Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          CircularProgressIndicator(color: primaryColor),
-                          const SizedBox(height: 16),
-                          Text(
-                            l10n.faultReading,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: onSurface.withValues(alpha: 0.7),
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : filteredFaults.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.check_circle_outline,
-                            size: 80,
-                            color: Colors.greenAccent.withValues(alpha: 0.5),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            l10n.faultNone,
-                            style: const TextStyle(
-                              color: Colors.greenAccent,
-                              fontSize: 18,
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : ListView.builder(
-                      itemCount: filteredFaults.length,
-                      itemBuilder: (context, index) {
-                        return _buildFaultCard(
-                          filteredFaults[index],
+                SizedBox(height: vPadding),
+                if (!isScreenLoading) ...[
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        _buildFilterChip(l10n.faultAll, null, onSurface),
+                        const SizedBox(width: 8),
+                        _buildFilterChip(
+                          l10n.faultConfirmed,
+                          DtcStatus.confirmed,
                           onSurface,
-                          l10n,
-                        );
-                      },
+                        ),
+                        const SizedBox(width: 8),
+                        _buildFilterChip(
+                          l10n.faultPending,
+                          DtcStatus.pending,
+                          onSurface,
+                        ),
+                        const SizedBox(width: 8),
+                        _buildFilterChip(
+                          l10n.faultPermanent,
+                          DtcStatus.permanent,
+                          onSurface,
+                        ),
+                      ],
                     ),
+                  ),
+                  SizedBox(height: isLandscape ? 12 : 24),
+                ],
+                Expanded(
+                  child: isScreenLoading
+                      ? Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              CircularProgressIndicator(color: primaryColor),
+                              const SizedBox(height: 16),
+                              Text(
+                                l10n.faultReading,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: onSurface.withValues(alpha: 0.7),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : filteredFaults.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.check_circle_outline,
+                                size: 80,
+                                color: Colors.greenAccent.withValues(
+                                  alpha: 0.5,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                l10n.faultNone,
+                                style: const TextStyle(
+                                  color: Colors.greenAccent,
+                                  fontSize: 18,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: filteredFaults.length,
+                          itemBuilder: (context, index) {
+                            return _buildFaultCard(
+                              filteredFaults[index],
+                              onSurface,
+                              l10n,
+                            );
+                          },
+                        ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
-      // --- BANNER DO ADMOB NO RODAPÉ ---
       bottomNavigationBar: const AdMobBanner(),
     );
   }
@@ -227,7 +238,6 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
   Widget _buildFilterChip(String label, DtcStatus? status, Color onSurface) {
     bool isSelected = _selectedFilter == status;
     final primaryColor = Theme.of(context).colorScheme.primary;
-
     return ChoiceChip(
       label: Text(label),
       selected: isSelected,
@@ -306,7 +316,6 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
   Widget _buildStatusBadge(DtcStatus status, AppLocalizations l10n) {
     Color color;
     String text;
-
     switch (status) {
       case DtcStatus.confirmed:
         color = Colors.redAccent;
@@ -321,7 +330,6 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
         text = l10n.faultPermanent;
         break;
     }
-
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
