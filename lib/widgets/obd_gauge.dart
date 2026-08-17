@@ -50,8 +50,10 @@ class ObdGauge extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final liveData = ref.watch(realTimeStateProvider);
-    final sensorData = liveData[pid.name];
+    final sensorData = ref.watch(
+      realTimeStateProvider.select((data) => data[pid.name]),
+    );
+
     final onSurface = Theme.of(context).colorScheme.onSurface;
     final appColors = ref.watch(appColorsProvider).current(context);
 

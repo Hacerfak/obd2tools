@@ -193,7 +193,10 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
   Widget build(BuildContext context) {
     final connState = ref.watch(connectionStateProvider);
     final onSurface = Theme.of(context).colorScheme.onSurface;
-    final l10n = AppLocalizations.of(context)!; // Instância de traduções
+    final l10n = AppLocalizations.of(context)!;
+    final appColors = ref
+        .watch(appColorsProvider)
+        .current(context); // BUSCA AS CORES
 
     ref.listen(connectionStateProvider, (previous, next) {
       if (next == AppConnectionState.ready) {
@@ -218,7 +221,7 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
               Icon(
                 Icons.bluetooth_searching,
                 size: 56,
-                color: Theme.of(context).colorScheme.primary,
+                color: appColors.primary,
               ),
               const SizedBox(height: 16),
               Text(
@@ -231,7 +234,6 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-
               if (connState == AppConnectionState.disconnected) ...[
                 Expanded(
                   child: SingleChildScrollView(
@@ -244,7 +246,7 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                             Text(
                               l10n.connPaired,
                               style: TextStyle(
-                                color: Theme.of(context).colorScheme.primary,
+                                color: appColors.primary,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -260,7 +262,6 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                         ),
                         const SizedBox(height: 8),
                         _buildDeviceList(_pairedDevices, Icons.save),
-
                         if (Platform.isAndroid || Platform.isIOS) ...[
                           Divider(
                             color: onSurface.withValues(alpha: 0.1),
@@ -272,7 +273,7 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                               Text(
                                 l10n.connNearby,
                                 style: TextStyle(
-                                  color: Theme.of(context).colorScheme.primary,
+                                  color: appColors.primary,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -305,10 +306,8 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                     ),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor: Theme.of(
-                        context,
-                      ).colorScheme.primary.withValues(alpha: 0.2),
-                      foregroundColor: Theme.of(context).colorScheme.primary,
+                      backgroundColor: appColors.primary.withValues(alpha: 0.2),
+                      foregroundColor: appColors.primary,
                     ),
                   ),
                 ],
@@ -319,7 +318,7 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                   child: Icon(
                     Icons.bluetooth_audio_rounded,
                     size: 80,
-                    color: Theme.of(context).colorScheme.primary,
+                    color: appColors.primary,
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -327,7 +326,7 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                   l10n.connEstablishing,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
+                    color: appColors.primary,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -335,22 +334,22 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                 const Spacer(),
               ] else if (connState == AppConnectionState.waitingForEcu) ...[
                 const Spacer(),
-                const Center(
-                  child: Icon(Icons.key, size: 80, color: Colors.amberAccent),
+                Center(
+                  child: Icon(Icons.key, size: 80, color: appColors.warning),
                 ),
                 const SizedBox(height: 24),
                 Text(
                   l10n.connWaitKey,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.amberAccent,
+                  style: TextStyle(
+                    color: appColors.warning,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Center(
-                  child: CircularProgressIndicator(color: Colors.amberAccent),
+                Center(
+                  child: CircularProgressIndicator(color: appColors.warning),
                 ),
                 const Spacer(),
                 TextButton(
@@ -359,16 +358,14 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                       .updateState(AppConnectionState.disconnected),
                   child: Text(
                     l10n.btnCancel,
-                    style: const TextStyle(color: Colors.redAccent),
+                    style: TextStyle(color: appColors.critical),
                   ),
                 ),
               ] else if (connState ==
                   AppConnectionState.discoveringSensors) ...[
                 const Spacer(),
                 Center(
-                  child: CircularProgressIndicator(
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+                  child: CircularProgressIndicator(color: appColors.primary),
                 ),
                 const SizedBox(height: 24),
                 Text(
@@ -382,19 +379,19 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                 const Spacer(),
               ] else if (connState == AppConnectionState.ready) ...[
                 const Spacer(),
-                const Center(
+                Center(
                   child: Icon(
                     Icons.check_circle_outline,
                     size: 80,
-                    color: Colors.greenAccent,
+                    color: appColors.normal,
                   ),
                 ),
                 const SizedBox(height: 24),
                 Text(
                   l10n.connSuccess,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.greenAccent,
+                  style: TextStyle(
+                    color: appColors.normal,
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                   ),

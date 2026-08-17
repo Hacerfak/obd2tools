@@ -11,11 +11,11 @@ class SensorTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final liveData = ref.watch(realTimeStateProvider);
-    final sensorData = liveData[pid.name];
-    final onSurfaceColor = Theme.of(context).colorScheme.onSurface;
+    final sensorData = ref.watch(
+      realTimeStateProvider.select((data) => data[pid.name]),
+    );
 
-    // CAPTURA AS CORES ESCOLHIDAS
+    final onSurfaceColor = Theme.of(context).colorScheme.onSurface;
     final appColors = ref.watch(appColorsProvider).current(context);
 
     // FUNÇÃO DINÂMICA INTERNA
