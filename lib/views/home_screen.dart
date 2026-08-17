@@ -58,12 +58,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void _disconnectAndExit() async {
     _isManualDisconnect = true; // Avisa que a desconexão foi proposital
     final manager = ref.read(obdManagerProvider);
-    manager.reset();
-    await manager.connection.disconnect();
 
+    manager.reset();
     ref
         .read(connectionStateProvider.notifier)
         .updateState(AppConnectionState.disconnected);
+
+    await manager.connection.disconnect();
   }
 
   Widget _buildThemeToggle(BuildContext context) {

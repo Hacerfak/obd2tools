@@ -353,9 +353,14 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                 ),
                 const Spacer(),
                 TextButton(
-                  onPressed: () => ref
-                      .read(connectionStateProvider.notifier)
-                      .updateState(AppConnectionState.disconnected),
+                  onPressed: () {
+                    ref.read(obdManagerProvider).forceDisconnect();
+                    setState(() {
+                      _isLoadingPaired = false;
+                      _isDiscovering = false;
+                    });
+                    _loadPairedDevices();
+                  },
                   child: Text(
                     l10n.btnCancel,
                     style: TextStyle(color: appColors.critical),

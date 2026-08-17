@@ -119,10 +119,15 @@ class ObdConnection {
   /// Encerra a comunicação de forma segura
   Future<void> disconnect() async {
     try {
+      // 1. Cancela a escuta e limpa a variável
       await _dataSubscription?.cancel();
+      _dataSubscription = null;
+
       if (_activeConnection != null) {
+        // 2. Apenas finaliza a conexão (o finish já faz o cleanup interno)
         await _activeConnection!.finish();
-        _activeConnection!.dispose();
+
+        // A linha _activeConnection!.dispose() foi removida para evitar o g_closure_unref no Linux
         _activeConnection = null;
       }
     } catch (e) {

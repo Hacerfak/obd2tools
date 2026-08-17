@@ -245,13 +245,38 @@ class ObdManager {
       // 1. TRATAMENTO DE ERROS E HIBERNAÇÃO DA ECU
       if (response.contains("NO DATA") ||
           response.contains("ERROR") ||
-          response.contains("UNABLE TO CONNECT")) {
-        if (_isPollingEnabled || response.contains("UNABLE TO CONNECT")) {
+          response.contains("UNABLE TO CONNECT") ||
+          response.contains("BUS INIT")) {
+        final currentState = ref.read(connectionStateProvider);
+
+        // SEGREDO 1: Se o erro ocorrer logo na partida (antes do painel abrir),
+        // é certeza que a ignição está desligada. Pula direto para a espera da chave!
+        if (currentState == AppConnectionState.connectingBluetooth ||
+            currentState == AppConnectionState.discoveringSensors) {
+          _addLog("ECU não respondeu à inicialização. Solicitando ignição...");
+          _commandQueue.clear();
+
+          // MUDA PARA A TELA DA CHAVE AMARELA AUTOMATICAMENTE
+          ref
+              .read(connectionStateProvider.notifier)
+              .updateState(AppConnectionState.waitingForEcu);
+
+          // Fica "cutucando" a ECU a cada 3 segundos até o motorista girar a chave
+          _ecuPingTimer?.cancel();
+          _ecuPingTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
+            queueCommand("0100");
+          });
+          return;
+        }
+
+        // SEGREDO 2: Se o erro ocorrer durante a viagem (painel ativo),
+        // usa a tolerância de 5 erros seguidos para não cair por uma interferência boba.
+        if (_isPollingEnabled) {
           _consecutiveErrors++;
           _addLog("ALERTA: Erro de comunicação. (Falha $_consecutiveErrors/5)");
 
           if (_consecutiveErrors >= 5) {
-            _addLog("ECU não responde. Entrando em modo de espera...");
+            _addLog("ECU parou de responder. Entrando em modo de espera...");
             _consecutiveErrors = 0;
             _isPollingEnabled = false;
             _commandQueue.clear();
@@ -264,10 +289,9 @@ class ObdManager {
             _ecuPingTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
               queueCommand("0100"); // Ping leve
             });
-            return;
           }
         } else {
-          //_addLog("Aviso: Dado não encontrado (Normal em DTC/Freeze Frame).");
+          // Ignora erros normais pontuais em Freeze Frame e Modo 06
         }
         return;
       }

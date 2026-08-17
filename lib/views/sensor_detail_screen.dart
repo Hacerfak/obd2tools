@@ -58,8 +58,9 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
     Color activeColor = appColors.primary;
     if (currentHealth == SensorHealth.normal) activeColor = appColors.normal;
     if (currentHealth == SensorHealth.warning) activeColor = appColors.warning;
-    if (currentHealth == SensorHealth.critical)
+    if (currentHealth == SensorHealth.critical) {
       activeColor = appColors.critical;
+    }
 
     return Scaffold(
       appBar: AppBar(
