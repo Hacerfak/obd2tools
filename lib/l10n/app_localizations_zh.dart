@@ -413,4 +413,26 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get errBleDisconnected => '蓝牙连接丢失！';
+
+  @override
+  String get aboutTitle => '关于应用';
+
+  @override
+  String get aboutVersion => '版本';
+
+  @override
+  String get aboutTheProjectTitle => '关于项目';
+
+  @override
+  String get aboutTheProjectDesc =>
+      'OBD2 Tools 的开发旨在让汽车诊断变得平民化。结合现代界面和实时遥测技术，这款应用程序将您的智能手机变成一个专业的扫描仪，让爱好者和机械师能够清晰、快速、客观地了解车辆的健康状况。';
+
+  @override
+  String get aboutDeveloperTitle => '开发者';
+
+  @override
+  String get aboutDeveloperRole => '学徒';
+
+  @override
+  String get aboutDeveloperDesc => '热爱技术和汽车世界。创造解决方案以简化日常生活。';
 }

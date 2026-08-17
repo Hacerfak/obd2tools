@@ -131,5 +131,12 @@
     "dtcSymptoms": "常见症状",
     "dtcCauses": "可能原因",
     "dtcResolution": "如何测试和解决",
-    "errBleDisconnected": "蓝牙连接丢失！"
+    "errBleDisconnected": "蓝牙连接丢失！",
+    "aboutTitle": "关于应用",
+    "aboutVersion": "版本",
+    "aboutTheProjectTitle": "关于项目",
+    "aboutTheProjectDesc": "OBD2 Tools 的开发旨在让汽车诊断变得平民化。结合现代界面和实时遥测技术，这款应用程序将您的智能手机变成一个专业的扫描仪，让爱好者和机械师能够清晰、快速、客观地了解车辆的健康状况。",
+    "aboutDeveloperTitle": "开发者",
+    "aboutDeveloperRole": "学徒",
+    "aboutDeveloperDesc": "热爱技术和汽车世界。创造解决方案以简化日常生活。"
 }

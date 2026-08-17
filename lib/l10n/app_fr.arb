@@ -131,5 +131,12 @@
     "dtcSymptoms": "Symptômes Courants",
     "dtcCauses": "Causes Possibles",
     "dtcResolution": "Comment Tester et Résoudre",
-    "errBleDisconnected": "Connexion Bluetooth perdue !"
+    "errBleDisconnected": "Connexion Bluetooth perdue !",
+    "aboutTitle": "À propos de l'application",
+    "aboutVersion": "Version",
+    "aboutTheProjectTitle": "Le Projet",
+    "aboutTheProjectDesc": "OBD2 Tools a été développé dans le but de démocratiser le diagnostic automobile. Alliant une interface moderne à la télémétrie en temps réel, cette application transforme votre smartphone en un scanner professionnel, permettant aux passionnés et aux mécaniciens de comprendre l'état de santé du véhicule de manière claire, rapide et objective.",
+    "aboutDeveloperTitle": "Développeur",
+    "aboutDeveloperRole": "Apprenti",
+    "aboutDeveloperDesc": "Passionné par la technologie et le monde de l'automobile. Créer des solutions pour simplifier le quotidien."
 }

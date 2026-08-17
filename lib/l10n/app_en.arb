@@ -169,5 +169,12 @@
     "dtcSymptoms": "Common Symptoms",
     "dtcCauses": "Possible Causes",
     "dtcResolution": "How to Test and Fix",
-    "errBleDisconnected": "Bluetooth connection lost!"
+    "errBleDisconnected": "Bluetooth connection lost!",
+    "aboutTitle": "About the App",
+    "aboutVersion": "Version",
+    "aboutTheProjectTitle": "The Project",
+    "aboutTheProjectDesc": "OBD2 Tools was developed to democratize automotive diagnostics. Combining a modern interface with real-time telemetry, this app turns your smartphone into a professional scanner, allowing enthusiasts and mechanics to understand vehicle health clearly, quickly, and objectively.",
+    "aboutDeveloperTitle": "Developer",
+    "aboutDeveloperRole": "Apprentice",
+    "aboutDeveloperDesc": "Passionate about technology and the automotive world. Creating solutions to simplify everyday life."
 }

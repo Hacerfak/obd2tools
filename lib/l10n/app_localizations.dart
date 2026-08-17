@@ -903,6 +903,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Bluetooth connection lost!'**
   String get errBleDisconnected;
+
+  /// No description provided for @aboutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'About the App'**
+  String get aboutTitle;
+
+  /// No description provided for @aboutVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get aboutVersion;
+
+  /// No description provided for @aboutTheProjectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The Project'**
+  String get aboutTheProjectTitle;
+
+  /// No description provided for @aboutTheProjectDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'OBD2 Tools was developed to democratize automotive diagnostics. Combining a modern interface with real-time telemetry, this app turns your smartphone into a professional scanner, allowing enthusiasts and mechanics to understand vehicle health clearly, quickly, and objectively.'**
+  String get aboutTheProjectDesc;
+
+  /// No description provided for @aboutDeveloperTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Developer'**
+  String get aboutDeveloperTitle;
+
+  /// No description provided for @aboutDeveloperRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Apprentice'**
+  String get aboutDeveloperRole;
+
+  /// No description provided for @aboutDeveloperDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Passionate about technology and the automotive world. Creating solutions to simplify everyday life.'**
+  String get aboutDeveloperDesc;
 }
 
 class _AppLocalizationsDelegate

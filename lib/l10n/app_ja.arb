@@ -131,5 +131,12 @@
     "dtcSymptoms": "一般的な症状",
     "dtcCauses": "考えられる原因",
     "dtcResolution": "テストと解決方法",
-    "errBleDisconnected": "Bluetooth接続が失われました！"
+    "errBleDisconnected": "Bluetooth接続が失われました！",
+    "aboutTitle": "アプリについて",
+    "aboutVersion": "バージョン",
+    "aboutTheProjectTitle": "プロジェクトについて",
+    "aboutTheProjectDesc": "OBD2 Toolsは、自動車診断を民主化することを目的に開発されました。最新のインターフェースとリアルタイムのテレメトリーを組み合わせることで、このアプリはスマートフォンをプロ仕様のスキャナーに変え、車好きや整備士が車両の状態を明確、迅速、かつ客観的に把握できるようにします。",
+    "aboutDeveloperTitle": "開発者",
+    "aboutDeveloperRole": "見習い",
+    "aboutDeveloperDesc": "テクノロジーと自動車の世界に情熱を注いでいます。日常生活をシンプルにするソリューションを構築しています。"
 }

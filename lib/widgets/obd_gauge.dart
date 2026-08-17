@@ -318,10 +318,11 @@ class ObdGauge extends ConsumerWidget {
             ),
           ),
         ),
+        // AQUI FOI ALTERADO: Trocamos a Row por uma Column para empilhar
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          padding: const EdgeInsets.only(bottom: 4.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               _buildMiniStat(
                 "MIN",
@@ -329,6 +330,7 @@ class ObdGauge extends ConsumerWidget {
                 onSurface,
                 Colors.blueAccent,
               ),
+              const SizedBox(height: 2), // Respiro sutil entre o Min e Max
               _buildMiniStat(
                 "MAX",
                 formatVal(currentMax),
@@ -342,41 +344,37 @@ class ObdGauge extends ConsumerWidget {
     );
   }
 
+  // AQUI FOI ALTERADO: Transforma o ícone, label e valor em uma linha única e compacta
   Widget _buildMiniStat(
     String label,
     String value,
     Color onSurface,
     Color iconColor,
   ) {
-    return Column(
+    return Row(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              label == "MIN"
-                  ? Icons.arrow_downward_rounded
-                  : Icons.arrow_upward_rounded,
-              color: iconColor,
-              size: 12,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                color: onSurface.withValues(alpha: 0.5),
-              ),
-            ),
-          ],
+        Icon(
+          label == "MIN"
+              ? Icons.arrow_downward_rounded
+              : Icons.arrow_upward_rounded,
+          color: iconColor,
+          size: 14,
+        ),
+        const SizedBox(width: 4),
+        Text(
+          "$label: ",
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.bold,
+            color: onSurface.withValues(alpha: 0.5),
+          ),
         ),
         Text(
           value,
           style: TextStyle(
-            fontSize: 14,
+            fontSize: 13,
             fontWeight: FontWeight.bold,
             color: onSurface,
             fontFamily: 'Monospace',

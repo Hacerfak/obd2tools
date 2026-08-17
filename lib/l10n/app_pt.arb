@@ -131,5 +131,12 @@
     "dtcSymptoms": "Sintomas Comuns",
     "dtcCauses": "Possíveis Causas",
     "dtcResolution": "Como Testar e Resolver",
-    "errBleDisconnected": "Conexão Bluetooth perdida!"
+    "errBleDisconnected": "Conexão Bluetooth perdida!",
+    "aboutTitle": "Sobre o App",
+    "aboutVersion": "Versão",
+    "aboutTheProjectTitle": "O Projeto",
+    "aboutTheProjectDesc": "O OBD2 Tools foi desenvolvido com o objetivo de democratizar o diagnóstico automotivo. Combinando uma interface moderna com telemetria em tempo real, este aplicativo transforma o seu smartphone em um scanner profissional, permitindo que entusiastas e mecânicos entendam a saúde do veículo de forma clara, rápida e objetiva.",
+    "aboutDeveloperTitle": "Desenvolvedor",
+    "aboutDeveloperRole": "Aprendiz",
+    "aboutDeveloperDesc": "Apaixonado por tecnologia e pelo mundo automotivo. Criando soluções para simplificar o dia a dia."
 }

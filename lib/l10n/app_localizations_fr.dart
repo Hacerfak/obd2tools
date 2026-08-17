@@ -428,4 +428,27 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get errBleDisconnected => 'Connexion Bluetooth perdue !';
+
+  @override
+  String get aboutTitle => 'À propos de l\'application';
+
+  @override
+  String get aboutVersion => 'Version';
+
+  @override
+  String get aboutTheProjectTitle => 'Le Projet';
+
+  @override
+  String get aboutTheProjectDesc =>
+      'OBD2 Tools a été développé dans le but de démocratiser le diagnostic automobile. Alliant une interface moderne à la télémétrie en temps réel, cette application transforme votre smartphone en un scanner professionnel, permettant aux passionnés et aux mécaniciens de comprendre l\'état de santé du véhicule de manière claire, rapide et objective.';
+
+  @override
+  String get aboutDeveloperTitle => 'Développeur';
+
+  @override
+  String get aboutDeveloperRole => 'Apprenti';
+
+  @override
+  String get aboutDeveloperDesc =>
+      'Passionné par la technologie et le monde de l\'automobile. Créer des solutions pour simplifier le quotidien.';
 }

@@ -131,5 +131,12 @@
     "dtcSymptoms": "Häufige Symptome",
     "dtcCauses": "Mögliche Ursachen",
     "dtcResolution": "Prüfung und Behebung",
-    "errBleDisconnected": "Bluetooth-Verbindung unterbrochen!"
+    "errBleDisconnected": "Bluetooth-Verbindung unterbrochen!",
+    "aboutTitle": "Über die App",
+    "aboutVersion": "Version",
+    "aboutTheProjectTitle": "Das Projekt",
+    "aboutTheProjectDesc": "OBD2 Tools wurde mit dem Ziel entwickelt, die Fahrzeugdiagnose zu demokratisieren. Durch die Kombination einer modernen Benutzeroberfläche mit Echtzeit-Telemetrie verwandelt diese App Ihr Smartphone in einen professionellen Scanner, der es Enthusiasten und Mechanikern ermöglicht, den Zustand des Fahrzeugs klar, schnell und objektiv zu verstehen.",
+    "aboutDeveloperTitle": "Entwickler",
+    "aboutDeveloperRole": "Auszubildender",
+    "aboutDeveloperDesc": "Leidenschaft für Technologie und die Automobilwelt. Lösungen schaffen, um den Alltag zu vereinfachen."
 }

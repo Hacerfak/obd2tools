@@ -428,4 +428,27 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get errBleDisconnected => 'Соединение Bluetooth потеряно!';
+
+  @override
+  String get aboutTitle => 'О приложении';
+
+  @override
+  String get aboutVersion => 'Версия';
+
+  @override
+  String get aboutTheProjectTitle => 'О проекте';
+
+  @override
+  String get aboutTheProjectDesc =>
+      'OBD2 Tools был разработан с целью демократизации автомобильной диагностики. Сочетая современный интерфейс с телеметрией в реальном времени, это приложение превращает ваш смартфон в профессиональный сканер, позволяя автолюбителям и механикам четко, быстро и объективно понимать состояние автомобиля.';
+
+  @override
+  String get aboutDeveloperTitle => 'Разработчик';
+
+  @override
+  String get aboutDeveloperRole => 'Ученик';
+
+  @override
+  String get aboutDeveloperDesc =>
+      'Увлечен технологиями и автомобильным миром. Создаю решения для упрощения повседневной жизни.';
 }

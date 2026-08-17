@@ -1,10 +1,20 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'views/connection_screen.dart';
 import 'state/obd_providers.dart';
 import 'l10n/app_localizations.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
-void main() {
+void main() async {
+  // Garante que os recursos nativos estejam prontos antes de iniciar
+  WidgetsFlutterBinding.ensureInitialized();
+
+  if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+    await MobileAds.instance.initialize();
+  }
+
   runApp(const ProviderScope(child: Obd2ToolsApp()));
 }
 

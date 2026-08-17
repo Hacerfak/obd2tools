@@ -415,4 +415,27 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get errBleDisconnected => 'Bluetooth接続が失われました！';
+
+  @override
+  String get aboutTitle => 'アプリについて';
+
+  @override
+  String get aboutVersion => 'バージョン';
+
+  @override
+  String get aboutTheProjectTitle => 'プロジェクトについて';
+
+  @override
+  String get aboutTheProjectDesc =>
+      'OBD2 Toolsは、自動車診断を民主化することを目的に開発されました。最新のインターフェースとリアルタイムのテレメトリーを組み合わせることで、このアプリはスマートフォンをプロ仕様のスキャナーに変え、車好きや整備士が車両の状態を明確、迅速、かつ客観的に把握できるようにします。';
+
+  @override
+  String get aboutDeveloperTitle => '開発者';
+
+  @override
+  String get aboutDeveloperRole => '見習い';
+
+  @override
+  String get aboutDeveloperDesc =>
+      'テクノロジーと自動車の世界に情熱を注いでいます。日常生活をシンプルにするソリューションを構築しています。';
 }

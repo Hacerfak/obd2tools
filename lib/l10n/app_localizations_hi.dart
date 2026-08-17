@@ -428,4 +428,27 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get errBleDisconnected => 'ब्लूटूथ कनेक्शन टूट गया!';
+
+  @override
+  String get aboutTitle => 'ऐप के बारे में';
+
+  @override
+  String get aboutVersion => 'संस्करण';
+
+  @override
+  String get aboutTheProjectTitle => 'परियोजना';
+
+  @override
+  String get aboutTheProjectDesc =>
+      'OBD2 Tools को ऑटोमोटिव डायग्नोस्टिक्स को सभी के लिए सुलभ बनाने के उद्देश्य से विकसित किया गया था। रीयल-टाइम टेलीमेट्री के साथ एक आधुनिक इंटरफ़ेस का संयोजन, यह ऐप आपके स्मार्टफोन को एक पेशेवर स्कैनर में बदल देता है, जिससे उत्साही और मैकेनिक वाहन के स्वास्थ्य को स्पष्ट, जल्दी और निष्पक्ष रूप से समझ सकते हैं।';
+
+  @override
+  String get aboutDeveloperTitle => 'डेवलपर';
+
+  @override
+  String get aboutDeveloperRole => 'शिक्षार्थी';
+
+  @override
+  String get aboutDeveloperDesc =>
+      'प्रौद्योगिकी और ऑटोमोटिव दुनिया के प्रति जुनूनी। रोजमर्रा की जिंदगी को आसान बनाने के लिए समाधान बनाना।';
 }

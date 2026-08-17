@@ -10,6 +10,7 @@ import 'vehicle_info_screen.dart';
 import 'test_results_screen.dart';
 import 'settings_screen.dart';
 import 'debug_console_screen.dart';
+import 'about_screen.dart';
 import '../state/technical_data_service.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -445,6 +446,16 @@ class MoreMenuListView extends StatelessWidget {
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.info_outline),
+            title: const Text("Sobre o App"),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AboutScreen()),
               );
             },
           ),
