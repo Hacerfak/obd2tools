@@ -11,10 +11,25 @@ import 'package:shared_preferences/shared_preferences.dart';
 // ============================================================================
 class ThemeModeNotifier extends Notifier<ThemeMode> {
   @override
-  ThemeMode build() => ThemeMode.system;
+  ThemeMode build() {
+    _loadTheme();
+    return ThemeMode.system; // Retorna sistema enquanto carrega da memória
+  }
 
-  void setTheme(ThemeMode mode) {
+  Future<void> _loadTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    final themeIndex = prefs.getInt('theme_mode');
+    if (themeIndex != null &&
+        themeIndex >= 0 &&
+        themeIndex < ThemeMode.values.length) {
+      state = ThemeMode.values[themeIndex];
+    }
+  }
+
+  Future<void> setTheme(ThemeMode mode) async {
     state = mode;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('theme_mode', mode.index);
   }
 }
 
