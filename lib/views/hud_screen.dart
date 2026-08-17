@@ -185,9 +185,10 @@ class _HudScreenState extends ConsumerState<HudScreen> {
                                     value: GaugeStyle.analog,
                                     icon: Icon(Icons.av_timer, size: 18),
                                   ),
+                                  // ATUALIZADO: Ícone de estatísticas em vez de linha
                                   ButtonSegment(
-                                    value: GaugeStyle.lineChart,
-                                    icon: Icon(Icons.show_chart, size: 18),
+                                    value: GaugeStyle.stats,
+                                    icon: Icon(Icons.query_stats, size: 18),
                                   ),
                                 ],
                                 selected: {_currentStyle},

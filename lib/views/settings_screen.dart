@@ -91,157 +91,146 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final double vPadding = isLandscape ? 8.0 : 16.0;
 
     return Scaffold(
-      body: Center(
-        // TRAVA A LARGURA MÁXIMA EM 800px PARA FICAR CENTRALIZADO EM TELAS LARGAS
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 800),
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(16.0, vPadding, 16.0, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.setTitle,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: onSurface,
-                  ),
-                ),
-                SizedBox(height: vPadding),
-                Expanded(
-                  child: ListView(
-                    children: [
-                      const SizedBox(height: 12),
-                      Text(
-                        l10n.setColor,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: primaryColor,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      // SELETOR DE TEMA PARA EDIÇÃO
-                      Center(
-                        child: SegmentedButton<bool>(
-                          segments: [
-                            ButtonSegment(
-                              value: true,
-                              icon: const Icon(Icons.light_mode),
-                              label: Text(l10n.setThemeLight),
-                            ),
-                            ButtonSegment(
-                              value: false,
-                              icon: const Icon(Icons.dark_mode),
-                              label: Text(l10n.setThemeDark),
-                            ),
-                          ],
-                          selected: {_isEditingLight},
-                          onSelectionChanged: (newSelection) {
-                            setState(
-                              () => _isEditingLight = newSelection.first,
-                            );
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      _buildColorTile(
-                        l10n.setMainColor,
-                        appColors.primary,
-                        'primary',
-                        onSurface,
-                        l10n,
-                      ),
-                      _buildColorTile(
-                        l10n.setNormalColor,
-                        appColors.normal,
-                        'normal',
-                        onSurface,
-                        l10n,
-                      ),
-                      _buildColorTile(
-                        l10n.setWarningColor,
-                        appColors.warning,
-                        'warning',
-                        onSurface,
-                        l10n,
-                      ),
-                      _buildColorTile(
-                        l10n.setCriticalColor,
-                        appColors.critical,
-                        'critical',
-                        onSurface,
-                        l10n,
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton.icon(
-                        onPressed: () => ref
-                            .read(appColorsProvider.notifier)
-                            .resetToDefaults(),
-                        icon: const Icon(Icons.restore),
-                        label: Text(l10n.setRestoreColors),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          foregroundColor: Colors.redAccent,
-                          backgroundColor: Colors.redAccent.withValues(
-                            alpha: 0.1,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-                      Text(
-                        l10n.setPerf,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: primaryColor,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Card(
-                        elevation: 0,
-                        color: onSurface.withValues(alpha: 0.05),
-                        child: ListTile(
-                          title: Text(l10n.setRate),
-                          subtitle: Text(l10n.setRateDesc),
-                          trailing: DropdownButton<int>(
-                            value: ref.watch(pollingIntervalProvider),
-                            underline: const SizedBox(),
-                            items: [
-                              DropdownMenuItem(
-                                value: 0,
-                                child: Text(l10n.setRateMax),
-                              ),
-                              DropdownMenuItem(
-                                value: 25,
-                                child: Text(l10n.setRateFast),
-                              ),
-                              DropdownMenuItem(
-                                value: 100,
-                                child: Text(l10n.setRateNormal),
-                              ),
-                              DropdownMenuItem(
-                                value: 500,
-                                child: Text(l10n.setRateEco),
-                              ),
-                            ],
-                            onChanged: (value) {
-                              if (value != null) {
-                                ref
-                                    .read(pollingIntervalProvider.notifier)
-                                    .updateInterval(value);
-                              }
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+      body: Padding(
+        padding: EdgeInsets.fromLTRB(16.0, vPadding, 16.0, 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.setTitle,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: onSurface,
+              ),
             ),
-          ),
+            SizedBox(height: vPadding),
+            Expanded(
+              child: ListView(
+                children: [
+                  const SizedBox(height: 12),
+                  Text(
+                    l10n.setColor,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: primaryColor,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  // SELETOR DE TEMA PARA EDIÇÃO
+                  Center(
+                    child: SegmentedButton<bool>(
+                      segments: [
+                        ButtonSegment(
+                          value: true,
+                          icon: const Icon(Icons.light_mode),
+                          label: Text(l10n.setThemeLight),
+                        ),
+                        ButtonSegment(
+                          value: false,
+                          icon: const Icon(Icons.dark_mode),
+                          label: Text(l10n.setThemeDark),
+                        ),
+                      ],
+                      selected: {_isEditingLight},
+                      onSelectionChanged: (newSelection) {
+                        setState(() => _isEditingLight = newSelection.first);
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildColorTile(
+                    l10n.setMainColor,
+                    appColors.primary,
+                    'primary',
+                    onSurface,
+                    l10n,
+                  ),
+                  _buildColorTile(
+                    l10n.setNormalColor,
+                    appColors.normal,
+                    'normal',
+                    onSurface,
+                    l10n,
+                  ),
+                  _buildColorTile(
+                    l10n.setWarningColor,
+                    appColors.warning,
+                    'warning',
+                    onSurface,
+                    l10n,
+                  ),
+                  _buildColorTile(
+                    l10n.setCriticalColor,
+                    appColors.critical,
+                    'critical',
+                    onSurface,
+                    l10n,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    onPressed: () =>
+                        ref.read(appColorsProvider.notifier).resetToDefaults(),
+                    icon: const Icon(Icons.restore),
+                    label: Text(l10n.setRestoreColors),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      foregroundColor: Colors.redAccent,
+                      backgroundColor: Colors.redAccent.withValues(alpha: 0.1),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  Text(
+                    l10n.setPerf,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: primaryColor,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Card(
+                    elevation: 0,
+                    color: onSurface.withValues(alpha: 0.05),
+                    child: ListTile(
+                      title: Text(l10n.setRate),
+                      subtitle: Text(l10n.setRateDesc),
+                      trailing: DropdownButton<int>(
+                        value: ref.watch(pollingIntervalProvider),
+                        underline: const SizedBox(),
+                        items: [
+                          DropdownMenuItem(
+                            value: 0,
+                            child: Text(l10n.setRateMax),
+                          ),
+                          DropdownMenuItem(
+                            value: 25,
+                            child: Text(l10n.setRateFast),
+                          ),
+                          DropdownMenuItem(
+                            value: 100,
+                            child: Text(l10n.setRateNormal),
+                          ),
+                          DropdownMenuItem(
+                            value: 500,
+                            child: Text(l10n.setRateEco),
+                          ),
+                        ],
+                        onChanged: (value) {
+                          if (value != null) {
+                            ref
+                                .read(pollingIntervalProvider.notifier)
+                                .updateInterval(value);
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
       bottomNavigationBar: const AdMobBanner(),

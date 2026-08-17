@@ -127,108 +127,100 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
     }).toList();
 
     return Scaffold(
-      body: Center(
-        // O SEGREDO ESTÁ AQUI: Trava a largura máxima em 800px!
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 800),
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(16.0, vPadding, 16.0, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeader(
-                  primaryColor,
-                  onSurface,
-                  isScreenLoading,
-                  hasFaults,
-                  l10n,
-                  isLandscape,
-                ),
-                SizedBox(height: vPadding),
-                if (!isScreenLoading) ...[
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        _buildFilterChip(l10n.faultAll, null, onSurface),
-                        const SizedBox(width: 8),
-                        _buildFilterChip(
-                          l10n.faultConfirmed,
-                          DtcStatus.confirmed,
-                          onSurface,
-                        ),
-                        const SizedBox(width: 8),
-                        _buildFilterChip(
-                          l10n.faultPending,
-                          DtcStatus.pending,
-                          onSurface,
-                        ),
-                        const SizedBox(width: 8),
-                        _buildFilterChip(
-                          l10n.faultPermanent,
-                          DtcStatus.permanent,
-                          onSurface,
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: isLandscape ? 12 : 24),
-                ],
-                Expanded(
-                  child: isScreenLoading
-                      ? Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              CircularProgressIndicator(color: primaryColor),
-                              const SizedBox(height: 16),
-                              Text(
-                                l10n.faultReading,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: onSurface.withValues(alpha: 0.7),
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                      : filteredFaults.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.check_circle_outline,
-                                size: 80,
-                                color: Colors.greenAccent.withValues(
-                                  alpha: 0.5,
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                l10n.faultNone,
-                                style: const TextStyle(
-                                  color: Colors.greenAccent,
-                                  fontSize: 18,
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                      : ListView.builder(
-                          itemCount: filteredFaults.length,
-                          itemBuilder: (context, index) {
-                            return _buildFaultCard(
-                              filteredFaults[index],
-                              onSurface,
-                              l10n,
-                            );
-                          },
-                        ),
-                ),
-              ],
+      body: Padding(
+        padding: EdgeInsets.fromLTRB(16.0, vPadding, 16.0, 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(
+              primaryColor,
+              onSurface,
+              isScreenLoading,
+              hasFaults,
+              l10n,
+              isLandscape,
             ),
-          ),
+            SizedBox(height: vPadding),
+            if (!isScreenLoading) ...[
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _buildFilterChip(l10n.faultAll, null, onSurface),
+                    const SizedBox(width: 8),
+                    _buildFilterChip(
+                      l10n.faultConfirmed,
+                      DtcStatus.confirmed,
+                      onSurface,
+                    ),
+                    const SizedBox(width: 8),
+                    _buildFilterChip(
+                      l10n.faultPending,
+                      DtcStatus.pending,
+                      onSurface,
+                    ),
+                    const SizedBox(width: 8),
+                    _buildFilterChip(
+                      l10n.faultPermanent,
+                      DtcStatus.permanent,
+                      onSurface,
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: isLandscape ? 12 : 24),
+            ],
+            Expanded(
+              child: isScreenLoading
+                  ? Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircularProgressIndicator(color: primaryColor),
+                          const SizedBox(height: 16),
+                          Text(
+                            l10n.faultReading,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: onSurface.withValues(alpha: 0.7),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : filteredFaults.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.check_circle_outline,
+                            size: 80,
+                            color: Colors.greenAccent.withValues(alpha: 0.5),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            l10n.faultNone,
+                            style: const TextStyle(
+                              color: Colors.greenAccent,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: filteredFaults.length,
+                      itemBuilder: (context, index) {
+                        return _buildFaultCard(
+                          filteredFaults[index],
+                          onSurface,
+                          l10n,
+                        );
+                      },
+                    ),
+            ),
+          ],
         ),
       ),
       bottomNavigationBar: const AdMobBanner(),

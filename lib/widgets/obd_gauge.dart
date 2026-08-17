@@ -1,11 +1,11 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fl_chart/fl_chart.dart';
 import '../parser/obd_pid.dart';
 import '../state/obd_providers.dart';
 
-enum GaugeStyle { digital, analog, lineChart }
+// TROCAMOS 'lineChart' POR 'stats'
+enum GaugeStyle { digital, analog, stats }
 
 class ZoneGradient {
   final List<Color> colors;
@@ -31,7 +31,6 @@ class ObdGauge extends ConsumerWidget {
     return 100;
   }
 
-  // ENCURTA NOMES LONGOS NO HUD
   String _getShortName(String fullName) {
     if (fullName.contains("Arrefecimento")) return "Temp. Motor";
     if (fullName.contains("Velocidade")) return "Velocidade";
@@ -50,6 +49,7 @@ class ObdGauge extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // ALTA PERFORMANCE: Escuta apenas os dados do PID específico
     final sensorData = ref.watch(
       realTimeStateProvider.select((data) => data[pid.name]),
     );
@@ -99,6 +99,7 @@ class ObdGauge extends ConsumerWidget {
     }
 
     double currentValue = sensorData?.value ?? 0.0;
+    List<double> history = sensorData?.history ?? [];
     double maxValue = _getMaxValue();
     double percent = (currentValue / maxValue).clamp(0.0, 1.0);
 
@@ -129,21 +130,21 @@ class ObdGauge extends ConsumerWidget {
                 left: 12.0,
                 right: 12.0,
               ),
-              child: style == GaugeStyle.lineChart
-                  ? _buildLineChart(
-                      context,
-                      sensorData?.history ?? [],
-                      maxValue,
+              child: style == GaugeStyle.stats
+                  // NOVO: PAINEL DE ESTATÍSTICAS
+                  ? _buildStatsPanel(
+                      currentValue,
+                      history,
                       onSurface,
                       activeColor,
                     )
+                  // MEDIDORES CIRCULARES
                   : LayoutBuilder(
                       builder: (context, constraints) {
                         double size = min(
                           constraints.maxWidth,
                           constraints.maxHeight,
                         );
-
                         return Center(
                           child: SizedBox(
                             width: size,
@@ -151,7 +152,6 @@ class ObdGauge extends ConsumerWidget {
                             child: Stack(
                               alignment: Alignment.center,
                               children: [
-                                // O PINTOR DO MEDIDOR
                                 CustomPaint(
                                   size: Size(size, size),
                                   painter: style == GaugeStyle.digital
@@ -167,11 +167,9 @@ class ObdGauge extends ConsumerWidget {
                                           zones: zones,
                                         ),
                                 ),
-
-                                // TEXTO DIGITAL (Exatamente no meio do anel)
                                 if (style == GaugeStyle.digital)
                                   SizedBox(
-                                    width: size * 0.55,
+                                    width: size * 0.65,
                                     child: FittedBox(
                                       fit: BoxFit.scaleDown,
                                       child: Column(
@@ -202,13 +200,9 @@ class ObdGauge extends ConsumerWidget {
                                       ),
                                     ),
                                   ),
-
-                                // TEXTO ANALÓGICO (Deslocado para a abertura inferior do arco)
                                 if (style == GaugeStyle.analog)
                                   Positioned(
-                                    bottom:
-                                        size *
-                                        0.01, // Encaixado no "gap" sem sobrepor a base
+                                    bottom: size * 0.05,
                                     child: SizedBox(
                                       width: size * 0.5,
                                       child: FittedBox(
@@ -275,65 +269,117 @@ class ObdGauge extends ConsumerWidget {
     );
   }
 
-  Widget _buildLineChart(
-    BuildContext context,
+  // WIDGET DO PAINEL DE ESTATÍSTICAS
+  Widget _buildStatsPanel(
+    double currentValue,
     List<double> history,
-    double maxValue,
     Color onSurface,
     Color activeColor,
   ) {
-    if (history.length < 2) {
-      return Center(
-        child: Text(
-          "Coletando...",
-          style: TextStyle(color: onSurface.withValues(alpha: 0.24)),
-        ),
-      );
+    double currentMin = currentValue;
+    double currentMax = currentValue;
+
+    if (history.isNotEmpty) {
+      currentMin = history.reduce((a, b) => a < b ? a : b);
+      currentMax = history.reduce((a, b) => a > b ? a : b);
     }
 
+    String formatVal(double v) => v.toStringAsFixed(pid.unit == "RPM" ? 0 : 1);
+
     return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Expanded(
-          child: LineChart(
-            LineChartData(
-              minY: 0,
-              maxY: maxValue,
-              minX: 0,
-              maxX: 29,
-              gridData: const FlGridData(show: false),
-              titlesData: const FlTitlesData(show: false),
-              borderData: FlBorderData(show: false),
-              lineTouchData: LineTouchData(enabled: false),
-              lineBarsData: [
-                LineChartBarData(
-                  spots: history
-                      .asMap()
-                      .entries
-                      .map((e) => FlSpot(e.key.toDouble(), e.value))
-                      .toList(),
-                  isCurved: true,
-                  curveSmoothness: 0.2,
-                  preventCurveOverShooting: true,
-                  color: activeColor,
-                  barWidth: 3,
-                  isStrokeCapRound: true,
-                  dotData: const FlDotData(show: false),
-                  belowBarData: BarAreaData(
-                    show: true,
-                    color: activeColor.withValues(alpha: 0.15),
+          child: Center(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    formatVal(currentValue),
+                    style: TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.w900,
+                      color: activeColor,
+                      fontFamily: 'Monospace',
+                    ),
                   ),
-                ),
-              ],
+                  Text(
+                    pid.unit,
+                    style: TextStyle(
+                      color: activeColor.withValues(alpha: 0.7),
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-        const SizedBox(height: 4),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildMiniStat(
+                "MIN",
+                formatVal(currentMin),
+                onSurface,
+                Colors.blueAccent,
+              ),
+              _buildMiniStat(
+                "MAX",
+                formatVal(currentMax),
+                onSurface,
+                Colors.redAccent,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMiniStat(
+    String label,
+    String value,
+    Color onSurface,
+    Color iconColor,
+  ) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              label == "MIN"
+                  ? Icons.arrow_downward_rounded
+                  : Icons.arrow_upward_rounded,
+              color: iconColor,
+              size: 12,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: onSurface.withValues(alpha: 0.5),
+              ),
+            ),
+          ],
+        ),
         Text(
-          "${history.last.toStringAsFixed(pid.unit == "RPM" ? 0 : 1)} ${pid.unit}",
+          value,
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: activeColor,
+            color: onSurface,
+            fontFamily: 'Monospace',
           ),
         ),
       ],
@@ -403,7 +449,6 @@ class DigitalGaugePainter extends CustomPainter {
       startAngle,
       sweepAngle,
     );
-
     final fillShader = _createSmartSweepShader(
       zones.colors,
       zones.stops,
@@ -423,7 +468,6 @@ class DigitalGaugePainter extends CustomPainter {
         ..style = PaintingStyle.stroke
         ..strokeWidth = 12,
     );
-
     canvas.drawArc(
       rect,
       startAngle,
@@ -517,7 +561,6 @@ class AnalogGaugePainter extends CustomPainter {
       ),
       pointerPaint,
     );
-
     canvas.drawCircle(center, 8, Paint()..color = baseColor);
     canvas.drawCircle(center, 4, Paint()..color = activeColor);
   }

@@ -47,103 +47,95 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
     final double vPadding = isLandscape ? 8.0 : 16.0;
 
     return Scaffold(
-      body: Center(
-        // TRAVA A LARGURA MÁXIMA EM 800px PARA FICAR CENTRALIZADO EM TELAS LARGAS
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 800),
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(16.0, vPadding, 16.0, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      body: Padding(
+        padding: EdgeInsets.fromLTRB(16.0, vPadding, 16.0, 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      l10n.infoTitle,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: onSurface,
-                      ),
-                    ),
-                    if (!_isLoading)
-                      IconButton.filledTonal(
-                        onPressed: _requestData,
-                        icon: const Icon(Icons.refresh),
-                        color: primaryColor,
-                        tooltip: l10n.btnRefresh,
-                        // ENCOLHE O BOTÃO NA HORIZONTAL PARA GANHAR ESPAÇO DE TELA
-                        visualDensity: isLandscape
-                            ? VisualDensity.compact
-                            : null,
-                      ),
-                  ],
+                Text(
+                  l10n.infoTitle,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: onSurface,
+                  ),
                 ),
-                SizedBox(height: vPadding),
-                Expanded(
-                  child: _isLoading
-                      ? Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              CircularProgressIndicator(color: primaryColor),
-                              const SizedBox(height: 16),
-                              Text(
-                                l10n.infoConsulting,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: onSurface.withValues(alpha: 0.54),
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                      : vehicleInfo.isEmpty
-                      ? Center(
-                          child: Text(
-                            l10n.infoNone,
+                if (!_isLoading)
+                  IconButton.filledTonal(
+                    onPressed: _requestData,
+                    icon: const Icon(Icons.refresh),
+                    color: primaryColor,
+                    tooltip: l10n.btnRefresh,
+                    // ENCOLHE O BOTÃO NA HORIZONTAL PARA GANHAR ESPAÇO DE TELA
+                    visualDensity: isLandscape ? VisualDensity.compact : null,
+                  ),
+              ],
+            ),
+            SizedBox(height: vPadding),
+            Expanded(
+              child: _isLoading
+                  ? Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircularProgressIndicator(color: primaryColor),
+                          const SizedBox(height: 16),
+                          Text(
+                            l10n.infoConsulting,
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: onSurface.withValues(alpha: 0.54),
                             ),
                           ),
-                        )
-                      : ListView.builder(
-                          itemCount: vehicleInfo.length,
-                          itemBuilder: (context, index) {
-                            String key = vehicleInfo.keys.elementAt(index);
-                            String value = vehicleInfo[key]!;
-                            return Card(
-                              margin: const EdgeInsets.only(bottom: 12),
-                              child: ListTile(
-                                leading: Icon(
-                                  key.contains("VIN") || key.contains("Chassi")
-                                      ? Icons.directions_car
-                                      : Icons.memory,
-                                  color: primaryColor,
-                                ),
-                                title: Text(
-                                  value,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    color: onSurface,
-                                    fontFamily: 'Monospace',
-                                  ),
-                                ),
-                                subtitle: Text(
-                                  key,
-                                  style: TextStyle(color: primaryColor),
-                                ),
-                              ),
-                            );
-                          },
+                        ],
+                      ),
+                    )
+                  : vehicleInfo.isEmpty
+                  ? Center(
+                      child: Text(
+                        l10n.infoNone,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: onSurface.withValues(alpha: 0.54),
                         ),
-                ),
-              ],
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: vehicleInfo.length,
+                      itemBuilder: (context, index) {
+                        String key = vehicleInfo.keys.elementAt(index);
+                        String value = vehicleInfo[key]!;
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          child: ListTile(
+                            leading: Icon(
+                              key.contains("VIN") || key.contains("Chassi")
+                                  ? Icons.directions_car
+                                  : Icons.memory,
+                              color: primaryColor,
+                            ),
+                            title: Text(
+                              value,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: onSurface,
+                                fontFamily: 'Monospace',
+                              ),
+                            ),
+                            subtitle: Text(
+                              key,
+                              style: TextStyle(color: primaryColor),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
             ),
-          ),
+          ],
         ),
       ),
       bottomNavigationBar: const AdMobBanner(),
