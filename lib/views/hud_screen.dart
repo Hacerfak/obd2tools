@@ -11,7 +11,6 @@ import '../state/obd_providers.dart';
 import '../widgets/obd_gauge.dart';
 import '../connection/obd_manager.dart';
 import '../widgets/hud_sensor_selector.dart';
-import '../widgets/admob_banner.dart';
 
 class HudScreen extends ConsumerStatefulWidget {
   const HudScreen({super.key});
@@ -378,7 +377,6 @@ class _HudScreenState extends ConsumerState<HudScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: const AdMobBanner(),
     );
   }
 }

@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '/l10n/app_localizations.dart';
 import '../state/obd_providers.dart';
-import '../widgets/admob_banner.dart';
 
 class AboutScreen extends ConsumerWidget {
   const AboutScreen({super.key});
@@ -163,7 +162,6 @@ class AboutScreen extends ConsumerWidget {
           ),
         ),
       ),
-      bottomNavigationBar: const AdMobBanner(),
     );
   }
 }

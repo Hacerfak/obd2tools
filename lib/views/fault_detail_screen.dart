@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '/l10n/app_localizations.dart';
 import '../models/dtc_fault.dart';
-import '../widgets/admob_banner.dart';
 import '../state/technical_data_service.dart';
 
 class FaultDetailScreen extends ConsumerWidget {
@@ -175,7 +174,6 @@ class FaultDetailScreen extends ConsumerWidget {
           ],
         ],
       ),
-      bottomNavigationBar: const AdMobBanner(),
     );
   }
 

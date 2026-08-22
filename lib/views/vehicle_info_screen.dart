@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '/l10n/app_localizations.dart'; // IMPORT DA TRADUÇÃO
 import '../state/obd_providers.dart';
-import '../widgets/admob_banner.dart';
 
 class VehicleInfoScreen extends ConsumerStatefulWidget {
   const VehicleInfoScreen({super.key});
@@ -138,7 +137,6 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: const AdMobBanner(),
     );
   }
 }

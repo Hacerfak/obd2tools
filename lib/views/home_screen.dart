@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '/l10n/app_localizations.dart';
 import '../state/obd_providers.dart';
+import '../widgets/admob_banner.dart';
 import 'sensors_dashboard_screen.dart';
 import 'hud_screen.dart';
 import 'connection_screen.dart';
@@ -25,20 +26,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final GlobalKey<NavigatorState> _moreTabKey = GlobalKey<NavigatorState>();
   late final List<Widget> _pages;
 
-  // Flag para evitar snackbar de erro ao sair manualmente
   bool _isManualDisconnect = false;
 
   @override
   void initState() {
     super.initState();
     _pages = [
-      const SensorsDashboardScreen(), // 0: Sensores
-      const HudScreen(), // 1: HUD
-      const TestResultsScreen(), // 2: Testes
-      const FaultsScreen(), // 3: Falhas
-      MoreMenuScreen(
-        navigatorKey: _moreTabKey,
-      ), // 4: Passando a chave com segurança
+      const SensorsDashboardScreen(),
+      const HudScreen(),
+      const TestResultsScreen(),
+      const FaultsScreen(),
+      MoreMenuScreen(navigatorKey: _moreTabKey),
     ];
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -49,7 +47,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   void _onTabTapped(int index) {
     if (index == 4 && _selectedIndex == 4) {
-      // Se já estamos no "Mais" e o usuário tocou de novo, volta pro início!
       _moreTabKey.currentState?.popUntil((route) => route.isFirst);
     } else {
       setState(() => _selectedIndex = index);
@@ -57,7 +54,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _disconnectAndExit() async {
-    _isManualDisconnect = true; // Avisa que a desconexão foi proposital
+    _isManualDisconnect = true;
     final manager = ref.read(obdManagerProvider);
 
     manager.reset();
@@ -176,17 +173,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final isFullscreen = ref.watch(hudFullscreenProvider);
     final l10n = AppLocalizations.of(context)!;
 
-    // --- MÁGICA DO RIVERPOD: ESCUTA QUEDAS E MUDANÇAS ---
     ref.listen(connectionStateProvider, (previous, next) {
-      // Se a conexão caiu ou a ECU hibernou
       if (next == AppConnectionState.disconnected ||
           next == AppConnectionState.waitingForEcu) {
-        // 1. DESATIVA O MODO TELA CHEIA CASO ESTEJA ATIVO
         if (ref.read(hudFullscreenProvider)) {
           ref.read(hudFullscreenProvider.notifier).toggle();
         }
 
-        // 2. MOSTRA A MENSAGEM DE ERRO (Apenas se a queda não foi intencional)
         if (next == AppConnectionState.disconnected) {
           if (!_isManualDisconnect && mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -197,10 +190,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             );
           }
-          _isManualDisconnect = false; // Reseta a flag
+          _isManualDisconnect = false;
         }
 
-        // 3. REDIRECIONA PARA O INÍCIO LIMPANDO A PILHA DE TELAS
         if (mounted) {
           Navigator.pushAndRemoveUntil(
             context,
@@ -319,9 +311,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ],
             ),
           ),
-          bottomNavigationBar: (isDesktop || isFullscreen)
-              ? null
-              : NavigationBar(
+          bottomNavigationBar: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // BANNER FIXO PERMANENTE (Visível em modo normal e em Tela Cheia)
+              const AdMobBanner(),
+              if (!isDesktop && !isFullscreen)
+                NavigationBar(
                   selectedIndex: _selectedIndex,
                   onDestinationSelected: _onTabTapped,
                   backgroundColor: Theme.of(
@@ -350,6 +346,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   ],
                 ),
+            ],
+          ),
         );
       },
     );
@@ -451,7 +449,7 @@ class MoreMenuListView extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.info_outline),
-            title: const Text("Sobre o App"),
+            title: Text(l10n.aboutTitle),
             onTap: () {
               Navigator.push(
                 context,

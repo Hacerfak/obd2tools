@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -10,71 +11,130 @@ class AdMobBanner extends StatefulWidget {
   State<AdMobBanner> createState() => _AdMobBannerState();
 }
 
-class _AdMobBannerState extends State<AdMobBanner> {
+class _AdMobBannerState extends State<AdMobBanner>
+    with AutomaticKeepAliveClientMixin {
   BannerAd? _bannerAd;
   bool _isLoaded = false;
+  bool _isLoadingAd = false;
 
-  // Variável para lembrar a orientação atual e evitar recarregar o anúncio à toa
+  // CONTROLE DE RETRY (RECARGA AUTOMÁTICA)
+  Timer? _retryTimer;
+  int _retryAttempts = 0;
+  static const int _maxRetryAttempts = 4; // Tenta no máximo 4 vezes seguidas
+
   Orientation? _currentOrientation;
+  bool? _isLargeScreen;
 
-  final String _adUnitId = Platform.isAndroid
-      ? 'ca-app-pub-4241608895500197/7309130446'
-      : 'ca-app-pub-4241608895500197/7562768546';
+  final String _adUnitId = kDebugMode
+      ? (Platform.isAndroid
+            ? 'ca-app-pub-3940256099942544/6300978111'
+            : 'ca-app-pub-3940256099942544/2934735716')
+      : (Platform.isAndroid
+            ? 'ca-app-pub-4241608895500197/7309130446'
+            : 'ca-app-pub-4241608895500197/7562768546');
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    // Descobre se o celular está em pé ou deitado
-    final orientation = MediaQuery.of(context).orientation;
+    final mediaQuery = MediaQuery.of(context);
+    final orientation = mediaQuery.orientation;
+    final isLarge = mediaQuery.size.shortestSide >= 600;
 
-    // Se a orientação mudou (ou se é a primeira vez abrindo a tela), carrega o anúncio certo
-    if (_currentOrientation != orientation) {
+    if (_currentOrientation != orientation || _isLargeScreen != isLarge) {
       _currentOrientation = orientation;
-      _loadAd(orientation);
+      _isLargeScreen = isLarge;
+      _retryAttempts = 0;
+      _retryTimer?.cancel();
+      _loadAd(orientation, isLarge);
     }
   }
 
-  void _loadAd(Orientation orientation) {
+  void _loadAd(Orientation orientation, bool isLargeScreen) {
     if (kIsWeb || (!Platform.isAndroid && !Platform.isIOS)) return;
 
-    // Descarta o anúncio antigo para não vazar memória no celular do usuário
+    if (_isLoaded || _isLoadingAd) return;
+
+    _isLoadingAd = true;
+
+    final AdSize adSize;
+    if (isLargeScreen) {
+      adSize = orientation == Orientation.portrait
+          ? AdSize.largeBanner
+          : AdSize.fullBanner;
+    } else {
+      adSize = AdSize.banner; // 320x50 padrão
+    }
+
     _bannerAd?.dispose();
-    setState(() => _isLoaded = false);
-
-    // MÁGICA AQUI: Escolhe o tamanho com base na rotação da tela
-    final adSize = orientation == Orientation.portrait
-        ? AdSize
-              .largeBanner // Celular em pé: 320x100
-        : AdSize.fullBanner; // Celular deitado: 468x60
-
     _bannerAd = BannerAd(
       adUnitId: _adUnitId,
       request: const AdRequest(),
       size: adSize,
       listener: BannerAdListener(
         onAdLoaded: (ad) {
-          debugPrint(
-            'AdMob: Anúncio carregado (Orientação: ${orientation.name})',
-          );
-          setState(() => _isLoaded = true);
+          debugPrint('AdMob: Anúncio carregado com sucesso!');
+          _retryAttempts = 0; // Zera as tentativas ao obter sucesso
+          _retryTimer?.cancel();
+          if (mounted) {
+            setState(() {
+              _isLoaded = true;
+              _isLoadingAd = false;
+            });
+          }
         },
         onAdFailedToLoad: (ad, err) {
-          debugPrint('AdMob: Falha ao carregar anúncio: ${err.message}');
+          debugPrint('AdMob: No Fill/Falha ($err). Agendando recarga...');
           ad.dispose();
+          if (mounted) {
+            setState(() {
+              _isLoaded = false;
+              _isLoadingAd = false;
+            });
+            _scheduleRetry(orientation, isLargeScreen);
+          }
         },
       ),
     )..load();
   }
 
+  // AGENDA UMA NOVA TENTATIVA APÓS ALGUNS SEGUNDOS
+  void _scheduleRetry(Orientation orientation, bool isLargeScreen) {
+    if (_retryAttempts >= _maxRetryAttempts) {
+      debugPrint('AdMob: Limite de retentativas atingido.');
+      return;
+    }
+
+    _retryTimer?.cancel();
+    // Aumenta o tempo a cada tentativa (5s, 10s, 15s, 20s) para não ser bloqueado por spam
+    final int delaySeconds = 5 * (_retryAttempts + 1);
+    _retryAttempts++;
+
+    debugPrint(
+      'AdMob: Tentando novamente em $delaySeconds segundos... (Tentativa $_retryAttempts)',
+    );
+
+    _retryTimer = Timer(Duration(seconds: delaySeconds), () {
+      if (mounted && !_isLoaded && !_isLoadingAd) {
+        _loadAd(orientation, isLargeScreen);
+      }
+    });
+  }
+
   @override
   void dispose() {
+    _retryTimer?.cancel();
     _bannerAd?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
+
     if (kIsWeb || (!Platform.isAndroid && !Platform.isIOS)) {
       return const SizedBox.shrink();
     }
@@ -88,11 +148,7 @@ class _AdMobBannerState extends State<AdMobBanner> {
       );
     }
 
-    // Altura dinâmica para o "buraco" de espera do anúncio, evitando que a tela pule
-    final double fallbackHeight = _currentOrientation == Orientation.portrait
-        ? 100
-        : 60;
-
-    return SizedBox(height: fallbackHeight);
+    // Se não carregou, encolhe a zero sem deixar buracos vazios na tela
+    return const SizedBox.shrink();
   }
 }

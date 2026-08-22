@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '/l10n/app_localizations.dart';
 import '../state/obd_providers.dart';
 import '../parser/parsers/mode_06_parser.dart';
-import '../widgets/admob_banner.dart';
 
 class TestResultsScreen extends ConsumerStatefulWidget {
   const TestResultsScreen({super.key});
@@ -190,7 +189,6 @@ class _TestResultsScreenState extends ConsumerState<TestResultsScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: const AdMobBanner(),
     );
   }
 

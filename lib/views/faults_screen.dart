@@ -4,7 +4,6 @@ import '/l10n/app_localizations.dart';
 import '../state/obd_providers.dart';
 import '../models/dtc_fault.dart';
 import 'fault_detail_screen.dart';
-import '../widgets/admob_banner.dart';
 
 class FaultsScreen extends ConsumerStatefulWidget {
   const FaultsScreen({super.key});
@@ -223,7 +222,6 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: const AdMobBanner(),
     );
   }
 

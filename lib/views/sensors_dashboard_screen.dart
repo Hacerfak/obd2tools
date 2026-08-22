@@ -6,7 +6,6 @@ import '../state/obd_providers.dart';
 import '../widgets/sensor_tile.dart';
 import '../views/sensor_detail_screen.dart';
 import '../connection/obd_manager.dart';
-import '../widgets/admob_banner.dart';
 
 class SensorsDashboardScreen extends ConsumerStatefulWidget {
   const SensorsDashboardScreen({super.key});
@@ -133,7 +132,6 @@ class _SensorsDashboardScreenState
           ),
         ],
       ),
-      bottomNavigationBar: const AdMobBanner(),
     );
   }
 }

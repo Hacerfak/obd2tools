@@ -8,7 +8,6 @@ import '../state/obd_providers.dart';
 import 'home_screen.dart';
 import 'package:flutter/foundation.dart';
 import '../parser/registries/mode_01_registry.dart';
-import '../widgets/admob_banner.dart';
 
 class ConnectionScreen extends ConsumerStatefulWidget {
   final bool attemptAutoConnect;
@@ -423,7 +422,6 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: const AdMobBanner(),
     );
   }
 }

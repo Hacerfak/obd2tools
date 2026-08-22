@@ -4,7 +4,6 @@ import '/l10n/app_localizations.dart';
 import '../parser/obd_pid.dart';
 import '../state/obd_providers.dart';
 import '../connection/obd_manager.dart';
-import '../widgets/admob_banner.dart';
 import '../state/technical_data_service.dart';
 
 class SensorDetailScreen extends ConsumerStatefulWidget {
@@ -303,7 +302,6 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: const AdMobBanner(),
     );
   }
 
