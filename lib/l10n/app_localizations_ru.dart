@@ -451,4 +451,146 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get aboutDeveloperDesc =>
       'Увлечен технологиями и автомобильным миром. Создаю решения для упрощения повседневной жизни.';
+
+  @override
+  String get unitCounts => 'отсчеты';
+
+  @override
+  String midO2Sensor(Object hex) {
+    return 'Датчик O2 - Датчик 0x$hex';
+  }
+
+  @override
+  String midCatalyst(Object bank) {
+    return 'Катализатор - Банк $bank';
+  }
+
+  @override
+  String midEgr(Object bank) {
+    return 'Система EGR - Банк $bank';
+  }
+
+  @override
+  String midVvt(Object bank) {
+    return 'Система VVT - Банк $bank';
+  }
+
+  @override
+  String get midEvapGeneral => 'EVAP - Монитор Бака';
+
+  @override
+  String get midEvapVacuumInit => 'EVAP - Герметичность / Начальный Вакуум';
+
+  @override
+  String get midEvapGrossLeak => 'EVAP - Большая Утечка (0.090\")';
+
+  @override
+  String get midEvapMedLeak => 'EVAP - Средняя Утечка (0.040\")';
+
+  @override
+  String get midEvapSmallLeak => 'EVAP - Малая Утечка (0.020\")';
+
+  @override
+  String get midEvapPurgeValve => 'EVAP - Клапан Продувки';
+
+  @override
+  String get midEvapVentValve => 'EVAP - Вентиляционный Клапан';
+
+  @override
+  String midO2Heater(Object hex) {
+    return 'Нагреватель O2 - Датчик 0x$hex';
+  }
+
+  @override
+  String midSecAir(Object bank) {
+    return 'Вторичный Воздух - Банк $bank';
+  }
+
+  @override
+  String midFuelSystem(Object bank) {
+    return 'Топливная Система - Банк $bank';
+  }
+
+  @override
+  String midMisfireCylinder(Object cylinder) {
+    return 'Пропуски Зажигания - Цилиндр $cylinder';
+  }
+
+  @override
+  String get midMisfireAll => 'Пропуски Зажигания - Все Цилиндры';
+
+  @override
+  String midProprietary(Object hex) {
+    return 'Заводской Монитор (0x$hex)';
+  }
+
+  @override
+  String midObd(Object hex) {
+    return 'Монитор OBD (0x$hex)';
+  }
+
+  @override
+  String get tidO2RichToLean => 'Время Отклика (Богатая в Бедную)';
+
+  @override
+  String get tidO2LeanToRich => 'Время Отклика (Бедная в Богатую)';
+
+  @override
+  String get tidO2MinVoltage => 'Минимальное Измеренное Напряжение';
+
+  @override
+  String get tidO2MaxVoltage => 'Максимальное Измеренное Напряжение';
+
+  @override
+  String get tidMisfireEwma => 'Число Пропусков (Среднее EWMA)';
+
+  @override
+  String get tidMisfireCurrent => 'Число Пропусков (Текущий Цикл)';
+
+  @override
+  String get tidEvapPurgeRate => 'Скорость Продувки/Утечки EVAP';
+
+  @override
+  String get tidEvapInitGrad => 'Начальный Градиент Давления EVAP';
+
+  @override
+  String get tidEvapTankDelta => 'Изменение Давления в Баке';
+
+  @override
+  String get tidEvapVacDecay => 'Удержание Вакуума EVAP';
+
+  @override
+  String get tidEvapInitStab => 'Начальная Стабильность Давления';
+
+  @override
+  String get tidEvapCanisterVac => 'Остаточный Вакуум Канистры';
+
+  @override
+  String get tidEvapVentFlow => 'Поток Вентиляционного Клапана';
+
+  @override
+  String get tidEvapSolResponse => 'Отклик Соленоида Продувки';
+
+  @override
+  String get tidEvapLinePress => 'Давление Линии Продувки под Нагрузкой';
+
+  @override
+  String get tidEvapSensorResp => 'Время Отклика Датчика Давления EVAP';
+
+  @override
+  String get tidEvapSmallDecay => 'Падение Вакуума (Малая Утечка 0.020\")';
+
+  @override
+  String get tidEvapMedDecay => 'Перепад Давления (Средняя Утечка 0.040\")';
+
+  @override
+  String get tidEvapGrossHold => 'Удержание Вакуума (Большая Утечка 0.090\")';
+
+  @override
+  String get tidEvapMinPurgePress => 'Мин. Давление при Продувке';
+
+  @override
+  String tidGeneric(Object hex) {
+    return 'Тест 0x$hex';
+  }
 }

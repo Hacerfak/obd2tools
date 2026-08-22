@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
+import 'app_localizations_ar.dart';
 import 'app_localizations_de.dart';
 import 'app_localizations_en.dart';
 import 'app_localizations_es.dart';
@@ -101,6 +102,7 @@ abstract class AppLocalizations {
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
+    Locale('ar'),
     Locale('de'),
     Locale('en'),
     Locale('es'),
@@ -945,6 +947,246 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Passionate about technology and the automotive world. Creating solutions to simplify everyday life.'**
   String get aboutDeveloperDesc;
+
+  /// No description provided for @unitCounts.
+  ///
+  /// In en, this message translates to:
+  /// **'counts'**
+  String get unitCounts;
+
+  /// No description provided for @midO2Sensor.
+  ///
+  /// In en, this message translates to:
+  /// **'O2 Sensor - Sensor 0x{hex}'**
+  String midO2Sensor(Object hex);
+
+  /// No description provided for @midCatalyst.
+  ///
+  /// In en, this message translates to:
+  /// **'Catalyst - Bank {bank}'**
+  String midCatalyst(Object bank);
+
+  /// No description provided for @midEgr.
+  ///
+  /// In en, this message translates to:
+  /// **'EGR System - Bank {bank}'**
+  String midEgr(Object bank);
+
+  /// No description provided for @midVvt.
+  ///
+  /// In en, this message translates to:
+  /// **'VVT System - Bank {bank}'**
+  String midVvt(Object bank);
+
+  /// No description provided for @midEvapGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'EVAP - Tank General Monitor'**
+  String get midEvapGeneral;
+
+  /// No description provided for @midEvapVacuumInit.
+  ///
+  /// In en, this message translates to:
+  /// **'EVAP - Sealing / Initial Vacuum'**
+  String get midEvapVacuumInit;
+
+  /// No description provided for @midEvapGrossLeak.
+  ///
+  /// In en, this message translates to:
+  /// **'EVAP - Gross Leak Test (0.090\")'**
+  String get midEvapGrossLeak;
+
+  /// No description provided for @midEvapMedLeak.
+  ///
+  /// In en, this message translates to:
+  /// **'EVAP - Medium Leak Test (0.040\")'**
+  String get midEvapMedLeak;
+
+  /// No description provided for @midEvapSmallLeak.
+  ///
+  /// In en, this message translates to:
+  /// **'EVAP - Small Leak Test (0.020\")'**
+  String get midEvapSmallLeak;
+
+  /// No description provided for @midEvapPurgeValve.
+  ///
+  /// In en, this message translates to:
+  /// **'EVAP - Canister Purge Valve'**
+  String get midEvapPurgeValve;
+
+  /// No description provided for @midEvapVentValve.
+  ///
+  /// In en, this message translates to:
+  /// **'EVAP - Vent Valve'**
+  String get midEvapVentValve;
+
+  /// No description provided for @midO2Heater.
+  ///
+  /// In en, this message translates to:
+  /// **'O2 Sensor Heater - Sensor 0x{hex}'**
+  String midO2Heater(Object hex);
+
+  /// No description provided for @midSecAir.
+  ///
+  /// In en, this message translates to:
+  /// **'Secondary Air System - Bank {bank}'**
+  String midSecAir(Object bank);
+
+  /// No description provided for @midFuelSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'Fuel System - Bank {bank}'**
+  String midFuelSystem(Object bank);
+
+  /// No description provided for @midMisfireCylinder.
+  ///
+  /// In en, this message translates to:
+  /// **'Misfire - Cylinder {cylinder}'**
+  String midMisfireCylinder(Object cylinder);
+
+  /// No description provided for @midMisfireAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Misfire - All Cylinders'**
+  String get midMisfireAll;
+
+  /// No description provided for @midProprietary.
+  ///
+  /// In en, this message translates to:
+  /// **'Proprietary Monitor (0x{hex})'**
+  String midProprietary(Object hex);
+
+  /// No description provided for @midObd.
+  ///
+  /// In en, this message translates to:
+  /// **'OBD Monitor (0x{hex})'**
+  String midObd(Object hex);
+
+  /// No description provided for @tidO2RichToLean.
+  ///
+  /// In en, this message translates to:
+  /// **'Response Time (Rich to Lean)'**
+  String get tidO2RichToLean;
+
+  /// No description provided for @tidO2LeanToRich.
+  ///
+  /// In en, this message translates to:
+  /// **'Response Time (Lean to Rich)'**
+  String get tidO2LeanToRich;
+
+  /// No description provided for @tidO2MinVoltage.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum Measured Voltage'**
+  String get tidO2MinVoltage;
+
+  /// No description provided for @tidO2MaxVoltage.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum Measured Voltage'**
+  String get tidO2MaxVoltage;
+
+  /// No description provided for @tidMisfireEwma.
+  ///
+  /// In en, this message translates to:
+  /// **'Misfire Count (EWMA Average)'**
+  String get tidMisfireEwma;
+
+  /// No description provided for @tidMisfireCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Misfire Count (Current Cycle)'**
+  String get tidMisfireCurrent;
+
+  /// No description provided for @tidEvapPurgeRate.
+  ///
+  /// In en, this message translates to:
+  /// **'EVAP Purge/Leak Rate'**
+  String get tidEvapPurgeRate;
+
+  /// No description provided for @tidEvapInitGrad.
+  ///
+  /// In en, this message translates to:
+  /// **'EVAP Initial Pressure Gradient'**
+  String get tidEvapInitGrad;
+
+  /// No description provided for @tidEvapTankDelta.
+  ///
+  /// In en, this message translates to:
+  /// **'Tank Pressure Delta'**
+  String get tidEvapTankDelta;
+
+  /// No description provided for @tidEvapVacDecay.
+  ///
+  /// In en, this message translates to:
+  /// **'EVAP Vacuum Hold/Decay'**
+  String get tidEvapVacDecay;
+
+  /// No description provided for @tidEvapInitStab.
+  ///
+  /// In en, this message translates to:
+  /// **'Initial Tank Pressure Stability'**
+  String get tidEvapInitStab;
+
+  /// No description provided for @tidEvapCanisterVac.
+  ///
+  /// In en, this message translates to:
+  /// **'Canister Residual Vacuum Hold'**
+  String get tidEvapCanisterVac;
+
+  /// No description provided for @tidEvapVentFlow.
+  ///
+  /// In en, this message translates to:
+  /// **'Canister Vent Valve Flow/Blockage'**
+  String get tidEvapVentFlow;
+
+  /// No description provided for @tidEvapSolResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'Purge Solenoid Response'**
+  String get tidEvapSolResponse;
+
+  /// No description provided for @tidEvapLinePress.
+  ///
+  /// In en, this message translates to:
+  /// **'Purge Line Pressure under Load'**
+  String get tidEvapLinePress;
+
+  /// No description provided for @tidEvapSensorResp.
+  ///
+  /// In en, this message translates to:
+  /// **'EVAP Pressure Sensor Response Time'**
+  String get tidEvapSensorResp;
+
+  /// No description provided for @tidEvapSmallDecay.
+  ///
+  /// In en, this message translates to:
+  /// **'Vacuum Decay (Small Leak 0.020\")'**
+  String get tidEvapSmallDecay;
+
+  /// No description provided for @tidEvapMedDecay.
+  ///
+  /// In en, this message translates to:
+  /// **'Pressure Delta (Medium Leak 0.040\")'**
+  String get tidEvapMedDecay;
+
+  /// No description provided for @tidEvapGrossHold.
+  ///
+  /// In en, this message translates to:
+  /// **'Vacuum Hold under Load (Gross Leak 0.090\")'**
+  String get tidEvapGrossHold;
+
+  /// No description provided for @tidEvapMinPurgePress.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum Pressure Reached during Purge'**
+  String get tidEvapMinPurgePress;
+
+  /// No description provided for @tidGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Test 0x{hex}'**
+  String tidGeneric(Object hex);
 }
 
 class _AppLocalizationsDelegate
@@ -958,6 +1200,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) => <String>[
+    'ar',
     'de',
     'en',
     'es',
@@ -976,6 +1219,8 @@ class _AppLocalizationsDelegate
 AppLocalizations lookupAppLocalizations(Locale locale) {
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
+    case 'ar':
+      return AppLocalizationsAr();
     case 'de':
       return AppLocalizationsDe();
     case 'en':

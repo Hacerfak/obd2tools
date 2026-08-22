@@ -437,11 +437,55 @@ class Mode06Result {
     required this.max,
   });
 
-  // Verifica se o teste já foi executado pela ECU (se tem dados reais)
-  bool get hasData => value != 0 || min != 0 || max != 0;
+  // 1. Deteção inteligente de teste executado vs pendente
+  bool get hasData {
+    // Misfire (MIDs 0xA1 a 0xB0) monitora continuamente desde a partida.
+    // 0 falhas = teste executado e saudável!
+    if (mid >= 0xA1 && mid <= 0xB0) return true;
 
-  // Um teste passa se o valor estiver entre o Mínimo e o Máximo
-  bool get isPass => value >= min && value <= max;
+    // Para EVAP, Catalisador e Sondas, se tudo vier 0, a ECU não executou o teste no ciclo atual
+    return value != 0 || min != 0 || max != 0;
+  }
+
+  // 2. Avaliação de Aprovação por Categoria de Monitor
+  bool get isPass {
+    // --- CATEGORIA 1: MISFIRE (MIDs 0xA1 a 0xB0) ---
+    if (mid >= 0xA1 && mid <= 0xB0) {
+      if (value == 0) return true; // Zero falhas = Aprovado!
+      if (max > 0 && max != 0xFFFF) return value <= max;
+      return false; // Teve falhas (>0) e o limite era 0 = Reprovado!
+    }
+
+    // --- CATEGORIA 2: TESTES DE LIMITE MÁXIMO / VAZAMENTO (EVAP, TIDs 0x01, 0x02, 0x31..0x34, 0xC0..0xCF) ---
+    bool isMaxTest =
+        (mid >= 0x39 && mid <= 0x3F) ||
+        tid == 0x01 ||
+        tid == 0x02 ||
+        (tid >= 0x31 && tid <= 0x34) ||
+        (tid >= 0xC0 && tid <= 0xCF);
+
+    if (isMaxTest) {
+      if (max == 0 || max == 0xFFFF) {
+        return value == 0;
+      }
+      return value <= max;
+    }
+
+    // --- CATEGORIA 3: TESTES DE LIMITE MÍNIMO / EFICIÊNCIA (TIDs 0x03, 0x05, 0x21, 0x35...) ---
+    bool isMinTest = tid == 0x03 || tid == 0x05 || tid == 0x21 || tid == 0x35;
+    if (isMinTest) {
+      return value >= min;
+    }
+
+    // --- CATEGORIA 4: BANDA PADRÃO (MÍNIMO E MÁXIMO DEFINIDOS) ---
+    if (min > 0 && max > 0 && max != 0xFFFF) {
+      return value >= min && value <= max;
+    }
+
+    // Fallback de segurança
+    if (max == 0 || max == 0xFFFF) return value <= (min > 0 ? min : 0);
+    return value <= max;
+  }
 }
 
 class TestResultsNotifier extends Notifier<List<Mode06Result>> {

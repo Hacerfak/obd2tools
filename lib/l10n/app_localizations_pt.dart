@@ -119,7 +119,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get testConsulting =>
-      'Consulting monitores e limites de testes...\nPor favor, aguarde.';
+      'Consultando monitores e limites de testes...\nPor favor, aguarde.';
 
   @override
   String get testNone => 'Nenhum teste interno encontrado.';
@@ -450,4 +450,149 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get aboutDeveloperDesc =>
       'Apaixonado por tecnologia e pelo mundo automotivo. Criando soluções para simplificar o dia a dia.';
+
+  @override
+  String get unitCounts => 'contas';
+
+  @override
+  String midO2Sensor(Object hex) {
+    return 'Sonda Lambda (O2) - Sensor 0x$hex';
+  }
+
+  @override
+  String midCatalyst(Object bank) {
+    return 'Catalisador - Banco $bank';
+  }
+
+  @override
+  String midEgr(Object bank) {
+    return 'Sistema EGR - Banco $bank';
+  }
+
+  @override
+  String midVvt(Object bank) {
+    return 'Comando de Válvulas (VVT) - Banco $bank';
+  }
+
+  @override
+  String get midEvapGeneral => 'EVAP - Monitor Geral do Tanque';
+
+  @override
+  String get midEvapVacuumInit => 'EVAP - Estanqueidade / Vácuo Inicial';
+
+  @override
+  String get midEvapGrossLeak => 'EVAP - Teste de Grande Vazamento (0.090\")';
+
+  @override
+  String get midEvapMedLeak => 'EVAP - Teste de Vazamento Médio (0.040\")';
+
+  @override
+  String get midEvapSmallLeak => 'EVAP - Teste de Micro Vazamento (0.020\")';
+
+  @override
+  String get midEvapPurgeValve => 'EVAP - Válvula de Purga do Canister';
+
+  @override
+  String get midEvapVentValve => 'EVAP - Válvula de Ventilação (Vent Valve)';
+
+  @override
+  String midO2Heater(Object hex) {
+    return 'Aquecedor Sonda Lambda - Sensor 0x$hex';
+  }
+
+  @override
+  String midSecAir(Object bank) {
+    return 'Sistema de Ar Secundário - Banco $bank';
+  }
+
+  @override
+  String midFuelSystem(Object bank) {
+    return 'Sistema de Combustível - Banco $bank';
+  }
+
+  @override
+  String midMisfireCylinder(Object cylinder) {
+    return 'Misfire (Falha de Ignição) - Cilindro $cylinder';
+  }
+
+  @override
+  String get midMisfireAll => 'Misfire (Falha de Ignição) - Todos os Cilindros';
+
+  @override
+  String midProprietary(Object hex) {
+    return 'Monitor Proprietário (0x$hex)';
+  }
+
+  @override
+  String midObd(Object hex) {
+    return 'Monitor OBD (0x$hex)';
+  }
+
+  @override
+  String get tidO2RichToLean => 'Tempo de Resposta (Rica para Magra)';
+
+  @override
+  String get tidO2LeanToRich => 'Tempo de Resposta (Magra para Rica)';
+
+  @override
+  String get tidO2MinVoltage => 'Tensão Mínima Medida';
+
+  @override
+  String get tidO2MaxVoltage => 'Tensão Máxima Medida';
+
+  @override
+  String get tidMisfireEwma => 'Contagem de Misfire (Média Móvel EWMA)';
+
+  @override
+  String get tidMisfireCurrent => 'Contagem de Misfire (Ciclo Atual)';
+
+  @override
+  String get tidEvapPurgeRate => 'Taxa de Purga/Vazamento EVAP';
+
+  @override
+  String get tidEvapInitGrad => 'Gradiente de Pressão Inicial EVAP';
+
+  @override
+  String get tidEvapTankDelta => 'Variação de Pressão do Tanque (Delta)';
+
+  @override
+  String get tidEvapVacDecay => 'Retenção / Queda de Vácuo EVAP';
+
+  @override
+  String get tidEvapInitStab => 'Estabilidade de Pressão Inicial do Tanque';
+
+  @override
+  String get tidEvapCanisterVac => 'Retenção de Vácuo Residual do Canister';
+
+  @override
+  String get tidEvapVentFlow => 'Fluxo / Bloqueio da Válvula Vent do Canister';
+
+  @override
+  String get tidEvapSolResponse => 'Resposta do Solenoide de Purga';
+
+  @override
+  String get tidEvapLinePress => 'Pressão da Linha de Purga sob Carga';
+
+  @override
+  String get tidEvapSensorResp => 'Tempo de Resposta do Sensor de Pressão EVAP';
+
+  @override
+  String get tidEvapSmallDecay =>
+      'Decaimento de Vácuo (Micro-Vazamento 0.020\")';
+
+  @override
+  String get tidEvapMedDecay =>
+      'Variação de Pressão por Evaporação (Vazamento 0.040\")';
+
+  @override
+  String get tidEvapGrossHold =>
+      'Retenção de Vácuo em Carga (Grande Vazamento 0.090\")';
+
+  @override
+  String get tidEvapMinPurgePress => 'Pressão Mínima Atingida na Purga';
+
+  @override
+  String tidGeneric(Object hex) {
+    return 'Teste 0x$hex';
+  }
 }

@@ -120,6 +120,8 @@ class _TestResultsScreenState extends ConsumerState<TestResultsScreen> {
                           statusText = l10n.testFailed;
                         }
 
+                        final unit = Mode06Parser.getUasUnit(test.cid, l10n);
+
                         return Card(
                           margin: const EdgeInsets.only(bottom: 12),
                           child: Padding(
@@ -134,7 +136,10 @@ class _TestResultsScreenState extends ConsumerState<TestResultsScreen> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        Mode06Parser.getMonitorName(test.mid),
+                                        Mode06Parser.getMonitorName(
+                                          test.mid,
+                                          l10n,
+                                        ),
                                         style: TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
@@ -143,7 +148,7 @@ class _TestResultsScreenState extends ConsumerState<TestResultsScreen> {
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        "TID: 0x${test.tid.toRadixString(16).padLeft(2, '0').toUpperCase()} | CID: 0x${test.cid.toRadixString(16).padLeft(2, '0').toUpperCase()} — $statusText",
+                                        "${Mode06Parser.getTidDescription(test.tid, l10n)}   $statusText",
                                         style: TextStyle(
                                           color: statusColor,
                                           fontWeight: FontWeight.w600,
@@ -157,17 +162,17 @@ class _TestResultsScreenState extends ConsumerState<TestResultsScreen> {
                                         children: [
                                           _buildMiniBox(
                                             l10n.testValue,
-                                            test.value.toString(),
+                                            "${test.value} $unit".trim(),
                                             onSurface,
                                           ),
                                           _buildMiniBox(
                                             l10n.testMin,
-                                            test.min.toString(),
+                                            "${test.min} $unit".trim(),
                                             onSurface,
                                           ),
                                           _buildMiniBox(
                                             l10n.testMax,
-                                            test.max.toString(),
+                                            "${test.max} $unit".trim(),
                                             onSurface,
                                           ),
                                         ],

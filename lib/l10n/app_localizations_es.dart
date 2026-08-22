@@ -450,4 +450,146 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get aboutDeveloperDesc =>
       'Apasionado por la tecnología y el mundo automotriz. Creando soluciones para simplificar el día a día.';
+
+  @override
+  String get unitCounts => 'cuentas';
+
+  @override
+  String midO2Sensor(Object hex) {
+    return 'Sonda Lambda (O2) - Sensor 0x$hex';
+  }
+
+  @override
+  String midCatalyst(Object bank) {
+    return 'Catalizador - Banco $bank';
+  }
+
+  @override
+  String midEgr(Object bank) {
+    return 'Sistema EGR - Banco $bank';
+  }
+
+  @override
+  String midVvt(Object bank) {
+    return 'Control de Válvulas (VVT) - Banco $bank';
+  }
+
+  @override
+  String get midEvapGeneral => 'EVAP - Monitor General del Tanque';
+
+  @override
+  String get midEvapVacuumInit => 'EVAP - Estanqueidad / Vacío Inicial';
+
+  @override
+  String get midEvapGrossLeak => 'EVAP - Fuga Grande (0.090\")';
+
+  @override
+  String get midEvapMedLeak => 'EVAP - Fuga Mediana (0.040\")';
+
+  @override
+  String get midEvapSmallLeak => 'EVAP - Fuga Pequeña (0.020\")';
+
+  @override
+  String get midEvapPurgeValve => 'EVAP - Válvula de Purga del Cánister';
+
+  @override
+  String get midEvapVentValve => 'EVAP - Válvula de Ventilación';
+
+  @override
+  String midO2Heater(Object hex) {
+    return 'Calentador Sonda Lambda - Sensor 0x$hex';
+  }
+
+  @override
+  String midSecAir(Object bank) {
+    return 'Sistema de Aire Secundario - Banco $bank';
+  }
+
+  @override
+  String midFuelSystem(Object bank) {
+    return 'Sistema de Combustible - Banco $bank';
+  }
+
+  @override
+  String midMisfireCylinder(Object cylinder) {
+    return 'Fallo de Encendido - Cilindro $cylinder';
+  }
+
+  @override
+  String get midMisfireAll => 'Fallo de Encendido - Todos los Cilindros';
+
+  @override
+  String midProprietary(Object hex) {
+    return 'Monitor Propietario (0x$hex)';
+  }
+
+  @override
+  String midObd(Object hex) {
+    return 'Monitor OBD (0x$hex)';
+  }
+
+  @override
+  String get tidO2RichToLean => 'Tiempo de Respuesta (Rica a Pobre)';
+
+  @override
+  String get tidO2LeanToRich => 'Tiempo de Respuesta (Pobre a Rica)';
+
+  @override
+  String get tidO2MinVoltage => 'Tensión Mínima Medida';
+
+  @override
+  String get tidO2MaxVoltage => 'Tensión Máxima Medida';
+
+  @override
+  String get tidMisfireEwma => 'Misfire (Promedio Móvil EWMA)';
+
+  @override
+  String get tidMisfireCurrent => 'Misfire (Ciclo Actual)';
+
+  @override
+  String get tidEvapPurgeRate => 'Tasa de Purga/Fuga EVAP';
+
+  @override
+  String get tidEvapInitGrad => 'Gradiente de Presión Inicial EVAP';
+
+  @override
+  String get tidEvapTankDelta => 'Variación de Presión del Tanque';
+
+  @override
+  String get tidEvapVacDecay => 'Retención de Vacío EVAP';
+
+  @override
+  String get tidEvapInitStab => 'Estabilidad de Presión Inicial';
+
+  @override
+  String get tidEvapCanisterVac => 'Vacío Residual del Cánister';
+
+  @override
+  String get tidEvapVentFlow => 'Flujo de Válvula Vent';
+
+  @override
+  String get tidEvapSolResponse => 'Respuesta del Solenoide de Purga';
+
+  @override
+  String get tidEvapLinePress => 'Presión de Purga bajo Carga';
+
+  @override
+  String get tidEvapSensorResp => 'Tiempo del Sensor de Presión EVAP';
+
+  @override
+  String get tidEvapSmallDecay => 'Caída de Vacío (Fuga 0.020\")';
+
+  @override
+  String get tidEvapMedDecay => 'Variación de Presión (Fuga 0.040\")';
+
+  @override
+  String get tidEvapGrossHold => 'Retención de Vacío (Fuga Grande 0.090\")';
+
+  @override
+  String get tidEvapMinPurgePress => 'Presión Mínima de Purga';
+
+  @override
+  String tidGeneric(Object hex) {
+    return 'Prueba 0x$hex';
+  }
 }

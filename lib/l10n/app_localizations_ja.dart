@@ -438,4 +438,146 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get aboutDeveloperDesc =>
       'テクノロジーと自動車の世界に情熱を注いでいます。日常生活をシンプルにするソリューションを構築しています。';
+
+  @override
+  String get unitCounts => 'カウント';
+
+  @override
+  String midO2Sensor(Object hex) {
+    return 'O2センサー - センサー 0x$hex';
+  }
+
+  @override
+  String midCatalyst(Object bank) {
+    return '触媒 - バンク $bank';
+  }
+
+  @override
+  String midEgr(Object bank) {
+    return 'EGRシステム - バンク $bank';
+  }
+
+  @override
+  String midVvt(Object bank) {
+    return 'VVTシステム - バンク $bank';
+  }
+
+  @override
+  String get midEvapGeneral => 'EVAP - タンク総合モニター';
+
+  @override
+  String get midEvapVacuumInit => 'EVAP - 密閉性/初期負圧';
+
+  @override
+  String get midEvapGrossLeak => 'EVAP - 大漏れテスト (0.090\")';
+
+  @override
+  String get midEvapMedLeak => 'EVAP - 中漏れテスト (0.040\")';
+
+  @override
+  String get midEvapSmallLeak => 'EVAP - 微小漏れテスト (0.020\")';
+
+  @override
+  String get midEvapPurgeValve => 'EVAP - パージバルブ';
+
+  @override
+  String get midEvapVentValve => 'EVAP - ベントバルブ';
+
+  @override
+  String midO2Heater(Object hex) {
+    return 'O2ヒーター - センサー 0x$hex';
+  }
+
+  @override
+  String midSecAir(Object bank) {
+    return '二次エアシステム - バンク $bank';
+  }
+
+  @override
+  String midFuelSystem(Object bank) {
+    return '燃料システム - バンク $bank';
+  }
+
+  @override
+  String midMisfireCylinder(Object cylinder) {
+    return '失火 - シリンダー $cylinder';
+  }
+
+  @override
+  String get midMisfireAll => '失火 - 全シリンダー';
+
+  @override
+  String midProprietary(Object hex) {
+    return '独自モニター (0x$hex)';
+  }
+
+  @override
+  String midObd(Object hex) {
+    return 'OBDモニター (0x$hex)';
+  }
+
+  @override
+  String get tidO2RichToLean => '応答時間（リッチからリーン）';
+
+  @override
+  String get tidO2LeanToRich => '応答時間（リーンからリッチ）';
+
+  @override
+  String get tidO2MinVoltage => '最小計測電圧';
+
+  @override
+  String get tidO2MaxVoltage => '最大計測電圧';
+
+  @override
+  String get tidMisfireEwma => '失火回数（EWMA移動平均）';
+
+  @override
+  String get tidMisfireCurrent => '失火回数（現在サイクル）';
+
+  @override
+  String get tidEvapPurgeRate => 'EVAP パージ/リーク率';
+
+  @override
+  String get tidEvapInitGrad => 'EVAP 初期圧力勾配';
+
+  @override
+  String get tidEvapTankDelta => 'タンク内圧変動';
+
+  @override
+  String get tidEvapVacDecay => 'EVAP 負圧保持率';
+
+  @override
+  String get tidEvapInitStab => '初期タンク圧力安定性';
+
+  @override
+  String get tidEvapCanisterVac => 'キャニスタ残留負圧保持';
+
+  @override
+  String get tidEvapVentFlow => 'ベントバルブ流量';
+
+  @override
+  String get tidEvapSolResponse => 'パージソレノイド応答';
+
+  @override
+  String get tidEvapLinePress => '負荷時パージライン圧力';
+
+  @override
+  String get tidEvapSensorResp => 'EVAP圧力センサー応答時間';
+
+  @override
+  String get tidEvapSmallDecay => '負圧減衰（微小漏れ 0.020\"）';
+
+  @override
+  String get tidEvapMedDecay => '圧力変動（中漏れ 0.040\"）';
+
+  @override
+  String get tidEvapGrossHold => '負圧保持（大漏れ 0.090\"）';
+
+  @override
+  String get tidEvapMinPurgePress => 'パージ時到達最小圧力';
+
+  @override
+  String tidGeneric(Object hex) {
+    return 'テスト 0x$hex';
+  }
 }

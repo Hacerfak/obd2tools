@@ -451,4 +451,146 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get aboutDeveloperDesc =>
       'Leidenschaft für Technologie und die Automobilwelt. Lösungen schaffen, um den Alltag zu vereinfachen.';
+
+  @override
+  String get unitCounts => 'Zählungen';
+
+  @override
+  String midO2Sensor(Object hex) {
+    return 'Lambdasonde - Sensor 0x$hex';
+  }
+
+  @override
+  String midCatalyst(Object bank) {
+    return 'Katalysator - Bank $bank';
+  }
+
+  @override
+  String midEgr(Object bank) {
+    return 'EGR-System - Bank $bank';
+  }
+
+  @override
+  String midVvt(Object bank) {
+    return 'VVT-System - Bank $bank';
+  }
+
+  @override
+  String get midEvapGeneral => 'EVAP - Tank Hauptmonitor';
+
+  @override
+  String get midEvapVacuumInit => 'EVAP - Dichtheit / Anfangsvakuum';
+
+  @override
+  String get midEvapGrossLeak => 'EVAP - Grobes Leck (0.090\")';
+
+  @override
+  String get midEvapMedLeak => 'EVAP - Mittleres Leck (0.040\")';
+
+  @override
+  String get midEvapSmallLeak => 'EVAP - Kleines Leck (0.020\")';
+
+  @override
+  String get midEvapPurgeValve => 'EVAP - Regulierventil';
+
+  @override
+  String get midEvapVentValve => 'EVAP - Belüftungsventil';
+
+  @override
+  String midO2Heater(Object hex) {
+    return 'Lambdasondenheizung - Sensor 0x$hex';
+  }
+
+  @override
+  String midSecAir(Object bank) {
+    return 'Sekundärluftsystem - Bank $bank';
+  }
+
+  @override
+  String midFuelSystem(Object bank) {
+    return 'Kraftstoffsystem - Bank $bank';
+  }
+
+  @override
+  String midMisfireCylinder(Object cylinder) {
+    return 'Aussetzer - Zylinder $cylinder';
+  }
+
+  @override
+  String get midMisfireAll => 'Aussetzer - Alle Zylinder';
+
+  @override
+  String midProprietary(Object hex) {
+    return 'Herstellerspezifischer Monitor (0x$hex)';
+  }
+
+  @override
+  String midObd(Object hex) {
+    return 'OBD Monitor (0x$hex)';
+  }
+
+  @override
+  String get tidO2RichToLean => 'Reaktionszeit (Fett zu Mager)';
+
+  @override
+  String get tidO2LeanToRich => 'Reaktionszeit (Mager zu Fett)';
+
+  @override
+  String get tidO2MinVoltage => 'Gemessene Mindestspannung';
+
+  @override
+  String get tidO2MaxVoltage => 'Gemessene Höchstspannung';
+
+  @override
+  String get tidMisfireEwma => 'Aussetzerquote (EWMA-Mittelwert)';
+
+  @override
+  String get tidMisfireCurrent => 'Aussetzerquote (Aktueller Zyklus)';
+
+  @override
+  String get tidEvapPurgeRate => 'EVAP Spül-/Leckrate';
+
+  @override
+  String get tidEvapInitGrad => 'EVAP Anfangsdruckgradient';
+
+  @override
+  String get tidEvapTankDelta => 'Tankdruck-Delta';
+
+  @override
+  String get tidEvapVacDecay => 'EVAP Vakuumabfall';
+
+  @override
+  String get tidEvapInitStab => 'Anfangstankdruckstabilität';
+
+  @override
+  String get tidEvapCanisterVac => 'Kanister-Restvakuum';
+
+  @override
+  String get tidEvapVentFlow => 'Belüftungsventil-Durchfluss';
+
+  @override
+  String get tidEvapSolResponse => 'Spülventil-Reaktion';
+
+  @override
+  String get tidEvapLinePress => 'Spülleitungsdruck unter Last';
+
+  @override
+  String get tidEvapSensorResp => 'EVAP Drucksensor-Reaktionszeit';
+
+  @override
+  String get tidEvapSmallDecay => 'Vakuumabfall (Kleines Leck 0.020\")';
+
+  @override
+  String get tidEvapMedDecay => 'Druck-Delta (Mittleres Leck 0.040\")';
+
+  @override
+  String get tidEvapGrossHold => 'Vakuumhalten (Grobes Leck 0.090\")';
+
+  @override
+  String get tidEvapMinPurgePress => 'Mindestdruck beim Spülen';
+
+  @override
+  String tidGeneric(Object hex) {
+    return 'Test 0x$hex';
+  }
 }
