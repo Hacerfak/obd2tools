@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../parser/obd_pid.dart';
 import '../state/obd_providers.dart';
 
-// TROCAMOS 'lineChart' POR 'stats'
 enum GaugeStyle { digital, analog, stats }
 
 class ZoneGradient {
@@ -31,25 +30,56 @@ class ObdGauge extends ConsumerWidget {
     return 100;
   }
 
+  /// Sistema abrangente de abreviações técnicas em linha única
   String _getShortName(String fullName) {
     if (fullName.contains("Arrefecimento")) return "Temp. Motor";
     if (fullName.contains("Velocidade")) return "Velocidade";
     if (fullName.contains("Rotação")) return "RPM Motor";
-    if (fullName.contains("Pressão Admissão")) return "Pressão MAP";
-    if (fullName.contains("Fluxo de Ar")) return "Fluxo MAF";
-    if (fullName.contains("Posição do Acelerador")) return "Acelerador";
-    if (fullName.contains("Temp. Ar Admissão")) return "Temp. Ar";
-    if (fullName.contains("Carga Calculada")) return "Carga Motor";
-    if (fullName.contains("Tensão")) return "Bateria";
+    if (fullName.contains("Pressão Admissão") || fullName.contains("MAP"))
+      return "Pressão MAP";
+    if (fullName.contains("Fluxo de Ar") || fullName.contains("MAF"))
+      return "Fluxo MAF";
+    if (fullName.contains("Acelerador") || fullName.contains("TPS"))
+      return "Acelerador";
+    if (fullName.contains("Temp. Ar Admissão") || fullName.contains("IAT"))
+      return "Temp. Ar IAT";
+    if (fullName.contains("Carga Calculada") ||
+        fullName.contains("Carga Absoluta"))
+      return "Carga Motor";
+    if (fullName.contains("Tensão Módulo") || fullName.contains("Bateria"))
+      return "Bateria ECU";
+    if (fullName.contains("Tensão da Sonda") ||
+        fullName.contains("Sonda Lambda"))
+      return "Sonda Lambda";
     if (fullName.contains("Barométrica")) return "Pressão Atm.";
-    if (fullName.contains("Razão Equivalência")) return "Mistura (AF)";
+    if (fullName.contains("Razão Equivalência") || fullName.contains("Mistura"))
+      return "Mistura (A/F)";
     if (fullName.contains("Ar Ambiente")) return "Temp. Ext.";
+    if (fullName.contains("Óleo do Motor")) return "Temp. Óleo";
+    if (fullName.contains("Curto Prazo")) return "STFT (Curto)";
+    if (fullName.contains("Longo Prazo")) return "LTFT (Longo)";
+    if (fullName.contains("Pressão do Combustível")) return "Pressão Comb.";
+    if (fullName.contains("Nível de Combustível")) return "Nível Comb.";
+    if (fullName.contains("Purga Canister") || fullName.contains("Purga"))
+      return "Purga Canister";
+    if (fullName.contains("Pressão de Vapor") || fullName.contains("EVAP"))
+      return "Pressão EVAP";
+    if (fullName.contains("Catalisador")) return "Temp. Catalisador";
+    if (fullName.contains("Consumo")) return "Consumo L/h";
+    if (fullName.contains("Torque")) return "Torque Real";
+    if (fullName.contains("Hodômetro")) return "Hodômetro ECU";
+    if (fullName.contains("Intercooler")) return "Intercooler";
+    if (fullName.contains("Avanço")) return "Avanço Ignição";
+    if (fullName.contains("Etanol")) return "Etanol %";
+
+    if (fullName.length > 14) {
+      return "${fullName.substring(0, 12)}..";
+    }
     return fullName;
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // ALTA PERFORMANCE: Escuta apenas os dados do PID específico
     final sensorData = ref.watch(
       realTimeStateProvider.select((data) => data[pid.name]),
     );
@@ -121,24 +151,19 @@ class ObdGauge extends ConsumerWidget {
           ),
         ],
       ),
-      child: Column(
-        children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(
-                top: 12.0,
-                left: 12.0,
-                right: 12.0,
-              ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 2.0, vertical: 2.0),
+        child: Column(
+          children: [
+            // 1. ÁREA DO ARCO GRÁFICO (UNIDADE NA BASE DO ARCO)
+            Expanded(
               child: style == GaugeStyle.stats
-                  // NOVO: PAINEL DE ESTATÍSTICAS
                   ? _buildStatsPanel(
                       currentValue,
                       history,
                       onSurface,
                       activeColor,
                     )
-                  // MEDIDORES CIRCULARES
                   : LayoutBuilder(
                       builder: (context, constraints) {
                         double size = min(
@@ -167,75 +192,31 @@ class ObdGauge extends ConsumerWidget {
                                           zones: zones,
                                         ),
                                 ),
-                                if (style == GaugeStyle.digital)
-                                  SizedBox(
+
+                                // UNIDADE ALINHADA NA BASE ABERTA DO ARCO
+                                Positioned(
+                                  top: style == GaugeStyle.analog
+                                      ? size * 0.60
+                                      : size * 0.60,
+                                  child: SizedBox(
                                     width: size * 0.65,
-                                    child: FittedBox(
-                                      fit: BoxFit.scaleDown,
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            currentValue.toStringAsFixed(
-                                              pid.unit == "RPM" ? 0 : 1,
-                                            ),
-                                            style: TextStyle(
-                                              fontSize: size * 0.28,
-                                              fontWeight: FontWeight.w900,
-                                              color: activeColor,
-                                              fontFamily: 'Monospace',
-                                            ),
-                                          ),
-                                          Text(
-                                            pid.unit,
-                                            style: TextStyle(
-                                              color: activeColor.withValues(
-                                                alpha: 0.7,
-                                              ),
-                                              fontSize: size * 0.1,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                if (style == GaugeStyle.analog)
-                                  Positioned(
-                                    bottom: size * 0.05,
-                                    child: SizedBox(
-                                      width: size * 0.5,
+                                    child: Center(
                                       child: FittedBox(
                                         fit: BoxFit.scaleDown,
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(
-                                              currentValue.toStringAsFixed(
-                                                pid.unit == "RPM" ? 0 : 1,
-                                              ),
-                                              style: TextStyle(
-                                                fontSize: size * 0.20,
-                                                fontWeight: FontWeight.w900,
-                                                color: activeColor,
-                                                fontFamily: 'Monospace',
-                                              ),
+                                        child: Text(
+                                          pid.unit.isEmpty ? "--" : pid.unit,
+                                          style: TextStyle(
+                                            fontSize: size * 0.22,
+                                            fontWeight: FontWeight.w900,
+                                            color: activeColor.withValues(
+                                              alpha: 0.85,
                                             ),
-                                            Text(
-                                              pid.unit,
-                                              style: TextStyle(
-                                                color: activeColor.withValues(
-                                                  alpha: 0.7,
-                                                ),
-                                                fontSize: size * 0.08,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
+                                ),
                               ],
                             ),
                           ),
@@ -243,33 +224,48 @@ class ObdGauge extends ConsumerWidget {
                       },
                     ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(
-              bottom: 12.0,
-              left: 8.0,
-              right: 8.0,
-              top: 8.0,
-            ),
-            child: Text(
+
+            // 2. VALOR ATUAL (Abaixo do arco, bem maior no espaço disponível)
+            if (style != GaugeStyle.stats) ...[
+              const SizedBox(height: 2),
+              SizedBox(
+                height: 26,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    currentValue.toStringAsFixed(pid.unit == "RPM" ? 0 : 1),
+                    style: TextStyle(
+                      fontSize: 26, // BEM MAIOR E DESTACADO!
+                      fontWeight: FontWeight.w900,
+                      color: activeColor,
+                      fontFamily: 'Monospace',
+                    ),
+                  ),
+                ),
+              ),
+            ],
+
+            const SizedBox(height: 2),
+
+            // 3. NOME ABREVIADO DO SENSOR
+            Text(
               _getShortName(pid.name).toUpperCase(),
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: onSurface.withValues(alpha: 0.54),
-                fontSize: 10,
+                fontSize: 9.5,
                 fontWeight: FontWeight.bold,
-                letterSpacing: 1,
+                letterSpacing: 0.5,
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  // WIDGET DO PAINEL DE ESTATÍSTICAS
   Widget _buildStatsPanel(
     double currentValue,
     List<double> history,
@@ -299,7 +295,7 @@ class ObdGauge extends ConsumerWidget {
                   Text(
                     formatVal(currentValue),
                     style: TextStyle(
-                      fontSize: 40,
+                      fontSize: 36,
                       fontWeight: FontWeight.w900,
                       color: activeColor,
                       fontFamily: 'Monospace',
@@ -309,7 +305,7 @@ class ObdGauge extends ConsumerWidget {
                     pid.unit,
                     style: TextStyle(
                       color: activeColor.withValues(alpha: 0.7),
-                      fontSize: 14,
+                      fontSize: 13,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -318,9 +314,8 @@ class ObdGauge extends ConsumerWidget {
             ),
           ),
         ),
-        // AQUI FOI ALTERADO: Trocamos a Row por uma Column para empilhar
         Padding(
-          padding: const EdgeInsets.only(bottom: 4.0),
+          padding: const EdgeInsets.only(bottom: 2.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -330,7 +325,7 @@ class ObdGauge extends ConsumerWidget {
                 onSurface,
                 Colors.blueAccent,
               ),
-              const SizedBox(height: 2), // Respiro sutil entre o Min e Max
+              const SizedBox(height: 1),
               _buildMiniStat(
                 "MAX",
                 formatVal(currentMax),
@@ -344,7 +339,6 @@ class ObdGauge extends ConsumerWidget {
     );
   }
 
-  // AQUI FOI ALTERADO: Transforma o ícone, label e valor em uma linha única e compacta
   Widget _buildMiniStat(
     String label,
     String value,
@@ -360,13 +354,13 @@ class ObdGauge extends ConsumerWidget {
               ? Icons.arrow_downward_rounded
               : Icons.arrow_upward_rounded,
           color: iconColor,
-          size: 14,
+          size: 12,
         ),
-        const SizedBox(width: 4),
+        const SizedBox(width: 2),
         Text(
           "$label: ",
           style: TextStyle(
-            fontSize: 11,
+            fontSize: 10,
             fontWeight: FontWeight.bold,
             color: onSurface.withValues(alpha: 0.5),
           ),
@@ -374,7 +368,7 @@ class ObdGauge extends ConsumerWidget {
         Text(
           value,
           style: TextStyle(
-            fontSize: 13,
+            fontSize: 12,
             fontWeight: FontWeight.bold,
             color: onSurface,
             fontFamily: 'Monospace',
@@ -464,7 +458,7 @@ class DigitalGaugePainter extends CustomPainter {
         ..shader = trackShader
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 12,
+        ..strokeWidth = 10,
     );
     canvas.drawArc(
       rect,
@@ -475,7 +469,7 @@ class DigitalGaugePainter extends CustomPainter {
         ..shader = fillShader
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 12,
+        ..strokeWidth = 10,
     );
   }
 
@@ -523,7 +517,7 @@ class AnalogGaugePainter extends CustomPainter {
         ..shader = trackShader
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 6,
+        ..strokeWidth = 5,
     );
 
     final tickPaint = Paint()
@@ -533,8 +527,8 @@ class AnalogGaugePainter extends CustomPainter {
     for (int i = 0; i <= 10; i++) {
       double angle = startAngle + (sweepAngle * (i / 10));
       Offset inner = Offset(
-        center.dx + (radius - 8) * cos(angle),
-        center.dy + (radius - 8) * sin(angle),
+        center.dx + (radius - 7) * cos(angle),
+        center.dy + (radius - 7) * sin(angle),
       );
       Offset outer = Offset(
         center.dx + radius * cos(angle),
@@ -544,12 +538,12 @@ class AnalogGaugePainter extends CustomPainter {
     }
 
     final pointerAngle = startAngle + (sweepAngle * percent);
-    final pointerLength = radius - 14;
+    final pointerLength = radius - 12;
 
     final pointerPaint = Paint()
       ..color = activeColor
       ..strokeCap = StrokeCap.round
-      ..strokeWidth = 4;
+      ..strokeWidth = 3.5;
 
     canvas.drawLine(
       center,
@@ -559,8 +553,8 @@ class AnalogGaugePainter extends CustomPainter {
       ),
       pointerPaint,
     );
-    canvas.drawCircle(center, 8, Paint()..color = baseColor);
-    canvas.drawCircle(center, 4, Paint()..color = activeColor);
+    canvas.drawCircle(center, 7, Paint()..color = baseColor);
+    canvas.drawCircle(center, 3.5, Paint()..color = activeColor);
   }
 
   @override
