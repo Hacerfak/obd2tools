@@ -23,7 +23,6 @@ class _HudScreenState extends ConsumerState<HudScreen> {
   late final ObdManager _obdManager;
   final List<int> _activeGaugesPids = [];
   GaugeStyle _currentStyle = GaugeStyle.digital;
-
   bool _showTutorial = false;
   final FocusNode _focusNode = FocusNode();
 
@@ -55,7 +54,6 @@ class _HudScreenState extends ConsumerState<HudScreen> {
     setState(() {
       _currentStyle = GaugeStyle.values[savedStyleIndex];
       _activeGaugesPids.clear();
-
       if (savedPids != null && savedPids.isNotEmpty) {
         final uniquePids = savedPids.map(int.parse).toSet().toList();
         _activeGaugesPids.addAll(uniquePids);
@@ -91,16 +89,93 @@ class _HudScreenState extends ConsumerState<HudScreen> {
     final isFullscreen = ref.watch(hudFullscreenProvider);
     final l10n = AppLocalizations.of(context)!;
 
-    // MELHORIA: Detecta com precisão se é um celular pelo lado mais curto
     final isPhone = MediaQuery.of(context).size.shortestSide < 600;
     final isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
 
-    // A MÁGICA DA SUA IDEIA: Corta a lista para 6 itens na horizontal no celular!
     List<int> displayPids = _activeGaugesPids;
     if (isPhone && isLandscape && displayPids.length > 6) {
       displayPids = displayPids.take(6).toList();
     }
+
+    // BOTÃO DE AÇÕES (EDITAR / FULLSCREEN)
+    final actionButtons = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton.filledTonal(
+          onPressed: () {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (context) => FractionallySizedBox(
+                heightFactor: 0.9,
+                child: HudSensorSelector(
+                  initialSelection: _activeGaugesPids,
+                  onSave: (newSelection) {
+                    setState(() {
+                      _activeGaugesPids.clear();
+                      _activeGaugesPids.addAll(newSelection);
+                    });
+                    _savePreferences(newSelection);
+                    _obdManager.setPollingPids(_activeGaugesPids);
+                  },
+                ),
+              ),
+            );
+          },
+          icon: const Icon(Icons.edit_rounded),
+          color: Theme.of(context).colorScheme.primary,
+          tooltip: l10n.hudManage,
+        ),
+        if (!isPhone || isLandscape) ...[
+          const SizedBox(width: 8),
+          IconButton.filledTonal(
+            onPressed: () => ref.read(hudFullscreenProvider.notifier).toggle(),
+            icon: const Icon(Icons.fullscreen),
+            color: Theme.of(context).colorScheme.primary,
+            tooltip: l10n.hudFullscreen,
+          ),
+        ],
+      ],
+    );
+
+    // SELETOR RESPONSIVO DE ESTILOS
+    final styleSelector = SegmentedButton<GaugeStyle>(
+      segments: const [
+        ButtonSegment(
+          value: GaugeStyle.digital,
+          icon: Icon(Icons.speed, size: 18),
+        ),
+        ButtonSegment(
+          value: GaugeStyle.analog,
+          icon: Icon(Icons.av_timer, size: 18),
+        ),
+        ButtonSegment(
+          value: GaugeStyle.stats,
+          icon: Icon(Icons.query_stats, size: 18),
+        ),
+        ButtonSegment(
+          value: GaugeStyle.chart,
+          icon: Icon(Icons.show_chart_rounded, size: 18),
+        ),
+      ],
+      selected: {_currentStyle},
+      onSelectionChanged: (Set<GaugeStyle> newSelection) {
+        final style = newSelection.first;
+        setState(() => _currentStyle = style);
+        SharedPreferences.getInstance().then((prefs) {
+          prefs.setInt('hud_style', style.index);
+        });
+      },
+      style: SegmentedButton.styleFrom(
+        visualDensity: VisualDensity.compact,
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        backgroundColor: onSurface.withValues(alpha: 0.1),
+        selectedForegroundColor: Colors.white,
+        selectedBackgroundColor: Theme.of(context).colorScheme.primary,
+      ),
+    );
 
     return Scaffold(
       body: Focus(
@@ -129,110 +204,54 @@ class _HudScreenState extends ConsumerState<HudScreen> {
                   if (!isFullscreen)
                     Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // Exibe quantos estão na tela vs Total em memória
-                          Text(
-                            "${l10n.tabHud} (${displayPids.length}/${_activeGaugesPids.length})",
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: onSurface,
-                            ),
-                          ),
-                          Row(
-                            children: [
-                              IconButton.filledTonal(
-                                onPressed: () {
-                                  showModalBottomSheet(
-                                    context: context,
-                                    isScrollControlled: true,
-                                    backgroundColor: Colors.transparent,
-                                    builder: (context) => FractionallySizedBox(
-                                      heightFactor: 0.9,
-                                      child: HudSensorSelector(
-                                        initialSelection: _activeGaugesPids,
-                                        onSave: (newSelection) {
-                                          setState(() {
-                                            _activeGaugesPids.clear();
-                                            _activeGaugesPids.addAll(
-                                              newSelection,
-                                            );
-                                          });
-                                          _savePreferences(newSelection);
-                                          _obdManager.setPollingPids(
-                                            _activeGaugesPids,
-                                          );
-                                        },
+                      child: isPhone && !isLandscape
+                          // LAYOUT VERTICAL NO CELULAR: 2 Linhas
+                          ? Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "${l10n.tabHud} (${displayPids.length}/${_activeGaugesPids.length})",
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: onSurface,
                                       ),
                                     ),
-                                  );
-                                },
-                                icon: const Icon(Icons.edit_rounded),
-                                color: Theme.of(context).colorScheme.primary,
-                                tooltip: l10n.hudManage,
-                              ),
-                              const SizedBox(width: 8),
-                              SegmentedButton<GaugeStyle>(
-                                segments: const [
-                                  ButtonSegment(
-                                    value: GaugeStyle.digital,
-                                    icon: Icon(Icons.speed, size: 18),
-                                  ),
-                                  ButtonSegment(
-                                    value: GaugeStyle.analog,
-                                    icon: Icon(Icons.av_timer, size: 18),
-                                  ),
-                                  ButtonSegment(
-                                    value: GaugeStyle.stats,
-                                    icon: Icon(Icons.query_stats, size: 18),
-                                  ),
-                                  ButtonSegment(
-                                    value: GaugeStyle.chart,
-                                    icon: Icon(
-                                      Icons.show_chart_rounded,
-                                      size: 18,
-                                    ), // <--- NOVO ÍCONE DE GRÁFICO
-                                  ),
-                                ],
-                                selected: {_currentStyle},
-                                onSelectionChanged:
-                                    (Set<GaugeStyle> newSelection) {
-                                      final style = newSelection.first;
-                                      setState(() => _currentStyle = style);
-                                      SharedPreferences.getInstance().then((
-                                        prefs,
-                                      ) {
-                                        prefs.setInt('hud_style', style.index);
-                                      });
-                                    },
-                                style: SegmentedButton.styleFrom(
-                                  backgroundColor: onSurface.withValues(
-                                    alpha: 0.1,
-                                  ),
-                                  selectedForegroundColor: Colors.white,
-                                  selectedBackgroundColor: Theme.of(
-                                    context,
-                                  ).colorScheme.primary,
+                                    actionButtons,
+                                  ],
                                 ),
-                              ),
-                              // Botão de fullscreen disponível no Desktop e no Mobile Landscape
-                              if (!isPhone || isLandscape) ...[
-                                const SizedBox(width: 8),
-                                IconButton.filledTonal(
-                                  onPressed: () => ref
-                                      .read(hudFullscreenProvider.notifier)
-                                      .toggle(),
-                                  icon: const Icon(Icons.fullscreen),
-                                  color: Theme.of(context).colorScheme.primary,
-                                  tooltip: l10n.hudFullscreen,
+                                const SizedBox(height: 10),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: styleSelector,
                                 ),
                               ],
-                            ],
-                          ),
-                        ],
-                      ),
+                            )
+                          // LAYOUT HORIZONTAL OU TABLET/DESKTOP: 1 Linha
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "${l10n.tabHud} (${displayPids.length}/${_activeGaugesPids.length})",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: onSurface,
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    actionButtons,
+                                    const SizedBox(width: 8),
+                                    styleSelector,
+                                  ],
+                                ),
+                              ],
+                            ),
                     ),
 
                   // GRID DE SENSORES ESTÁTICO E RESPONSIVO
@@ -243,27 +262,21 @@ class _HudScreenState extends ConsumerState<HudScreen> {
                         builder: (context, constraints) {
                           int totalItems = displayPids.length;
                           if (totalItems == 0) return const SizedBox();
-
                           int crossAxisCount;
 
-                          // LÓGICA DE DISTRIBUIÇÃO
                           if (!isPhone) {
-                            // Tablets e PCs: Aguentam muitas colunas
                             crossAxisCount = totalItems > 6
                                 ? 4
                                 : (totalItems > 3 ? 3 : 2);
                           } else if (isLandscape) {
-                            // Celular Deitado: Máximo 6 itens (Sempre até 2 linhas)
                             if (totalItems <= 2) {
                               crossAxisCount = totalItems;
                             } else if (totalItems <= 4) {
                               crossAxisCount = 2;
-                            } // 2x2
-                            else {
+                            } else {
                               crossAxisCount = 3;
-                            } // 3x2 (6 itens)
+                            }
                           } else {
-                            // Celular em Pé: Máximo 12 itens (Até 4 linhas)
                             if (totalItems <= 2) {
                               crossAxisCount = 1;
                             } else if (totalItems <= 6) {
@@ -273,16 +286,12 @@ class _HudScreenState extends ConsumerState<HudScreen> {
                             }
                           }
 
-                          // CÁLCULO EXATO PARA PREENCHER 100% DA TELA SEM SCROLL
                           int rowCount = (totalItems / crossAxisCount).ceil();
                           double totalSpacingWidth =
                               (crossAxisCount - 1) * 12.0;
-
-                          // Ajusta o padding dinamicamente (com fullscreen ativado removemos margens extras)
                           double extraBottomPadding = isFullscreen ? 16.0 : 0.0;
                           double totalSpacingHeight =
                               (rowCount - 1) * 12.0 + extraBottomPadding;
-
                           double itemWidth =
                               (constraints.maxWidth - totalSpacingWidth) /
                               crossAxisCount;
@@ -290,15 +299,12 @@ class _HudScreenState extends ConsumerState<HudScreen> {
                               (constraints.maxHeight - totalSpacingHeight) /
                               rowCount;
 
-                          // Proteção contra divisões por zero durante redimensionamento
                           if (itemWidth <= 0 || itemHeight <= 0) {
                             return const SizedBox();
                           }
-
                           double childAspectRatio = itemWidth / itemHeight;
 
                           return GridView.builder(
-                            // PAINEL DE VOLTA AO MODO ESTÁTICO (Sem rolagem)
                             physics: const NeverScrollableScrollPhysics(),
                             padding: EdgeInsets.only(
                               bottom: extraBottomPadding,

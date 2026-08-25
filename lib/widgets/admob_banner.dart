@@ -25,13 +25,7 @@ class _AdMobBannerState extends State<AdMobBanner>
   Orientation? _currentOrientation;
   bool? _isLargeScreen;
 
-  final String _adUnitId = kDebugMode
-      ? (Platform.isAndroid
-            ? 'ca-app-pub-3940256099942544/6300978111'
-            : 'ca-app-pub-3940256099942544/2934735716')
-      : (Platform.isAndroid
-            ? 'ca-app-pub-4241608895500197/7309130446'
-            : 'ca-app-pub-4241608895500197/7562768546');
+  final String _adUnitId = 'ca-app-pub-4241608895500197/7309130446';
 
   @override
   bool get wantKeepAlive => true;
