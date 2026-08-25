@@ -31,7 +31,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  flutter_classic_bluetooth: ^0.1.4
+  flutter_classic_bluetooth: ^1.0.0
   permission_handler: ^13.0.1
 
   # The following adds the Cupertino Icons font to your application.
@@ -80,6 +80,8 @@ flutter:
     - assets/icon/icon.png
     - assets/data/sensors/
     - assets/data/dtcs/
+    - assets/data/mode06/
+    - assets/data/mode09/
     - assets/images/eu.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see

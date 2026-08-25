@@ -1,6 +1,12 @@
+import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '/l10n/app_localizations.dart'; // IMPORT DA TRADUÇÃO
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
+import '/l10n/app_localizations.dart';
 import '../state/obd_providers.dart';
 
 class VehicleInfoScreen extends ConsumerStatefulWidget {
@@ -24,12 +30,65 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
   void _requestData() async {
     setState(() => _isLoading = true);
     ref.read(obdManagerProvider).requestVehicleInfo();
-
-    // Delay artificial de 2.5s para garantir que todos os PIDs 09 respondam
-    // e o usuário perceba a leitura da ECU
     await Future.delayed(const Duration(milliseconds: 2500));
     if (mounted) {
       setState(() => _isLoading = false);
+    }
+  }
+
+  void _copyToClipboard(String key, String value, AppLocalizations l10n) {
+    Clipboard.setData(ClipboardData(text: "$key: $value"));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(l10n.infoCopiedSnack(key)),
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  Future<void> _exportJson(AppLocalizations l10n) async {
+    final vehicleInfo = ref.read(vehicleInfoStateProvider);
+
+    if (vehicleInfo.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.dbgEmpty)));
+      return;
+    }
+
+    try {
+      final jsonString = const JsonEncoder.withIndent(
+        '  ',
+      ).convert(vehicleInfo);
+
+      if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+        final directory = await getTemporaryDirectory();
+        final file = File('${directory.path}/vehicle_info.json');
+        await file.writeAsString(jsonString);
+        await Share.shareXFiles([
+          XFile(file.path),
+        ], text: l10n.infoShareSubject);
+      } else {
+        final directory = await getApplicationDocumentsDirectory();
+        final file = File('${directory.path}/vehicle_info.json');
+        await file.writeAsString(jsonString);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("${l10n.dbgSaved}\n${file.path}"),
+              duration: const Duration(seconds: 5),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.dbgExportError(e.toString()))),
+        );
+      }
     }
   }
 
@@ -40,7 +99,6 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
     final primaryColor = Theme.of(context).colorScheme.primary;
     final l10n = AppLocalizations.of(context)!;
 
-    // VERIFICA SE ESTÁ DEITADO E CALCULA AS MARGENS
     final isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
     final double vPadding = isLandscape ? 8.0 : 16.0;
@@ -63,13 +121,30 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
                   ),
                 ),
                 if (!_isLoading)
-                  IconButton.filledTonal(
-                    onPressed: _requestData,
-                    icon: const Icon(Icons.refresh),
-                    color: primaryColor,
-                    tooltip: l10n.btnRefresh,
-                    // ENCOLHE O BOTÃO NA HORIZONTAL PARA GANHAR ESPAÇO DE TELA
-                    visualDensity: isLandscape ? VisualDensity.compact : null,
+                  Row(
+                    children: [
+                      if (vehicleInfo.isNotEmpty) ...[
+                        IconButton.filledTonal(
+                          onPressed: () => _exportJson(l10n),
+                          icon: const Icon(Icons.download_rounded),
+                          color: primaryColor,
+                          tooltip: l10n.infoExportTooltip,
+                          visualDensity: isLandscape
+                              ? VisualDensity.compact
+                              : null,
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                      IconButton.filledTonal(
+                        onPressed: _requestData,
+                        icon: const Icon(Icons.refresh),
+                        color: primaryColor,
+                        tooltip: l10n.btnRefresh,
+                        visualDensity: isLandscape
+                            ? VisualDensity.compact
+                            : null,
+                      ),
+                    ],
                   ),
               ],
             ),
@@ -129,6 +204,17 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
                               key,
                               style: TextStyle(color: primaryColor),
                             ),
+                            trailing: IconButton(
+                              icon: Icon(
+                                Icons.copy_rounded,
+                                color: onSurface.withValues(alpha: 0.54),
+                                size: 20,
+                              ),
+                              tooltip: l10n.btnCopy,
+                              onPressed: () =>
+                                  _copyToClipboard(key, value, l10n),
+                            ),
+                            onTap: () => _copyToClipboard(key, value, l10n),
                           ),
                         );
                       },

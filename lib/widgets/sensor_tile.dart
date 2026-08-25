@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../parser/obd_pid.dart';
 import '../state/obd_providers.dart';
+import '../state/technical_data_service.dart';
 
 class SensorTile extends ConsumerWidget {
   final ObdPid pid;
@@ -14,11 +15,20 @@ class SensorTile extends ConsumerWidget {
     final sensorData = ref.watch(
       realTimeStateProvider.select((data) => data[pid.name]),
     );
-
     final onSurfaceColor = Theme.of(context).colorScheme.onSurface;
     final appColors = ref.watch(appColorsProvider).current(context);
+    final techService = ref.watch(technicalDataProvider);
 
-    // FUNÇÃO DINÂMICA INTERNA
+    final hexId = pid.id.toRadixString(16).padLeft(2, '0').toUpperCase();
+    final sensorTechData = techService.getSensorData(hexId);
+
+    // Usa o nome traduzido do JSON ou cai de volta para o nome padrão do PID
+    final String displayName = sensorTechData?.name.isNotEmpty == true
+        ? sensorTechData!.name
+        : pid.name;
+
+    final hasValueMap = sensorTechData?.valueMap != null;
+
     Color getColorForHealth(SensorHealth? health, Color defaultColor) {
       if (health == SensorHealth.normal) return appColors.normal;
       if (health == SensorHealth.warning) return appColors.warning;
@@ -26,16 +36,21 @@ class SensorTile extends ConsumerWidget {
       return defaultColor;
     }
 
-    // Calcula a saúde para pintar o texto (usando a função nova)
     SensorHealth? currentHealth =
         sensorData != null && pid.evaluateHealth != null
         ? pid.evaluateHealth!(sensorData.value)
         : null;
 
-    Color activeColor = getColorForHealth(
-      currentHealth,
-      appColors.primary,
-    ); // Usa a primary como default
+    Color activeColor = getColorForHealth(currentHealth, appColors.primary);
+
+    // Obtém a representação formatada/traduzida do valor
+    final displayValue = sensorData != null
+        ? techService.getSensorValueDescription(
+            hexId,
+            sensorData.value,
+            rawBytes: sensorData.rawBytes,
+          )
+        : "--";
 
     return Card(
       elevation: 1,
@@ -48,9 +63,9 @@ class SensorTile extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // NOME DO SENSOR
+              // NOME DO SENSOR TRADUZIDO
               Text(
-                pid.name,
+                displayName,
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -59,20 +74,18 @@ class SensorTile extends ConsumerWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-
-              // VALOR E UNIDADE
+              // VALOR FORMATADO E UNIDADE
               Row(
                 crossAxisAlignment: CrossAxisAlignment.baseline,
                 textBaseline: TextBaseline.alphabetic,
                 children: [
                   Expanded(
-                    child: (sensorData != null && pid.formatValue != null)
-                        // Texto traduzido com FittedBox para não estourar a tela!
+                    child: hasValueMap
                         ? FittedBox(
                             fit: BoxFit.scaleDown,
                             alignment: Alignment.centerLeft,
                             child: Text(
-                              pid.formatValue!(sensorData.value),
+                              displayValue,
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -80,13 +93,8 @@ class SensorTile extends ConsumerWidget {
                               ),
                             ),
                           )
-                        // Valor numérico
                         : Text(
-                            sensorData != null
-                                ? sensorData.value.toStringAsFixed(
-                                    pid.unit == "RPM" ? 0 : 1,
-                                  )
-                                : "--",
+                            displayValue,
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.w900,
@@ -95,7 +103,7 @@ class SensorTile extends ConsumerWidget {
                             ),
                           ),
                   ),
-                  if (pid.unit.isNotEmpty && pid.formatValue == null)
+                  if (pid.unit.isNotEmpty && !hasValueMap)
                     Text(
                       pid.unit,
                       style: TextStyle(

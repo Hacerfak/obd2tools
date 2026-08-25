@@ -194,13 +194,14 @@ final appColorsProvider = NotifierProvider<AppColorsNotifier, AppThemePalette>(
 class SensorData {
   final double value;
   final String unit;
-  final List<double> history; // Guarda os últimos valores
+  final List<double> history;
+  final List<int>? rawBytes;
 
-  SensorData(this.value, this.unit, this.history);
+  SensorData(this.value, this.unit, this.history, {this.rawBytes});
 }
 
 class RealTimeDataNotifier extends Notifier<Map<String, SensorData>> {
-  final int maxHistoryPoints = 30; // Quantos pontos o gráfico vai mostrar
+  final int maxHistoryPoints = 30;
 
   @override
   Map<String, SensorData> build() {
@@ -208,28 +209,30 @@ class RealTimeDataNotifier extends Notifier<Map<String, SensorData>> {
   }
 
   void updateData(Map<String, ObdReadResult> newData) {
-    // Cria uma cópia do estado atual para podermos editar
     final newState = Map<String, SensorData>.from(state);
 
     newData.forEach((nome, resultado) {
       final existingData = newState[nome];
 
-      // Pega o histórico antigo ou cria um novo se for a primeira vez
       List<double> history = existingData != null
           ? List<double>.from(existingData.history)
           : [];
 
       history.add(resultado.value);
 
-      // Remove o ponto mais antigo se passar do limite (faz o gráfico andar para frente)
       if (history.length > maxHistoryPoints) {
         history.removeAt(0);
       }
 
-      newState[nome] = SensorData(resultado.value, resultado.unit, history);
+      newState[nome] = SensorData(
+        resultado.value,
+        resultado.unit,
+        history,
+        rawBytes: resultado.rawBytes ?? existingData?.rawBytes,
+      );
     });
 
-    state = newState; // Atualiza a tela
+    state = newState;
   }
 
   void clearData() {

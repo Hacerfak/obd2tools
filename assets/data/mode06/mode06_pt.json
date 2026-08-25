@@ -1,0 +1,659 @@
+{
+    "01": {
+        "title": "Sonda Lambda (O2) - Banco 1, Sensor 1",
+        "purpose": "Monitorar a integridade, respostas de transição e amplitude de tensão da Sonda Lambda pré-catalisador do Banco 1.",
+        "sensorsUsed": [
+            "Sonda Lambda B1S1",
+            "Sensor CKP",
+            "Sensor MAP/MAF"
+        ],
+        "howItIsMeasured": "A ECU comuta a dosagem de combustível entre rica e pobre, medindo os tempos de resposta e tensões extremas da sonda."
+    },
+    "01_01": {
+        "title": "Sonda Lambda B1S1 - Tempo de Resposta (Rica para Magra)",
+        "purpose": "Avaliar a velocidade com que a Sonda Lambda primária do Banco 1 detecta a mudança de uma mistura rica para uma mistura pobre.",
+        "sensorsUsed": [
+            "Sonda Lambda B1S1",
+            "Injetores de Combustível"
+        ],
+        "howItIsMeasured": "A ECU reduz abruptamente o pulso de injeção e cronometra em ms a queda do sinal de ~0.8V para ~0.2V."
+    },
+    "01_02": {
+        "title": "Sonda Lambda B1S1 - Tempo de Resposta (Magra para Rica)",
+        "purpose": "Avaliar a velocidade com que a Sonda Lambda primária do Banco 1 detecta a mudança de uma mistura pobre para uma mistura rica.",
+        "sensorsUsed": [
+            "Sonda Lambda B1S1",
+            "Injetores de Combustível"
+        ],
+        "howItIsMeasured": "A ECU aplica um pulso extra de combustível e cronometra a subida da tensão de ~0.2V para ~0.8V."
+    },
+    "01_03": {
+        "title": "Sonda Lambda B1S1 - Tensão Mínima de Comutação",
+        "purpose": "Verificar se a Sonda Lambda B1S1 atinge o nível mínimo de tensão quando exposta a excesso de oxigênio.",
+        "sensorsUsed": [
+            "Sonda Lambda B1S1"
+        ],
+        "howItIsMeasured": "Durante o corte de combustível em desaceleração (Cut-off), a ECU afere se a tensão da sonda cai abaixo do limite de validação."
+    },
+    "01_04": {
+        "title": "Sonda Lambda B1S1 - Tensão Máxima de Comutação",
+        "purpose": "Verificar se a Sonda Lambda B1S1 atinge o pico de tensão correto quando a mistura está rica.",
+        "sensorsUsed": [
+            "Sonda Lambda B1S1"
+        ],
+        "howItIsMeasured": "Em acelerações plenas, a ECU mede se a tensão de pico da sonda ultrapassa o limiar de alta voltagem."
+    },
+    "01_07": {
+        "title": "Sonda Lambda B1S1 - Tensão Mínima do Ciclo",
+        "purpose": "Verificar o menor valor absoluto de tensão gerado pela Sonda B1S1 durante todo o ciclo de teste.",
+        "sensorsUsed": [
+            "Sonda Lambda B1S1"
+        ],
+        "howItIsMeasured": "A ECU grava o menor sinal elétrico emitido pelo sensor em malha fechada."
+    },
+    "01_08": {
+        "title": "Sonda Lambda B1S1 - Tensão Máxima do Ciclo",
+        "purpose": "Verificar o maior valor absoluto de tensão gerado pela Sonda B1S1 durante todo o ciclo de teste.",
+        "sensorsUsed": [
+            "Sonda Lambda B1S1"
+        ],
+        "howItIsMeasured": "A ECU grava o maior sinal elétrico emitido pelo sensor durante variações normais de carga."
+    },
+    "02": {
+        "title": "Sonda Lambda (O2) - Banco 1, Sensor 2",
+        "purpose": "Monitorar a Sonda Lambda pós-catalisador do Banco 1.",
+        "sensorsUsed": [
+            "Sonda Lambda B1S2"
+        ],
+        "howItIsMeasured": "A ECU mede a tensão contínua da sonda pós-catalisador para verificar o armazenamento de oxigênio do catalisador."
+    },
+    "02_01": {
+        "title": "Sonda Lambda B1S2 - Tempo de Resposta (Rica para Magra)",
+        "purpose": "Verificar a velocidade de reação da sonda pós-catalisador do Banco 1 em transições de mistura rica para pobre.",
+        "sensorsUsed": [
+            "Sonda Lambda B1S2"
+        ],
+        "howItIsMeasured": "Cronometra o tempo de queda de tensão da sonda secundária após alteração no pulso de injeção."
+    },
+    "02_02": {
+        "title": "Sonda Lambda B1S2 - Tempo de Resposta (Magra para Rica)",
+        "purpose": "Verificar a velocidade de reação da sonda pós-catalisador do Banco 1 em transições de mistura pobre para rica.",
+        "sensorsUsed": [
+            "Sonda Lambda B1S2"
+        ],
+        "howItIsMeasured": "Cronometra o tempo de elevação de tensão da sonda secundária em enriquecimento forçado."
+    },
+    "05": {
+        "title": "Sonda Lambda (O2) - Banco 2, Sensor 1",
+        "purpose": "Monitorar a Sonda Lambda primária do Banco 2 em motores V6, V8 ou Boxer.",
+        "sensorsUsed": [
+            "Sonda Lambda B2S1"
+        ],
+        "howItIsMeasured": "Medição de tempos de chaveamento e picos de tensão da sonda pré-catalisador do Banco 2."
+    },
+    "06": {
+        "title": "Sonda Lambda (O2) - Banco 2, Sensor 2",
+        "purpose": "Monitorar a Sonda Lambda secundária do Banco 2.",
+        "sensorsUsed": [
+            "Sonda Lambda B2S2"
+        ],
+        "howItIsMeasured": "Avaliação de sinal de oxigênio pós-catalisador na bancada secundária do motor."
+    },
+    "21": {
+        "title": "Catalisador - Banco 1",
+        "purpose": "Avaliar a capacidade de conversão química e armazenamento de oxigênio do catalisador do Banco 1.",
+        "sensorsUsed": [
+            "Sonda Lambda B1S1",
+            "Sonda Lambda B1S2"
+        ],
+        "howItIsMeasured": "A ECU compara a oscilação do sinal da sonda pós-catalisador com a sonda pré-catalisador. Quanto menor a variação da sonda pós, mais eficiente é o catalisador."
+    },
+    "21_01": {
+        "title": "Catalisador Banco 1 - Capacidade de Armazenamento de Oxigênio (OSC)",
+        "purpose": "Calcular a eficiência de armazenamento e liberação de oxigênio no substrato do catalisador do Banco 1.",
+        "sensorsUsed": [
+            "Sonda Lambda B1S1",
+            "Sonda Lambda B1S2"
+        ],
+        "howItIsMeasured": "A ECU induz alternâncias de mistura e integra o tempo que o catalisador leva para saturar de oxigênio."
+    },
+    "22": {
+        "title": "Catalisador - Banco 2",
+        "purpose": "Avaliar a eficiência do catalisador do Banco 2 em motores com dupla bancada.",
+        "sensorsUsed": [
+            "Sonda Lambda B2S1",
+            "Sonda Lambda B2S2"
+        ],
+        "howItIsMeasured": "Comparação das frequências de chaveamento das sondas pré e pós do Banco 2."
+    },
+    "31": {
+        "title": "Sistema EGR - Banco 1",
+        "purpose": "Verificar se o fluxo de recirculação de gases de escape no Banco 1 está correto e desobstruído.",
+        "sensorsUsed": [
+            "Válvula EGR",
+            "Sensor MAP"
+        ],
+        "howItIsMeasured": "A ECU abre a válvula EGR durante retenções de aceleração e monitora a alteração de vácuo no coletor."
+    },
+    "31_01": {
+        "title": "Sistema EGR Banco 1 - Taxa de Vazão de Gás",
+        "purpose": "Medir a vazão efetiva de gás de exaustão admitida pelo sistema EGR no Banco 1.",
+        "sensorsUsed": [
+            "Válvula EGR",
+            "Sensor MAP"
+        ],
+        "howItIsMeasured": "A ECU afere o aumento da pressão absoluta no coletor de admissão ao energizar a EGR."
+    },
+    "35": {
+        "title": "Comando de Válvulas Variável (VVT) - Banco 1",
+        "purpose": "Monitorar a precisão e tempo de resposta da variação de fase do comando do Banco 1.",
+        "sensorsUsed": [
+            "Sensor CMP",
+            "Sensor CKP",
+            "Solenoide VVT"
+        ],
+        "howItIsMeasured": "A ECU envia comandos para a solenoide do VVT e afere o deslocamento do ângulo do comando."
+    },
+    "35_01": {
+        "title": "Sistema VVT Banco 1 - Erro de Posição da Fase",
+        "purpose": "Medir o desvio entre o ângulo de fase comandado pela ECU e a posição real do comando do Banco 1.",
+        "sensorsUsed": [
+            "Sensor CMP",
+            "Sensor CKP"
+        ],
+        "howItIsMeasured": "Mede a diferença angular em graus entre o sinal do sensor de fase e da roda fônica do virabrequim."
+    },
+    "39": {
+        "title": "EVAP - Monitor Geral do Tanque",
+        "purpose": "Verificar a estanqueidade e integridade do reservatório de combustível e cânister.",
+        "sensorsUsed": [
+            "Sensor FTP",
+            "Válvula de Purga",
+            "Válvula Vent"
+        ],
+        "howItIsMeasured": "A ECU inspeciona variações de pressão no reservatório sob condições normais de rodagem."
+    },
+    "39_31": {
+        "title": "EVAP - Taxa de Purga e Vazamento",
+        "purpose": "Avaliar o fluxo de sucção dos vapores de combustível para o coletor.",
+        "sensorsUsed": [
+            "Válvula de Purga",
+            "Sonda Lambda B1S1"
+        ],
+        "howItIsMeasured": "Mede a variação no ajuste de combustível de curto prazo (STFT) gerada pela queima do vapor de gasolina."
+    },
+    "3A": {
+        "title": "EVAP - Estanqueidade / Vácuo Inicial",
+        "purpose": "Validar a vedação primária das válvulas do cânister antes de aplicar o teste de estanqueidade.",
+        "sensorsUsed": [
+            "Sensor FTP",
+            "Válvula Vent",
+            "Válvula de Purga"
+        ],
+        "howItIsMeasured": "Veda o reservatório e verifica a estabilização natural da pressão de vapor."
+    },
+    "3A_C0": {
+        "title": "EVAP - Estabilidade de Pressão Inicial do Tanque",
+        "purpose": "Confirmar se a pressão interna do tanque está estável antes do teste de vácuo.",
+        "sensorsUsed": [
+            "Sensor FTP"
+        ],
+        "howItIsMeasured": "Monitora oscilações causadas pelo balanço do combustível no tanque por um curto período."
+    },
+    "3A_C1": {
+        "title": "EVAP - Retenção de Vácuo Residual no Cânister",
+        "purpose": "Verificar se o filtro de carvão ativado mantém a depressão sem vazamentos nas conexões.",
+        "sensorsUsed": [
+            "Sensor FTP",
+            "Válvula Vent"
+        ],
+        "howItIsMeasured": "Mede o decaimento do vácuo residual acumulado no cânister."
+    },
+    "3B": {
+        "title": "EVAP - Teste de Grande Vazamento (0.090\")",
+        "purpose": "Detectar vazamentos severos, tampa de combustível aberta ou tubulação rompida.",
+        "sensorsUsed": [
+            "Sensor FTP",
+            "Válvula de Purga",
+            "Válvula Vent"
+        ],
+        "howItIsMeasured": "A ECU veda o sistema e abre a purga. Se não houver formação de vácuo, o teste reprova."
+    },
+    "3B_CA": {
+        "title": "EVAP - Retenção de Vácuo Sob Carga (Grande Vazamento)",
+        "purpose": "Validar se o vácuo gerado se sustenta durante oscilações de carga do motor.",
+        "sensorsUsed": [
+            "Sensor FTP",
+            "Válvula de Purga"
+        ],
+        "howItIsMeasured": "Aplica vácuo e monitora a perda rápida de depressão sob aceleração leve."
+    },
+    "3C": {
+        "title": "EVAP - Teste de Vazamento Médio (0.040\")",
+        "purpose": "Detectar vazamentos médios em mangueiras, orifícios ou vedações do tanque.",
+        "sensorsUsed": [
+            "Sensor FTP",
+            "Válvula Vent",
+            "Válvula de Purga"
+        ],
+        "howItIsMeasured": "Induz vácuo controlado e mede a velocidade de perda do vácuo em 15 segundos."
+    },
+    "3C_C8": {
+        "title": "EVAP - Decaimento de Vácuo (Vazamento Médio 0.040\")",
+        "purpose": "Calcular o gradiente de perda de vácuo na linha do tanque de combustível.",
+        "sensorsUsed": [
+            "Sensor FTP"
+        ],
+        "howItIsMeasured": "A ECU registra a taxa de alteração da curva de pressão de vapor em Pa/s."
+    },
+    "3C_C9": {
+        "title": "EVAP - Variação de Pressão por Evaporação",
+        "purpose": "Diferenciar perda de vácuo por vazamento da pressão gerada pela evaporação natural da gasolina.",
+        "sensorsUsed": [
+            "Sensor FTP",
+            "Sensor IAT"
+        ],
+        "howItIsMeasured": "Compara a taxa de elevação da pressão pré e pós aplicação do vácuo."
+    },
+    "3D": {
+        "title": "EVAP - Teste de Micro Vazamento (0.020\")",
+        "purpose": "Identificar micro fissuras de até 0,5mm na estrutura do tanque e tubulações.",
+        "sensorsUsed": [
+            "Sensor FTP"
+        ],
+        "howItIsMeasured": "Geralmente executado via EONV (Engine Off Natural Vacuum) com o motor desligado."
+    },
+    "3E": {
+        "title": "EVAP - Válvula de Purga do Cânister",
+        "purpose": "Testar o acionamento elétrico e a vedação mecânica da válvula de purga.",
+        "sensorsUsed": [
+            "Válvula de Purga",
+            "Sensor MAP"
+        ],
+        "howItIsMeasured": "Aplica pulsos de PWM e afere a resposta na depressão do coletor."
+    },
+    "3E_C5": {
+        "title": "EVAP - Tempo de Resposta da Solenoide de Purga",
+        "purpose": "Medir a agilidade de abertura da solenoide de purga ao receber o comando.",
+        "sensorsUsed": [
+            "Válvula de Purga",
+            "Sensor MAP"
+        ],
+        "howItIsMeasured": "Mede o atraso entre o pulso elétrico enviado e a alteração de vácuo no duto."
+    },
+    "3F": {
+        "title": "EVAP - Válvula de Ventilação (Vent Valve)",
+        "purpose": "Testar se a Válvula Vent fecha completamente sob comando elétrico.",
+        "sensorsUsed": [
+            "Válvula Vent",
+            "Sensor FTP"
+        ],
+        "howItIsMeasured": "Energiza a válvula e monitora se ocorre isolamento em relação à pressão atmosférica."
+    },
+    "3F_C4": {
+        "title": "EVAP - Fluxo e Bloqueio da Válvula Vent",
+        "purpose": "Verificar se a válvula de ventilação está desobstruída em modo desenergizado.",
+        "sensorsUsed": [
+            "Válvula Vent",
+            "Sensor FTP"
+        ],
+        "howItIsMeasured": "Mede o tempo de equalização entre a pressão do tanque e o ar ambiente."
+    },
+    "41": {
+        "title": "Aquecedor da Sonda Lambda - Banco 1, Sensor 1",
+        "purpose": "Monitorar a resistência e integridade do aquecedor da sonda pré-catalisador do Banco 1.",
+        "sensorsUsed": [
+            "Aquecedor Sonda B1S1"
+        ],
+        "howItIsMeasured": "A ECU mede a corrente elétrica e a queda de tensão no circuito do aquecedor."
+    },
+    "41_03": {
+        "title": "Aquecedor Sonda B1S1 - Resistência/Corrente do Circuito",
+        "purpose": "Verificar a integridade do resistor interno de aquecimento da Sonda B1S1.",
+        "sensorsUsed": [
+            "Aquecedor Sonda B1S1"
+        ],
+        "howItIsMeasured": "A ECU monitora o consumo em Amperes durante a partida a frio."
+    },
+    "42": {
+        "title": "Aquecedor da Sonda Lambda - Banco 1, Sensor 2",
+        "purpose": "Monitorar o aquecedor da sonda pós-catalisador do Banco 1.",
+        "sensorsUsed": [
+            "Aquecedor Sonda B1S2"
+        ],
+        "howItIsMeasured": "Medição de consumo elétrico do resistor de aquecimento pós-catalisador."
+    },
+    "71": {
+        "title": "Sistema de Ar Secundário - Banco 1",
+        "purpose": "Monitorar a injeção de ar fresco no escape na partida a frio.",
+        "sensorsUsed": [
+            "Bomba de Ar Secundário",
+            "Sonda Lambda B1S1"
+        ],
+        "howItIsMeasured": "Verifica se a Sonda B1S1 registra queda de tensão indicando ar em excesso ao ligar a bomba."
+    },
+    "71_01": {
+        "title": "Sistema de Ar Secundário Banco 1 - Fluxo de Ar",
+        "purpose": "Medir o volume de ar secundário injetado no coletor de exaustão.",
+        "sensorsUsed": [
+            "Bomba de Ar Secundário",
+            "Sonda Lambda B1S1"
+        ],
+        "howItIsMeasured": "Afere a taxa de empobrecimento da leitura da sonda durante a atuação da bomba."
+    },
+    "81": {
+        "title": "Sistema de Combustível - Banco 1",
+        "purpose": "Avaliar o limite de ajuste e equilíbrio do sistema de alimentação de combustível do Banco 1.",
+        "sensorsUsed": [
+            "Sonda Lambda B1S1",
+            "Injetores",
+            "Sensor MAF/MAP"
+        ],
+        "howItIsMeasured": "Monitora a soma das correções adaptativas de curto e longo prazo (STFT + LTFT)."
+    },
+    "81_01": {
+        "title": "Sistema de Combustível Banco 1 - Limite Superior de Correção",
+        "purpose": "Verificar se a ECU atingiu o limite máximo de enriquecimento de combustível.",
+        "sensorsUsed": [
+            "Sonda Lambda B1S1",
+            "Injetores"
+        ],
+        "howItIsMeasured": "A ECU avalia se a soma das correções ultrapassa +25% sem enriquecer a mistura."
+    },
+    "91": {
+        "title": "Pressão de Sobrealimentação (Turbo) - Banco 1",
+        "purpose": "Monitorar o controle e limites de pressão exercidos pelo turbocompressor no Banco 1.",
+        "sensorsUsed": [
+            "Sensor MAP",
+            "Válvula Wastegate / Solenoide Turbo"
+        ],
+        "howItIsMeasured": "Compara a pressão de turbo medida no coletor de admissão com a pressão alvo solicitada."
+    },
+    "91_01": {
+        "title": "Pressão de Turbo Banco 1 - Erro de Sobrealimentação",
+        "purpose": "Detectar desvios de pressão no turbo (sobrepressão ou falta de pressão).",
+        "sensorsUsed": [
+            "Sensor MAP",
+            "Wastegate"
+        ],
+        "howItIsMeasured": "Subtrai a pressão absoluta medida da pressão comandada durante plenitude de carga."
+    },
+    "A1": {
+        "title": "Misfire Geral - Resumo do Motor",
+        "purpose": "Garantir a contagem consolidada de falhas de ignição de todos os cilindros.",
+        "sensorsUsed": [
+            "Sensor CKP",
+            "Sensor CMP"
+        ],
+        "howItIsMeasured": "Monitoramento contínuo das variações de rotação do virabrequim."
+    },
+    "A1_0B": {
+        "title": "Misfire Geral - Média Móvel Ponderada (EWMA)",
+        "purpose": "Avaliar a taxa média acumulada de falhas de ignição em todos os cilindros nos últimos 1.000 a 10.000 ciclos.",
+        "sensorsUsed": [
+            "Sensor CKP",
+            "Sensor CMP"
+        ],
+        "howItIsMeasured": "Filtro digital EWMA aplicado sobre os pulsos do virabrequim para isolar desvios sistemáticos de ignição."
+    },
+    "A1_0C": {
+        "title": "Misfire Geral - Contagem do Ciclo Atual",
+        "purpose": "Contar o total absoluto de falhas de ignição ocorridas no motor durante a viagem atual.",
+        "sensorsUsed": [
+            "Sensor CKP"
+        ],
+        "howItIsMeasured": "Soma em tempo real das perdas de aceleração angular do virabrequim nesta partida."
+    },
+    "A2": {
+        "title": "Misfire (Falha de Ignição) - Cilindro 1",
+        "purpose": "Detectar perda de força de combustão específica no Cilindro 1.",
+        "sensorsUsed": [
+            "Sensor CKP",
+            "Sensor CMP"
+        ],
+        "howItIsMeasured": "Mede a aceleração angular da roda fônica na janela de tempo de explosão do Cilindro 1."
+    },
+    "A2_0B": {
+        "title": "Misfire Cilindro 1 - Média Móvel (EWMA)",
+        "purpose": "Avaliar a tendência histórica e desgaste acumulado de combustão no Cilindro 1.",
+        "sensorsUsed": [
+            "Sensor CKP",
+            "Sensor CMP"
+        ],
+        "howItIsMeasured": "Filtro EWMA longo focado na janela de tempo de trabalho do Cilindro 1."
+    },
+    "A2_0C": {
+        "title": "Misfire Cilindro 1 - Ciclo Atual",
+        "purpose": "Contar o número exato de falhas de ignição no Cilindro 1 durante a viagem atual.",
+        "sensorsUsed": [
+            "Sensor CKP"
+        ],
+        "howItIsMeasured": "Contagem instantânea das Perdas de torque no virabrequim associadas ao Cilindro 1."
+    },
+    "A3": {
+        "title": "Misfire (Falha de Ignição) - Cilindro 2",
+        "purpose": "Detectar perda de força de combustão específica no Cilindro 2.",
+        "sensorsUsed": [
+            "Sensor CKP"
+        ],
+        "howItIsMeasured": "Mede a aceleração angular do virabrequim na explosão do Cilindro 2."
+    },
+    "A3_0B": {
+        "title": "Misfire Cilindro 2 - Média Móvel (EWMA)",
+        "purpose": "Avaliar a tendência histórica de falhas no Cilindro 2.",
+        "sensorsUsed": [
+            "Sensor CKP",
+            "Sensor CMP"
+        ],
+        "howItIsMeasured": "Média móvel ponderada da aceleração do virabrequim no Cilindro 2."
+    },
+    "A3_0C": {
+        "title": "Misfire Cilindro 2 - Ciclo Atual",
+        "purpose": "Contar falhas de ignição no Cilindro 2 durante esta partida.",
+        "sensorsUsed": [
+            "Sensor CKP"
+        ],
+        "howItIsMeasured": "Medição imediata de desaceleração na roda fônica no tempo do Cilindro 2."
+    },
+    "A4": {
+        "title": "Misfire (Falha de Ignição) - Cilindro 3",
+        "purpose": "Detectar perda de força de combustão específica no Cilindro 3.",
+        "sensorsUsed": [
+            "Sensor CKP"
+        ],
+        "howItIsMeasured": "Mede o pulso de rotação no virabrequim referente ao Cilindro 3."
+    },
+    "A4_0B": {
+        "title": "Misfire Cilindro 3 - Média Móvel (EWMA)",
+        "purpose": "Avaliar a tendência histórica de falhas no Cilindro 3.",
+        "sensorsUsed": [
+            "Sensor CKP",
+            "Sensor CMP"
+        ],
+        "howItIsMeasured": "Filtro EWMA longo focado no Cilindro 3."
+    },
+    "A4_0C": {
+        "title": "Misfire Cilindro 3 - Ciclo Atual",
+        "purpose": "Contar falhas de ignição no Cilindro 3 na viagem atual.",
+        "sensorsUsed": [
+            "Sensor CKP"
+        ],
+        "howItIsMeasured": "Contagem direta de perda de torque no tempo do Cilindro 3."
+    },
+    "A5": {
+        "title": "Misfire (Falha de Ignição) - Cilindro 4",
+        "purpose": "Detectar perda de força de combustão específica no Cilindro 4.",
+        "sensorsUsed": [
+            "Sensor CKP"
+        ],
+        "howItIsMeasured": "Mede a expansão do pistão do Cilindro 4 na roda fônica."
+    },
+    "A5_0B": {
+        "title": "Misfire Cilindro 4 - Média Móvel (EWMA)",
+        "purpose": "Avaliar a tendência histórica de falhas no Cilindro 4.",
+        "sensorsUsed": [
+            "Sensor CKP",
+            "Sensor CMP"
+        ],
+        "howItIsMeasured": "Filtro EWMA acumulado focado no Cilindro 4."
+    },
+    "A5_0C": {
+        "title": "Misfire Cilindro 4 - Ciclo Atual",
+        "purpose": "Contar falhas de ignição no Cilindro 4 no ciclo de direção atual.",
+        "sensorsUsed": [
+            "Sensor CKP"
+        ],
+        "howItIsMeasured": "Medição instantânea de perda de força do Cilindro 4."
+    },
+    "A6": {
+        "title": "Misfire (Falha de Ignição) - Cilindro 5",
+        "purpose": "Detectar falhas específicas no Cilindro 5.",
+        "sensorsUsed": [
+            "Sensor CKP"
+        ],
+        "howItIsMeasured": "Medição de desaceleração da roda fônica na expansão do Cilindro 5."
+    },
+    "A6_0B": {
+        "title": "Misfire Cilindro 5 - Média Móvel (EWMA)",
+        "purpose": "Avaliar a tendência histórica de falhas no Cilindro 5.",
+        "sensorsUsed": [
+            "Sensor CKP",
+            "Sensor CMP"
+        ],
+        "howItIsMeasured": "Cálculo EWMA focado no Cilindro 5."
+    },
+    "A6_0C": {
+        "title": "Misfire Cilindro 5 - Ciclo Atual",
+        "purpose": "Contar falhas no Cilindro 5 na viagem atual.",
+        "sensorsUsed": [
+            "Sensor CKP"
+        ],
+        "howItIsMeasured": "Contagem instantânea de perdas no tempo do Cilindro 5."
+    },
+    "A7": {
+        "title": "Misfire (Falha de Ignição) - Cilindro 6",
+        "purpose": "Detectar falhas específicas no Cilindro 6.",
+        "sensorsUsed": [
+            "Sensor CKP"
+        ],
+        "howItIsMeasured": "Medição de aceleração angular do virabrequim no Cilindro 6."
+    },
+    "A7_0B": {
+        "title": "Misfire Cilindro 6 - Média Móvel (EWMA)",
+        "purpose": "Avaliar a tendência histórica de falhas no Cilindro 6.",
+        "sensorsUsed": [
+            "Sensor CKP",
+            "Sensor CMP"
+        ],
+        "howItIsMeasured": "Cálculo EWMA acumulado do Cilindro 6."
+    },
+    "A7_0C": {
+        "title": "Misfire Cilindro 6 - Ciclo Atual",
+        "purpose": "Contar falhas no Cilindro 6 no ciclo de direção atual.",
+        "sensorsUsed": [
+            "Sensor CKP"
+        ],
+        "howItIsMeasured": "Contagem de falhas instantâneas no Cilindro 6."
+    },
+    "A8": {
+        "title": "Misfire (Falha de Ignição) - Cilindro 7",
+        "purpose": "Detectar falhas específicas no Cilindro 7.",
+        "sensorsUsed": [
+            "Sensor CKP"
+        ],
+        "howItIsMeasured": "Análise da aceleração do virabrequim no Cilindro 7."
+    },
+    "A8_0B": {
+        "title": "Misfire Cilindro 7 - Média Móvel (EWMA)",
+        "purpose": "Avaliar a tendência histórica de falhas no Cilindro 7.",
+        "sensorsUsed": [
+            "Sensor CKP",
+            "Sensor CMP"
+        ],
+        "howItIsMeasured": "Cálculo EWMA acumulado do Cilindro 7."
+    },
+    "A8_0C": {
+        "title": "Misfire Cilindro 7 - Ciclo Atual",
+        "purpose": "Contar falhas no Cilindro 7 na viagem atual.",
+        "sensorsUsed": [
+            "Sensor CKP"
+        ],
+        "howItIsMeasured": "Contagem instantânea de falhas no Cilindro 7."
+    },
+    "A9": {
+        "title": "Misfire (Falha de Ignição) - Cilindro 8",
+        "purpose": "Detectar falhas específicas no Cilindro 8.",
+        "sensorsUsed": [
+            "Sensor CKP"
+        ],
+        "howItIsMeasured": "Análise da aceleração do virabrequim no Cilindro 8."
+    },
+    "A9_0B": {
+        "title": "Misfire Cilindro 8 - Média Móvel (EWMA)",
+        "purpose": "Avaliar a tendência histórica de falhas no Cilindro 8.",
+        "sensorsUsed": [
+            "Sensor CKP",
+            "Sensor CMP"
+        ],
+        "howItIsMeasured": "Cálculo EWMA acumulado do Cilindro 8."
+    },
+    "A9_0C": {
+        "title": "Misfire Cilindro 8 - Ciclo Atual",
+        "purpose": "Contar falhas no Cilindro 8 na viagem atual.",
+        "sensorsUsed": [
+            "Sensor CKP"
+        ],
+        "howItIsMeasured": "Contagem de falhas instantâneas no Cilindro 8."
+    },
+    "B0": {
+        "title": "Misfire Consolidado - Todos os Cilindros",
+        "purpose": "Apresentar a contagem unificada das falhas de ignição de todos os cilindros do motor.",
+        "sensorsUsed": [
+            "Sensor CKP"
+        ],
+        "howItIsMeasured": "Soma em tempo real de todas as perdas de aceleração registradas na roda fônica."
+    },
+    "B0_0B": {
+        "title": "Misfire Consolidado - Média Móvel (EWMA)",
+        "purpose": "Monitorar a taxa média histórica acumulada de falhas somando todos os cilindros.",
+        "sensorsUsed": [
+            "Sensor CKP",
+            "Sensor CMP"
+        ],
+        "howItIsMeasured": "Cálculo EWMA consolidado de todos os cilindros."
+    },
+    "B0_0C": {
+        "title": "Misfire Consolidado - Ciclo Atual",
+        "purpose": "Contar o total de falhas de ignição acumuladas de todos os cilindros durante esta viagem.",
+        "sensorsUsed": [
+            "Sensor CKP"
+        ],
+        "howItIsMeasured": "Soma contínua das falhas identificadas em todos os cilindros nesta partida."
+    },
+    "B2": {
+        "title": "Filtro de Partículas Diesel (DPF) - Eficiência do Filtro",
+        "purpose": "Monitorar a retenção de fuligem e eficiência do filtro DPF em motores a Diesel.",
+        "sensorsUsed": [
+            "Sensor de Pressão Diferencial DPF",
+            "Sensor de Temp. EGT"
+        ],
+        "howItIsMeasured": "A ECU mede a contrapressão antes e depois do elemento cerâmico do filtro DPF."
+    },
+    "B2_01": {
+        "title": "Filtro DPF - Pressão Diferencial de Restrição",
+        "purpose": "Medir o nível de entupimento do filtro DPF por fuligem.",
+        "sensorsUsed": [
+            "Sensor de Pressão Diferencial DPF"
+        ],
+        "howItIsMeasured": "Mede a variação de pressão em kPa através do elemento filtrante para determinar a necessidade de regeneração."
+    },
+    "B3": {
+        "title": "Catalisador de Redução Selectiva (SCR / NOx)",
+        "purpose": "Monitorar a eficiência da conversão de óxidos de nitrogênio através da injeção de uréia (Arla 32).",
+        "sensorsUsed": [
+            "Sensor de NOx Pré-SCR",
+            "Sensor de NOx Pós-SCR"
+        ],
+        "howItIsMeasured": "Compara a concentração de NOx em ppm na entrada e na saída do sistema SCR."
+    }
+}

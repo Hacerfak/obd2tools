@@ -1,66 +1,25 @@
 class Mode09Pid {
   final int id;
-  final String name;
-  final String Function(String hexData) decode;
+  final String Function(String hexData, Map<String, dynamic> labels) decode;
 
-  const Mode09Pid({required this.id, required this.name, required this.decode});
+  const Mode09Pid({required this.id, required this.decode});
 }
 
-// Dicionário dos dados do Modo 09 (Informações do Veículo)
 final Map<int, Mode09Pid> mode09Registry = {
-  0x01: Mode09Pid(
-    id: 0x01,
-    name: "Contagem de Msg (Chassi)",
-    decode: _decodeCount,
-  ),
-  0x02: Mode09Pid(id: 0x02, name: "Chassi (VIN)", decode: _decodeAscii),
-  0x03: Mode09Pid(
-    id: 0x03,
-    name: "Contagem de Msg (Calibração)",
-    decode: _decodeCount,
-  ),
-  0x04: Mode09Pid(
-    id: 0x04,
-    name: "ID de Calibração da ECU",
-    decode: _decodeAscii,
-  ),
-  0x05: Mode09Pid(
-    id: 0x05,
-    name: "Contagem de Msg (CVN)",
-    decode: _decodeCount,
-  ),
-  0x06: Mode09Pid(
-    id: 0x06,
-    name: "Núm. de Verificação de Calibração (CVN)",
-    decode: _decodeCVN,
-  ),
-  0x07: Mode09Pid(
-    id: 0x07,
-    name: "Contagem de Msg (Rastreamento Otto)",
-    decode: _decodeCount,
-  ),
-  0x08: Mode09Pid(
-    id: 0x08,
-    name: "Rastreamento de Desempenho (Otto)",
-    decode: _decodeIUPR,
-  ),
-  0x09: Mode09Pid(
-    id: 0x09,
-    name: "Contagem de Msg (Nome ECU)",
-    decode: _decodeCount,
-  ),
-  0x0A: Mode09Pid(id: 0x0A, name: "Nome da ECU", decode: _decodeAscii),
-  0x0B: Mode09Pid(
-    id: 0x0B,
-    name: "Rastreamento de Desempenho (Diesel)",
-    decode: _decodeIUPR,
-  ),
+  0x01: Mode09Pid(id: 0x01, decode: _decodeCount),
+  0x02: Mode09Pid(id: 0x02, decode: _decodeAscii),
+  0x03: Mode09Pid(id: 0x03, decode: _decodeCount),
+  0x04: Mode09Pid(id: 0x04, decode: _decodeAscii),
+  0x05: Mode09Pid(id: 0x05, decode: _decodeCount),
+  0x06: Mode09Pid(id: 0x06, decode: _decodeCVN),
+  0x07: Mode09Pid(id: 0x07, decode: _decodeCount),
+  0x08: Mode09Pid(id: 0x08, decode: _decodeIUPR),
+  0x09: Mode09Pid(id: 0x09, decode: _decodeCount),
+  0x0A: Mode09Pid(id: 0x0A, decode: _decodeAscii),
+  0x0B: Mode09Pid(id: 0x0B, decode: _decodeIUPR),
 };
 
-// --- FUNÇÕES DE DECODIFICAÇÃO ---
-
-// PIDs como o 02 e 04 enviam texto.
-String _decodeAscii(String hexData) {
+String _decodeAscii(String hexData, Map<String, dynamic> labels) {
   if (hexData.length >= 2) hexData = hexData.substring(2);
   String text = "";
   for (int i = 0; i < hexData.length - 1; i += 2) {
@@ -72,21 +31,17 @@ String _decodeAscii(String hexData) {
   return text.trim();
 }
 
-// PIDs de contagem
-String _decodeCount(String hexData) {
+String _decodeCount(String hexData, Map<String, dynamic> labels) {
   if (hexData.length >= 4) {
     int count = int.parse(hexData.substring(2, 4), radix: 16);
-    return "$count pacote(s)";
+    final packetLabel = labels['packets'] ?? 'packet(s)';
+    return "$count $packetLabel";
   }
   return hexData;
 }
 
-// ---------------------------------------------------------
-// TRATAMENTO ESPECÍFICO PARA O CVN (Hashes de 4 Bytes)
-// ---------------------------------------------------------
-String _decodeCVN(String hexData) {
+String _decodeCVN(String hexData, Map<String, dynamic> labels) {
   int startIndex = 0;
-  // Se veio com um byte sobrando na frente, é o contador, pulamos ele
   if (hexData.length % 8 != 0 && (hexData.length - 2) % 8 == 0) {
     startIndex = 2;
   }
@@ -100,17 +55,12 @@ String _decodeCVN(String hexData) {
   return cvns.join("\n");
 }
 
-// ---------------------------------------------------------
-// TRATAMENTO ESPECÍFICO PARA O RASTREAMENTO (IUPR)
-// ---------------------------------------------------------
-String _decodeIUPR(String hexData) {
+String _decodeIUPR(String hexData, Map<String, dynamic> labels) {
   int startIndex = 0;
-  // Pula o contador inicial se ele existir
   if (hexData.length % 4 != 0 && (hexData.length - 2) % 4 == 0) {
     startIndex = 2;
   }
 
-  // Extrai blocos de 2 bytes (4 caracteres) e converte para número decimal
   List<int> values = [];
   for (int i = startIndex; i < hexData.length; i += 4) {
     if (i + 4 <= hexData.length) {
@@ -119,36 +69,40 @@ String _decodeIUPR(String hexData) {
   }
 
   if (values.length >= 2) {
-    // A SAE J1979 define que os dois primeiros valores são as métricas globais
-    String result =
-        "Condições Globais (Monitoradas): ${values[0]}\nCiclos de Ignição: ${values[1]}";
+    final globalCond = labels['globalConditions'] ?? 'Global Conditions';
+    final ignCycles = labels['ignitionCycles'] ?? 'Ignition Cycles';
+    final testsComp = labels['testsCompleted'] ?? 'Tests Completed';
+    final condMet = labels['conditionsMet'] ?? 'Conditions Met';
+    final extraMon = labels['extraMonitor'] ?? 'Extra Monitor';
 
-    // Do índice 2 em diante, os valores vêm em pares: Numerador (Completou) / Denominador (Teve Chance)
-    List<String> monitorNames = [
-      "Catalisador",
-      "Catalisador (B2)",
-      "Sonda Lambda Primária",
-      "Sonda Lambda Primária (B2)",
-      "Sistema Evaporativo",
-      "Sistema EGR / VVT",
-      "Sonda Lambda Secundária",
-      "Sonda Lambda Secundária (B2)",
-      "Ar Secundário",
+    final monitorsMap = (labels['monitors'] as Map<String, dynamic>?) ?? {};
+    final monitorNames = [
+      monitorsMap['catalyst'] ?? 'Catalyst',
+      monitorsMap['catalystB2'] ?? 'Catalyst (B2)',
+      monitorsMap['primaryO2'] ?? 'Primary O2 Sensor',
+      monitorsMap['primaryO2B2'] ?? 'Primary O2 Sensor (B2)',
+      monitorsMap['evap'] ?? 'EVAP System',
+      monitorsMap['egrVvt'] ?? 'EGR / VVT System',
+      monitorsMap['secondaryO2'] ?? 'Secondary O2 Sensor',
+      monitorsMap['secondaryO2B2'] ?? 'Secondary O2 Sensor (B2)',
+      monitorsMap['secondaryAir'] ?? 'Secondary Air System',
     ];
+
+    String result = "$globalCond: ${values[0]}\n$ignCycles: ${values[1]}";
 
     int monitorIndex = 0;
     for (int i = 2; i < values.length; i += 2) {
       if (i + 1 < values.length) {
         String name = monitorIndex < monitorNames.length
             ? monitorNames[monitorIndex]
-            : "Monitor Extra ${monitorIndex + 1}";
+            : "$extraMon ${monitorIndex + 1}";
 
         result +=
-            "\n\n$name:\nTestes Concluídos: ${values[i]}\nCondições Atingidas: ${values[i + 1]}";
+            "\n\n$name:\n$testsComp: ${values[i]}\n$condMet: ${values[i + 1]}";
         monitorIndex++;
       }
     }
     return result;
   }
-  return "Dados insuficientes";
+  return labels['insufficientData'] ?? "Insufficient data";
 }

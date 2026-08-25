@@ -1,14 +1,730 @@
 {
+    "01": {
+        "name": "Statut des Moniteurs DTC",
+        "shortName": "Statut MIL/DTC",
+        "whatIsIt": "Indicateur interne de l'ECU informant si le voyant d'anomalie (Check Engine / MIL) est allumé et le nombre total de codes d'erreur enregistrés.",
+        "function": "Informer immédiatement de l'état de l'alerte d'injection au tableau de bord et du nombre total de défauts diagnostiqués.",
+        "impact": "Utilisé pour les inspections rapides du véhicule et le diagnostic initial des codes en mémoire."
+    },
+    "03": {
+        "name": "Statut du Système de Carburant",
+        "shortName": "Statut Boucle",
+        "whatIsIt": "État opérationnel de la stratégie de contrôle du mélange air/carburant (Boucle Ouverte ou Boucle Fermée).",
+        "function": "Indiquer si l'ECU ajuste l'injection en temps réel selon les lectures de la sonde lambda.",
+        "impact": "En Boucle Ouverte (moteur froid ou plein gaz), l'ECU utilise des cartographies fixes ; en Boucle Fermée, elle vise le rapport stœchiométrique idéal."
+    },
+    "04": {
+        "name": "Charge Calculée du Moteur",
+        "shortName": "Charge Moteur",
+        "whatIsIt": "Pourcentage du flux d'air actuel du moteur par rapport au flux d'air théorique maximal au même régime.",
+        "function": "Indiquer le pourcentage de couple théorique demandé au moteur à l'instant T.",
+        "impact": "Utilisé par l'ECU pour déterminer la quantité de carburant injectée et l'avance à l'allumage."
+    },
     "05": {
         "name": "Température du Liquide de Refroidissement (ECT)",
-        "whatIsIt": "Une thermistance située dans le bloc moteur ou le boîtier du thermostat.",
-        "function": "Mesure la température du liquide de refroidissement du moteur.",
-        "impact": "L'ECU l'utilise pour calculer l'injection de carburant et déclencher les ventilateurs."
+        "shortName": "ECT",
+        "whatIsIt": "Thermistance située sur le bloc moteur, la culasse ou le boîtier de calorstat.",
+        "function": "Mesurer la température du liquide de refroidissement qui circule dans le moteur.",
+        "impact": "Paramètre critique pour l'enrichissement à froid, l'ajustement de l'allumage et le déclenchement des moto-ventilateurs."
+    },
+    "06": {
+        "name": "Ajustement de Carburant à Court Terme (Banque 1)",
+        "shortName": "STFT Banque 1",
+        "whatIsIt": "Correction dynamique et instantanée du temps d'injection basée sur la sonde lambda amont.",
+        "function": "Compenser les variations momentanées du mélange pour maintenir le rapport stœchiométrique.",
+        "impact": "Les valeurs positives ajoutent du carburant (mélange pauvre) ; les valeurs négatives en réduisent (mélange riche)."
+    },
+    "07": {
+        "name": "Ajustement de Carburant à Long Terme (Banque 1)",
+        "shortName": "LTFT Banque 1",
+        "whatIsIt": "Mémoire adaptative à long terme accumulée par l'ECU pour corriger les dérives constantes du mélange.",
+        "function": "Compenser les dérives systématiques comme l'usure des injecteurs ou les petites prises d'air.",
+        "impact": "Des variations au-delà de ±10% à ±15% indiquent des fuites de vide, du carburant altéré ou un souci d'alimentation."
+    },
+    "08": {
+        "name": "Ajustement de Carburant à Court Terme (Banque 2)",
+        "shortName": "STFT Banque 2",
+        "whatIsIt": "Correction instantanée du temps d'injection pour le deuxième banc de cylindres (moteurs en V ou Boxer).",
+        "function": "Maintenir l'équilibre du mélange sur le banc secondaire du moteur.",
+        "impact": "Permet de comparer la réponse de l'injection entre les deux côtés du moteur sur des bancs séparés."
+    },
+    "09": {
+        "name": "Ajustement de Carburant à Long Terme (Banque 2)",
+        "shortName": "LTFT Banque 2",
+        "whatIsIt": "Mémoire adaptative accumulée à long terme pour le mélange du deuxième banc de cylindres.",
+        "function": "Ajuster en permanence l'injection de la Banque 2 pour compenser l'usure des composants.",
+        "impact": "Des écarts importants par rapport à la Banque 1 pointent vers des problèmes spécifiques à l'un des bancs."
+    },
+    "0A": {
+        "name": "Pression de Carburant (Pompe)",
+        "shortName": "Pression Carb.",
+        "whatIsIt": "Lecture du capteur de pression installé sur la ligne d'alimentation basse pression.",
+        "function": "Surveiller la pression de refoulement exercée par la pompe à carburant vers la rampe d'injection.",
+        "impact": "Une pression trop basse provoque des râtés d'accélération et un mélange pauvre ; une pression trop haute crée un excès de carburant."
+    },
+    "0B": {
+        "name": "Pression Absolue du Collecteur d'Admission (MAP)",
+        "shortName": "MAP",
+        "whatIsIt": "Capteur piézorésistif mesurant la pression absolue régnant dans le collecteur d'admission.",
+        "function": "Informer du niveau de dépression (moteurs atmosphériques) ou de suralimentation (moteurs turbo).",
+        "impact": "Paramètre essentiel de la méthode Pression-Régime pour calculer la masse d'air admise et l'injection."
     },
     "0C": {
         "name": "Régime Moteur (RPM)",
+        "shortName": "RPM",
         "whatIsIt": "Signal généré par le capteur de position du vilebrequin (CKP).",
-        "function": "Mesure le nombre de tours par minute du moteur.",
-        "impact": "Crucial pour synchroniser l'injection de carburant et l'allumage."
+        "function": "Mesurer le nombre de tours par minute du moteur.",
+        "impact": "Donnée fondamentale pour la synchronisation de l'injection, le déclenchement de l'étincelle et le calcul du couple."
+    },
+    "0D": {
+        "name": "Vitesse du Véhicule",
+        "shortName": "Vitesse",
+        "whatIsIt": "Signal du capteur de vitesse (VSS) situé sur la boîte de vitesses ou venant du système ABS.",
+        "function": "Indiquer la vitesse réelle de déplacement du véhicule en km/h.",
+        "impact": "Utilisé pour le régulateur de vitesse, l'antipatinage et la coupure d'injection en décélération (Cut-off)."
+    },
+    "0E": {
+        "name": "Avance à l'Allumage",
+        "shortName": "Avance Allumage",
+        "whatIsIt": "Angle du moment de l'étincelle par rapport au Point Mort Haut (PMH) du piston.",
+        "function": "Indiquer le moment où la bougie déclenche l'étincelle pendant la phase de compression.",
+        "impact": "Un point d'allumage optimisé offre un rendement mécanique maximal ; trop d'avance provoque du cliquetis."
+    },
+    "0F": {
+        "name": "Température de l'Air d'Admission (IAT)",
+        "shortName": "IAT",
+        "whatIsIt": "Thermistance située dans le conduit d'admission d'air ou intégrée au débitmètre MAF.",
+        "function": "Mesurer la température de l'air frais entrant dans le moteur.",
+        "impact": "L'air froid étant plus dense, l'ECU utilise cette donnée pour calculer la masse réelle d'air et ajuster l'injection."
+    },
+    "10": {
+        "name": "Débit de Masse d'Air (MAF)",
+        "shortName": "MAF",
+        "whatIsIt": "Capteur à film chaud ou fil chaud situé après le filtre à air.",
+        "function": "Mesurer directement en grammes par seconde (g/s) la quantité d'air entrant dans le moteur.",
+        "impact": "Permet un calcul très précis du carburant nécessaire pour maintenir le mélange stœchiométrique."
+    },
+    "11": {
+        "name": "Position du Papillon (TPS)",
+        "shortName": "TPS",
+        "whatIsIt": "Capteur potentiométrique ou à effet Hall installé sur le boîtier papillon.",
+        "function": "Indiquer le pourcentage d'ouverture du papillon des gaz.",
+        "impact": "Informe l'ECU de l'intention du conducteur (ralenti, accélération franche ou plein gaz)."
+    },
+    "13": {
+        "name": "Sondes d'Oxygène Présentes",
+        "shortName": "Sondes Présentes",
+        "whatIsIt": "Masque de bits indiquant le nombre et l'emplacement des sondes lambda présentes sur le véhicule.",
+        "function": "Cartographier les sondes amont et aval présentes sur la ligne d'échappement.",
+        "impact": "Indique à l'outil de diagnostic quelles positions de sondes lambda doivent être interrogées."
+    },
+    "14": {
+        "name": "Tension de la Sonde Lambda (B1S1)",
+        "shortName": "Sonde B1S1",
+        "whatIsIt": "Sonde à oxygène primaire de la Banque 1, située avant le catalyseur.",
+        "function": "Générer un signal de tension (0.1V à 0.9V) proportionnel à l'oxygène résiduel des gaz d'échappement.",
+        "impact": "Signal primaire utilisé par l'ECU pour réguler le mélange air/carburant en boucle fermée."
+    },
+    "15": {
+        "name": "Tension de la Sonde Lambda (B1S2)",
+        "shortName": "Sonde B1S2",
+        "whatIsIt": "Sonde à oxygène secondaire de la Banque 1, située juste après le catalyseur.",
+        "function": "Surveiller la capacité de rétention d'oxygène du catalyseur.",
+        "impact": "Une tension stable entre 0.6V et 0.8V indique un catalyseur efficace ; des oscillations fréquentes signalent sa dégradation."
+    },
+    "16": {
+        "name": "Tension de la Sonde Lambda (B2S1)",
+        "shortName": "Sonde B2S1",
+        "whatIsIt": "Sonde à oxygène primaire avant catalyseur sur la Banque 2 (moteurs V ou Boxer).",
+        "function": "Mesurer les gaz d'échappement du deuxième banc de cylindres.",
+        "impact": "Permet le contrôle indépendant du mélange sur la Banque 2."
+    },
+    "17": {
+        "name": "Tension de la Sonde Lambda (B2S2)",
+        "shortName": "Sonde B2S2",
+        "whatIsIt": "Sonde à oxygène secondaire de la Banque 2, située après le catalyseur.",
+        "function": "Surveiller l'efficacité de conversion catalytique du deuxième banc.",
+        "impact": "Utilisée par l'ECU pour évaluer le fonctionnement du catalyseur du banc 2."
+    },
+    "1C": {
+        "name": "Norme OBD Supportée",
+        "shortName": "Norme OBD",
+        "whatIsIt": "Code de spécification réglementaire auquel répond le système de diagnostic de l'ECU.",
+        "function": "Identifier la norme régionale de diagnostic (OBD-II, EOBD, JOBD, OBDBr, etc.).",
+        "impact": "Garantit la bonne interprétation des protocoles de communication et des tests d'émissions."
+    },
+    "1F": {
+        "name": "Temps de Fonctionnement du Moteur",
+        "shortName": "Temps Moteur",
+        "whatIsIt": "Compteur en secondes depuis que le moteur a démarré avec succès.",
+        "function": "Mesurer la durée continue de fonctionnement du moteur durant le trajet actuel.",
+        "impact": "Utilisé par l'ECU pour autoriser les tests de diagnostic d'évaporation ou le chauffage de composants."
+    },
+    "21": {
+        "name": "Distance Parcourue avec Voyant Allumé",
+        "shortName": "Distance MIL",
+        "whatIsIt": "Distance accumulée parcourue par le véhicule pendant que le voyant moteur est resté allumé.",
+        "function": "Enregistrer la distance parcourue sans que le défaut détecté ne soit corrigé.",
+        "impact": "Indique la durée de fonctionnement avec une anomalie et la sévérité d'utilisation en mode dégradé."
+    },
+    "22": {
+        "name": "Pression de Rampe de Carburant (Relative)",
+        "shortName": "Pression Rampe Rel.",
+        "whatIsIt": "Pression de carburant dans la rampe mesurée par rapport à la dépression du collecteur.",
+        "function": "Surveiller la pression différentielle s'appliquant aux injecteurs.",
+        "impact": "Garantit un volume d'injection exact indépendamment de la dépression moteur."
+    },
+    "23": {
+        "name": "Pression de Rampe de Carburant (Absolue)",
+        "shortName": "Pression Rampe Abs.",
+        "whatIsIt": "Pression totale mesurée dans la rampe de carburant par rapport au vide absolu.",
+        "function": "Mesurer la pression d'injection sur les moteurs à injection directe (GDI) ou Diesel (Common Rail).",
+        "impact": "Essentiel dans les systèmes haute pression pour assurer une bonne pulvérisation du carburant."
+    },
+    "2C": {
+        "name": "Commande EGR",
+        "shortName": "Commande EGR",
+        "whatIsIt": "Pourcentage d'ouverture demandé par l'ECU à la vanne de recyclage des gaz d'échappement (EGR).",
+        "function": "Réguler le volume de gaz d'échappement réintroduit dans l'admission.",
+        "impact": "Abaisse la température de combustion dans le cylindre, réduisant fortement les émissions de NOx."
+    },
+    "2D": {
+        "name": "Erreur du Système EGR",
+        "shortName": "Erreur EGR",
+        "whatIsIt": "Écart en pourcentage entre la position désirée de la vanne EGR et sa position réelle mesurée.",
+        "function": "Détecter les dysfonctionnements mécaniques ou électriques de la vanne EGR.",
+        "impact": "Des valeurs élevées indiquent que la vanne est grippée, encrassée par la calamine ou défectueuse."
+    },
+    "2E": {
+        "name": "Purge du Canister",
+        "shortName": "Purge Canister",
+        "whatIsIt": "Pourcentage du rapport cyclique d'ouverture (Duty Cycle) appliqué à l'électrovanne de purge.",
+        "function": "Contrôler le passage des vapeurs de carburant stockées dans le filtre à charbon vers l'admission.",
+        "impact": "Recycle les vapeurs du réservoir, évitant ainsi les émissions polluantes par évaporation."
+    },
+    "2F": {
+        "name": "Niveau de Carburant",
+        "shortName": "Niveau Carb.",
+        "whatIsIt": "Signal de la jauge du réservoir de carburant transmis à l'ECU.",
+        "function": "Indiquer le pourcentage de carburant restant dans le réservoir.",
+        "impact": "L'ECU utilise cette donnée pour autoriser les tests d'étanchéité EVAP (nécessitent entre 15% et 85% de carburant)."
+    },
+    "30": {
+        "name": "Nombre de Effacements de Codes depuis Reset",
+        "shortName": "Effacements DTC",
+        "whatIsIt": "Nombre de fois où la mémoire de défauts de l'ECU a été effacée via un outil de diagnostic.",
+        "function": "Conserver l'historique des opérations d'effacement de défauts d'injection.",
+        "impact": "Utile pour vérifier les réinitialisations fréquentes effectuées sans réparation physique."
+    },
+    "31": {
+        "name": "Distance Parcourue depuis Reset",
+        "shortName": "Distance Reset",
+        "whatIsIt": "Kilométrage parcouru par le véhicule après la dernière commande d'effacement des défauts.",
+        "function": "Évaluer si le véhicule a parcouru une distance suffisante pour exécuter ses auto-tests.",
+        "impact": "Indique si les moniteurs d'émissions OBD2 ont eu le temps de diagnostiquer les systèmes."
+    },
+    "32": {
+        "name": "Pression de Vapeur du Système EVAP",
+        "shortName": "Pression EVAP",
+        "whatIsIt": "Capteur ultra-sensible mesurant les petites variations de pression/dépression dans la ligne EVAP.",
+        "function": "Surveiller l'étanchéité des durites et du réservoir pendant le test d'évaporation.",
+        "impact": "Détecte les micro-fuites dans le circuit de carburant."
+    },
+    "33": {
+        "name": "Pression Barométrique (Ambiante)",
+        "shortName": "Pression Atm.",
+        "whatIsIt": "Capteur piézoélectrique mesurant la pression atmosphérique ambiante.",
+        "function": "Indiquer l'altitude et la densité de l'air de l'endroit où circule le véhicule.",
+        "impact": "Permet de compenser le mélange air/carburant et d'ajuster la pression de suralimentation en altitude."
+    },
+    "34": {
+        "name": "Sonde Lambda 1 (B1S1) - Rapport d'Équivalence",
+        "shortName": "Lambda B1S1",
+        "whatIsIt": "Mesure du rapport Lambda (λ) fournie par une sonde large bande (Wideband) sur la Banque 1.",
+        "function": "Indiquer la valeur précise de la richesse du mélange air/carburant dans l'échappement.",
+        "impact": "Permet des corrections instantanées de la richesse avec une très haute précision."
+    },
+    "35": {
+        "name": "Sonde Lambda 2 (B1S2) - Rapport d'Équivalence",
+        "shortName": "Lambda B1S2",
+        "whatIsIt": "Rapport Lambda (λ) mesuré par sonde large bande installée après le catalyseur de la Banque 1.",
+        "function": "Surveiller la composition des gaz sortant du catalyseur.",
+        "impact": "Utilisé par l'ECU pour évaluer la santé chimique du catalyseur."
+    },
+    "3C": {
+        "name": "Temp. Catalyseur (Banque 1, Capteur 1)",
+        "shortName": "Temp. Cat B1S1",
+        "whatIsIt": "Température mesurée ou estimée à l'entrée du premier catalyseur de la Banque 1.",
+        "function": "Surveiller la température opérationnelle de conversion chimique.",
+        "impact": "La température normale varie de 400°C à 800°C. Au-dessus de 950°C, la céramique risque de fondre."
+    },
+    "3D": {
+        "name": "Temp. Catalyseur (Banque 2, Capteur 1)",
+        "shortName": "Temp. Cat B2S1",
+        "whatIsIt": "Température du premier catalyseur de la Banque 2.",
+        "function": "Surveiller la réaction thermique sur le banc secondaire.",
+        "impact": "Évite les dommages structurels causés par l'essence imbrûlée due à des ratés d'allumage."
+    },
+    "3E": {
+        "name": "Temp. Catalyseur (Banque 1, Capteur 2)",
+        "shortName": "Temp. Cat B1S2",
+        "whatIsIt": "Température mesurée à la sortie du catalyseur de la Banque 1.",
+        "function": "Évaluer la dissipation thermique sur la ligne d'échappement secondaire.",
+        "impact": "Aide au contrôle des émissions et au diagnostic de l'état du catalyseur."
+    },
+    "3F": {
+        "name": "Temp. Catalyseur (Banque 2, Capteur 2)",
+        "shortName": "Temp. Cat B2S2",
+        "whatIsIt": "Température relevée sur le second catalyseur de la Banque 2.",
+        "function": "Surveiller la température en sortie de catalyseur sur la Banque 2.",
+        "impact": "Garantit la stabilité thermique et la filtration sur la ligne complète."
+    },
+    "41": {
+        "name": "Statut Moniteurs (Cycle Actuel)",
+        "shortName": "Statut Cycle",
+        "whatIsIt": "Résumé de l'état des moniteurs d'émissions pendant le cycle de conduite actif.",
+        "function": "Informer si tous les tests continus ont été exécutés depuis le dernier démarrage.",
+        "impact": "Utilisé pour vérifier la conformité du véhicule avant un contrôle technique des émissions."
+    },
+    "42": {
+        "name": "Tension du Module de Contrôle (ECU / Batterie)",
+        "shortName": "Batterie ECU",
+        "whatIsIt": "Tension électrique fournie par la batterie et l'alternateur aux bornes de l'ECU.",
+        "function": "Surveiller la santé du système électrique principal du moteur.",
+        "impact": "Les tensions inférieures à 12V au démarrage provoquent des erreurs de communication et de faux codes de défaut."
+    },
+    "43": {
+        "name": "Charge Absolue",
+        "shortName": "Charge Absolue",
+        "whatIsIt": "Efficacité volumétrique corrigée et normalisée de l'air admis par les cylindres.",
+        "function": "Indiquer le remplissage en air des cylindres indépendamment de l'altitude ou de la température.",
+        "impact": "Utilisé pour le calcul du couple sur les moteurs turbo et la gestion moteur avancée."
+    },
+    "44": {
+        "name": "Rapport d'Équivalence Air/Carburant",
+        "shortName": "Mélange (A/F)",
+        "whatIsIt": "Proportion entre le rapport air/carburant mesuré et la stœchiométrie idéale du carburant.",
+        "function": "Afficher la valeur Lambda globale en temps réel.",
+        "impact": "Une valeur égale à 1.0 est le mélange idéal. Inférieure à 1.0 signifie un mélange riche ; supérieure à 1.0, un mélange pauvre."
+    },
+    "45": {
+        "name": "Position Relative du Papillon",
+        "shortName": "Papillon Rel.",
+        "whatIsIt": "Ouverture en pourcentage utile du papillon hors position de repos de ralenti.",
+        "function": "Afficher l'accélération effective demandée au boîtier papillon motorisé.",
+        "impact": "Offre une sensibilité précise de la réponse à la pédale d'accélérateur."
+    },
+    "46": {
+        "name": "Température de l'Air Ambiant",
+        "shortName": "Temp. Ext.",
+        "whatIsIt": "Capteur de température placé sur le pare-chocs, le rétroviseur ou la calandre.",
+        "function": "Informer de la température de l'air extérieur autour du véhicule.",
+        "impact": "Utilisé pour la gestion de la climatisation, de l'ordinateur de bord et du démarrage à froid."
+    },
+    "47": {
+        "name": "Position Absolue du Papillon B",
+        "shortName": "Papillon B",
+        "whatIsIt": "Signal électrique de la deuxième piste potentiométrique (Piste B) du boîtier papillon.",
+        "function": "Fournir un signal redondant pour la sécurité de l'accélération.",
+        "impact": "En cas d'écart entre les pistes A et B, l'ECU passe en mode dégradé de sécurité."
+    },
+    "48": {
+        "name": "Position Absolue du Papillon C",
+        "shortName": "Papillon C",
+        "whatIsIt": "Signal de la troisième piste de mesure pour les papillons motorisés haute sécurité.",
+        "function": "Garantir la tolérance aux pannes sur les accélérateurs sécurisés.",
+        "impact": "Évite les accélérations intempestives en cas de défaillance des autres pistes."
+    },
+    "49": {
+        "name": "Position de la Pédale d'Accélérateur D",
+        "shortName": "Pédale D",
+        "whatIsIt": "Signal du premier circuit électrique (Piste D) du module de pédale d'accélérateur.",
+        "function": "Lire la position d'enfoncement de la pédale par le conducteur.",
+        "impact": "Transmet l'intention de couple du conducteur pour l'ouverture du papillon motorisé."
+    },
+    "4A": {
+        "name": "Position de la Pédale d'Accélérateur E",
+        "shortName": "Pédale E",
+        "whatIsIt": "Signal du deuxième circuit (Piste E) intégré à la pédale d'accélérateur.",
+        "function": "Vérifier et valider la lecture de la piste D de la pédale.",
+        "impact": "Garantit un contrôle sécurisé de la pédale sans accélérations incontrôlées."
+    },
+    "4B": {
+        "name": "Position de la Pédale d'Accélérateur F",
+        "shortName": "Pédale F",
+        "whatIsIt": "Signal redondant du troisième circuit de la pédale d'accélérateur.",
+        "function": "Offrir un triple contrôle sur les pédales d'accélérateur électroniques.",
+        "impact": "Augmente la fiabilité du système Drive-by-Wire."
+    },
+    "4C": {
+        "name": "Actionneur du Papillon des Gaz",
+        "shortName": "Actionneur Pap.",
+        "whatIsIt": "Pourcentage de courant appliqué au moteur à courant continu du papillon.",
+        "function": "Informer de la force appliquée par l'ECU pour positionner le papillon à l'ouverture voulue.",
+        "impact": "Effort élevé au ralenti indique un encrassement ou un grippage mécanique."
+    },
+    "4D": {
+        "name": "Temps Moteur avec Voyant Allumé",
+        "shortName": "Temps MIL",
+        "whatIsIt": "Temps cumulé en minutes avec le moteur tournant et le voyant moteur allumé.",
+        "function": "Mesurer la durée de fonctionnement du moteur sous condition de défaut actif.",
+        "impact": "Permet de vérifier la persistance d'une anomalie non réparée par le conducteur."
+    },
+    "4E": {
+        "name": "Temps Moteur depuis Effacement des Défauts",
+        "shortName": "Temps Reset",
+        "whatIsIt": "Temps total de fonctionnement du moteur après le dernier effacement de la mémoire.",
+        "function": "Évaluer le temps de roulage post-maintenance.",
+        "impact": "S'assure que le véhicule a suffisamment roulé pour valider les moniteurs de test."
+    },
+    "51": {
+        "name": "Type de Carburant du Véhicule",
+        "shortName": "Type Carb.",
+        "whatIsIt": "Code d'identification du type de carburant configuré ou détecté par l'ECU.",
+        "function": "Informer si le carburant est Essence, Éthanol, Diesel, Flex, GNV ou Électrique.",
+        "impact": "Ajuste les paramètres d'avance, d'injection et de logique d'émissions."
+    },
+    "52": {
+        "name": "Pourcentage d'Éthanol dans le Carburant",
+        "shortName": "Éthanol %",
+        "whatIsIt": "Pourcentage estimé d'alcool contenu dans le réservoir de carburant.",
+        "function": "Afficher le taux d'alcool (0% à 100%) sur les moteurs Flex-Fuel.",
+        "impact": "Ajuste les cartographies d'injection et d'allumage selon le mélange présent."
+    },
+    "53": {
+        "name": "Pression Absolue de Vapeur (EVAP)",
+        "shortName": "Pression EVAP Abs",
+        "whatIsIt": "Lecture de la pression absolue étendue dans la ligne de vapeurs du réservoir.",
+        "function": "Mesurer la rétention de vapeur dans les réservoirs scellés et sous pression.",
+        "impact": "Évite l'échappement de polluants par vapeurs d'essence sur les véhicules modernes."
+    },
+    "59": {
+        "name": "Pression Absolue de Rampe de Carburant",
+        "shortName": "Pression Rampe Abs",
+        "whatIsIt": "Pression totale mesurée dans la rampe de carburant à haute résolution.",
+        "function": "Surveiller les systèmes d'injection directe à haute pression.",
+        "impact": "Assure la pression idéale pour une nébulisation optimale du carburant."
+    },
+    "5A": {
+        "name": "Position Relative de la Pédale d'Accélérateur",
+        "shortName": "Pédale Relative",
+        "whatIsIt": "Ouverture utile en pourcentage de la pédale d'accélérateur sans la garde.",
+        "function": "Mesurer l'intention d'accélération immédiate demandée par le conducteur.",
+        "impact": "Commande directe pour les stratégies d'accélération et changements de vitesse."
+    },
+    "5B": {
+        "name": "Durée de Vie de la Batterie (Hybrides)",
+        "shortName": "Batterie Hybride",
+        "whatIsIt": "Pourcentage de capacité de rétention de charge de la batterie de traction (SOH %).",
+        "function": "Informer de l'état de santé et de dégradation de la batterie haute tension.",
+        "impact": "Détermine le moment où la batterie nécessite un équilibrage de cellules ou un remplacement."
+    },
+    "5C": {
+        "name": "Température de l'Huile Moteur",
+        "shortName": "Temp. Huile",
+        "whatIsIt": "Capteur thermique dans le carter d'huile ou le support de filtre à huile.",
+        "function": "Mesurer la température du lubrifiant de protection du moteur.",
+        "impact": "L'huile fonctionne idéalement entre 80°C et 110°C ; au-delà de 125°C, le film d'huile se dégrade."
+    },
+    "5D": {
+        "name": "Avance de l'Injection de Carburant",
+        "shortName": "Avance Inj.",
+        "whatIsIt": "Angle du vilebrequin par rapport au PMH où débute la pulvérisation des injecteurs.",
+        "function": "Synchroniser l'injection sur les moteurs Diesel ou à injection directe.",
+        "impact": "Améliore la combustion, réduit le bruit moteur et les émissions de suie."
+    },
+    "5E": {
+        "name": "Consommation de Carburant (Débit)",
+        "shortName": "Consommation L/h",
+        "whatIsIt": "Débit instantané de carburant consommé par le moteur mesuré en litres par heure.",
+        "function": "Mesurer le taux de consommation de carburant.",
+        "impact": "Sert de base pour le calcul de la consommation moyenne et de l'autonomie."
+    },
+    "5F": {
+        "name": "Norme d'Émissions Conçue",
+        "shortName": "Norme Émissions",
+        "whatIsIt": "Code spécifiant la réglementation environnementale adoptée par l'ECU.",
+        "function": "Identifier la norme environnementale réglementaire du véhicule.",
+        "impact": "Définit les seuils de tolérance aux défauts pour l'allumage du voyant moteur."
+    },
+    "61": {
+        "name": "Couple Demandé par le Conducteur",
+        "shortName": "Couple Demandé",
+        "whatIsIt": "Niveau de couple en pourcentage demandé par la position de la pédale d'accélérateur.",
+        "function": "Transformer l'enfoncement de la pédale en une demande de couple moteur.",
+        "impact": "Base de calcul pour l'ouverture du papillon, la pression de turbo et les passages de vitesse."
+    },
+    "62": {
+        "name": "Couple Réel du Moteur",
+        "shortName": "Couple Réel",
+        "whatIsIt": "Estimation en pourcentage du couple produit par le moteur au vilebrequin.",
+        "function": "Informer de la force motrice mécanique actuellement générée par la combustion.",
+        "impact": "Utilisé par la boîte automatique et le contrôle de trajectoire (ESP)."
+    },
+    "63": {
+        "name": "Couple de Référence du Moteur",
+        "shortName": "Couple Réf.",
+        "whatIsIt": "Valeur constante du couple maximal nominal du moteur en Newton-mètres (Nm).",
+        "function": "Fournir l'échelle physique en Nm pour convertir les pourcentages de couple.",
+        "impact": "Permet au scanner de convertir les pourcentages de couple en valeurs physiques réelles."
+    },
+    "66": {
+        "name": "Débit de Masse d'Air (Capteur A)",
+        "shortName": "Débit MAF A",
+        "whatIsIt": "Débitmètre d'air à plage étendue situé sur le conduit d'admission principal A.",
+        "function": "Mesurer des débits d'air élevés sur moteurs performants ou à double admission.",
+        "impact": "Améliore la précision du calcul d'injection sur gros moteurs ou bi-turbo."
+    },
+    "67": {
+        "name": "Temp. Refroidissement (Capteurs Multiples)",
+        "shortName": "Temp. Moteur Mult.",
+        "whatIsIt": "Lecture combinée de capteurs thermiques sur le bloc moteur et sur le radiateur.",
+        "function": "Surveiller l'écart de température du liquide avant et après le radiateur.",
+        "impact": "Diagnostique les thermostats bloqués ou le manque d'efficacité du radiateur."
+    },
+    "68": {
+        "name": "Temp. Air Admission (Capteurs Multiples)",
+        "shortName": "Temp. Air Mult.",
+        "whatIsIt": "Capteurs thermiques situés avant et après l'échangeur d'air (Intercooler).",
+        "function": "Évaluer le refroidissement de l'air comprimé par le turbocompresseur.",
+        "impact": "Protège contre une densité d'air inadéquate dans les chambres de combustion."
+    },
+    "6F": {
+        "name": "Pression d'Entrée du Turbo",
+        "shortName": "Pression Entrée Turbo",
+        "whatIsIt": "Capteur de pression placé à l'entrée d'air du turbocompresseur.",
+        "function": "Mesurer la restriction du filtre à air ou la pression d'entrée du compresseur.",
+        "impact": "Identifie les filtres à air colmatés et les pertes de charge à l'admission."
+    },
+    "78": {
+        "name": "Temp. Gaz d'Échappement (EGT) - Banque 1",
+        "shortName": "Temp. EGT B1",
+        "whatIsIt": "Capteur pour hautes températures dans le collecteur d'échappement de la Banque 1.",
+        "function": "Mesurer la température des gaz d'échappement du premier banc.",
+        "impact": "Protège la turbine du turbo et le catalyseur contre la fusion par surchauffe."
+    },
+    "79": {
+        "name": "Temp. Gaz d'Échappement (EGT) - Banque 2",
+        "shortName": "Temp. EGT B2",
+        "whatIsIt": "Capteur haute température du collecteur d'échappement de la Banque 2.",
+        "function": "Surveiller la température d'échappement sur le deuxième banc de cylindres.",
+        "impact": "Assure la protection contre les chocs thermiques et l'équilibre des bancs."
+    },
+    "81": {
+        "name": "Temps Moteur avec Contrôle d'Émission Actif",
+        "shortName": "Temps Dépollution",
+        "whatIsIt": "Temps cumulé en minutes avec le moteur opérant dans des paramètres de dépollution actifs.",
+        "function": "Enregistrer la durée de fonctionnement écologique du cycle actuel.",
+        "impact": "Utilisé pour la validation de la conformité aux normes environnementales."
+    },
+    "82": {
+        "name": "Temps Moteur depuis Début du Contrôle d'Émission",
+        "shortName": "Temps Post-Traitement",
+        "whatIsIt": "Temps écoulé depuis que les catalyseurs/filtres ont atteint leur température opérationnelle.",
+        "function": "Évaluer le temps nécessaire au système pour atteindre son efficacité maximale.",
+        "impact": "Analyse la vitesse de montée en température des sondes et catalyseurs."
+    },
+    "83": {
+        "name": "Pression de Vapeur du Système EVAP (Alt)",
+        "shortName": "Pression EVAP Alt",
+        "whatIsIt": "Voie alternative de mesure de pression du réservoir en Pascals (Pa).",
+        "function": "Mesurer les variations de pression du réservoir pour les tests d'étanchéité.",
+        "impact": "Permet une détection très précise des fuites sur les systèmes EVAP récents."
+    },
+    "84": {
+        "name": "Avance/Temps d'Injection de Carburant",
+        "shortName": "Avance Injection",
+        "whatIsIt": "Angle du vilebrequin déclenchant l'injection par rapport au PMH.",
+        "function": "Synchroniser le début d'injection avec la phase d'aspiration/compression.",
+        "impact": "Évite le mouillage des parois froides du cylindre et réduit la formation de suies."
+    },
+    "85": {
+        "name": "Consommation de Carburant Moteur (Alt)",
+        "shortName": "Consommation L/h Alt",
+        "whatIsIt": "Voie alternative de mesure continue de la consommation en L/h.",
+        "function": "Enregistrer la consommation de carburant en haute résolution.",
+        "impact": "Utilisé pour la télématique de flotte et les mesures techniques de consommation."
+    },
+    "91": {
+        "name": "Température de l'Huile Moteur (Alt)",
+        "shortName": "Temp. Huile Alt",
+        "whatIsIt": "Capteur secondaire de température d'huile placé sur la galerie supérieure de culasse.",
+        "function": "Surveiller la température de lubrification du haut moteur.",
+        "impact": "Protège les arbres à cames contre la rupture du film d'huile due à une chaleur extrême."
+    },
+    "92": {
+        "name": "Correction du Temps d'Injection",
+        "shortName": "Correction Temps Inj.",
+        "whatIsIt": "Compensation appliquée en microsecondes sur la durée d'injection.",
+        "function": "Ajuster le temps d'ouverture mécanique de l'injecteur selon la tension batterie.",
+        "impact": "Évite les variations de quantité de carburant causées par les fluctuations électriques."
+    },
+    "98": {
+        "name": "Concentration du Capteur NOx",
+        "shortName": "Conc. NOx",
+        "whatIsIt": "Capteur céramique spécialisé mesurant les oxydes d'azote dans l'échappement.",
+        "function": "Mesurer la concentration de polluants NOx en parties par million (ppm).",
+        "impact": "Détermine la quantité nécessaire d'injection d'AdBlue / produit réducteur."
+    },
+    "A1": {
+        "name": "Données d'Injection (Débit et Temps)",
+        "shortName": "Données Injection",
+        "whatIsIt": "Signal combiné du débit et de la largeur d'impulsion d'injection.",
+        "function": "Fournir des diagnostics consolidés sur les performances des injecteurs.",
+        "impact": "Permet d'évaluer l'usure et les dérives de débit des injecteurs de carburant."
+    },
+    "A2": {
+        "name": "Débit de Carburant par Cylindre",
+        "shortName": "Carb. Cylindre",
+        "whatIsIt": "Masse de carburant dosée par cycle individuellement pour chaque cylindre.",
+        "function": "Surveiller l'équilibre d'injection cylindre par cylindre.",
+        "impact": "Détecte les injecteurs déséquilibrés ou bouchés générant des vibrations moteur."
+    },
+    "A3": {
+        "name": "Couple de Frottement du Moteur",
+        "shortName": "Couple Frottement",
+        "whatIsIt": "Calcul des pertes de couple causées par les frottements mécaniques internes.",
+        "function": "Informer de la résistance interne que le moteur doit surmonter pour tourner.",
+        "impact": "Une hausse soudaine indique une huile inadaptée, des coussinets usés ou des accessoires grippés."
+    },
+    "A4": {
+        "name": "Température de Routage des Gaz d'Échappement",
+        "shortName": "Temp. Routage EGT",
+        "whatIsIt": "Température mesurée dans le conduit de dérivation (bypass) des gaz d'échappement.",
+        "function": "Réguler la température du flux de gaz pour préchauffer les catalyseurs ou le turbo.",
+        "impact": "Accélère la mise en action des systèmes de dépollution et évite les chocs thermiques."
+    },
+    "A6": {
+        "name": "Odomètre (Kilométrage ECU)",
+        "shortName": "Odomètre ECU",
+        "whatIsIt": "Kilométrage réel accumulé dans la mémoire non volatile du calculateur moteur.",
+        "function": "Stocker la distance totale parcourue par le véhicule.",
+        "impact": "Essentiel pour vérifier l'authenticité du kilométrage affiché au combiné d'instruments."
+    },
+    "A7": {
+        "name": "Capteur de NOx (Banque 1)",
+        "shortName": "Capteur NOx B1",
+        "whatIsIt": "Capteur de mesure des oxydes d'azote placé sur le premier banc.",
+        "function": "Évaluer le niveau de polluants NOx généré par la Banque 1.",
+        "impact": "Ajuste le débit d'AdBlue ou limite le couple si les niveaux dépassent les normes."
+    },
+    "A8": {
+        "name": "Capteur de NOx (Banque 2)",
+        "shortName": "Capteur NOx B2",
+        "whatIsIt": "Capteur de NOx de la ligne d'échappement de la Banque 2.",
+        "function": "Surveiller les gaz d'échappement de la Banque 2.",
+        "impact": "Assure la conformité environnementale sur les moteurs de forte cylindrée."
+    },
+    "AA": {
+        "name": "Temp. Intercooler (Refroidisseur d'Air)",
+        "shortName": "Intercooler",
+        "whatIsIt": "Capteur de température placé après l'échangeur air/air du turbo.",
+        "function": "Mesurer la température de l'air comprimé après son refroidissement.",
+        "impact": "L'air frais augmente la puissance. Si l'intercooler dépasse 60°C, le rendement chute."
+    },
+    "AB": {
+        "name": "Pression du Système d'Injection",
+        "shortName": "Pression Injection",
+        "whatIsIt": "Pression de rampe sur les moteurs à injection directe d'essence.",
+        "function": "Surveiller la haute pression requise pour les injecteurs directs.",
+        "impact": "Une défaillance provoque des râtés d'accélération directs et des calages."
+    },
+    "AF": {
+        "name": "Système de Contrôle d'Air Secondaire",
+        "shortName": "Air Secondaire",
+        "whatIsIt": "Pourcentage d'opération de la pompe à air secondaire d'échappement.",
+        "function": "Injecter de l'air frais dans le collecteur lors des démarrages à froid.",
+        "impact": "Réagit avec le carburant imbrûlé pour réchauffer le catalyseur en quelques secondes."
+    },
+    "B4": {
+        "name": "Température Sonde Lambda (B1, B2)",
+        "shortName": "Temp. Sonde",
+        "whatIsIt": "Température de l'élément céramique des sondes lambda Banque 1 et Banque 2.",
+        "function": "Garantir que les sondes atteignent leur plage thermique active (plus de 350°C).",
+        "impact": "Ajuste le chauffage électrique des sondes pour éviter les chocs thermiques."
+    },
+    "C4": {
+        "name": "Contrôle de la Vanne EGR (Avancé)",
+        "shortName": "EGR Avancé",
+        "whatIsIt": "Signal de commande et position étendue de la vanne de recyclage EGR.",
+        "function": "Ajuster avec une précision millimétrique le taux de gaz recyclés.",
+        "impact": "Maximise la réduction des NOx sans déstabiliser le comportement au ralenti."
+    },
+    "C5": {
+        "name": "Contrôle du Turbo à Géométrie Variable (VGT)",
+        "shortName": "Turbo VGT",
+        "whatIsIt": "Pourcentage d'actionnement des aubes du turbocompresseur VGT.",
+        "function": "Réguler l'angle des aubes internes de la turbine du turbo.",
+        "impact": "Assure une pression instantanée à bas régime et évite les pics de surpression."
+    },
+    "C6": {
+        "name": "Pression du Filtre à Particules Diesel (FAP)",
+        "shortName": "Pression FAP",
+        "whatIsIt": "Capteur de pression différentielle mesurant la restriction amont/aval du FAP.",
+        "function": "Mesurer la quantité de suie accumulée dans le filtre à particules.",
+        "impact": "Une pression élevée indique un FAP colmaté, déclenchant la régénération."
+    },
+    "C8": {
+        "name": "Temps d'Apprentissage de l'Injecteur",
+        "shortName": "Apprent. Injecteur",
+        "whatIsIt": "Durée en ms pour le calcul de micro-injection d'apprentissage de l'injecteur.",
+        "function": "Auto-corriger le temps d'injection compensant l'usure mécanique des nez d'injecteur.",
+        "impact": "Élimine le claquement des injecteurs et garantit un fonctionnement silencieux."
+    },
+    "CB": {
+        "name": "Capteur de NOx (Post-Catalyseur)",
+        "shortName": "NOx Post-Cat",
+        "whatIsIt": "Mesure des NOx en sortie d'échappement après le système SCR.",
+        "function": "Confirmer que le catalyseur SCR réduit efficacement les NOx.",
+        "impact": "Valide le bon fonctionnement du dosage d'AdBlue."
+    },
+    "CD": {
+        "name": "Capteur de Matière Particulaire (PM)",
+        "shortName": "Capteur PM",
+        "whatIsIt": "Capteur d'échappement mesurant la concentration de suie en $mg/m^3$.",
+        "function": "Surveiller l'efficacité de rétention du filtre FAP.",
+        "impact": "Détecte les fissures ou perforations de la céramique du FAP."
+    },
+    "CE": {
+        "name": "Réchauffeur d'Air d'Admission",
+        "shortName": "Réchauffeur Air",
+        "whatIsIt": "Pourcentage d'activation de la grille chauffante d'admission.",
+        "function": "Chauffer l'air d'admission pour les démarrages à froid sur moteurs Diesel.",
+        "impact": "Facilite l'inflammation du carburant par temps froid et supprime la fumée blanche."
+    },
+    "D0": {
+        "name": "Pression du Système de Carburant (Haute Pression)",
+        "shortName": "Haute Pression Carb.",
+        "whatIsIt": "Lecture haute pression de rampe Common Rail Diesel ou injection directe essence.",
+        "function": "Mesurer la pression d'injection (de 200 à plus de 2000 bars).",
+        "impact": "Permet un dosage du carburant extrêmement précis sous très haute pression."
+    },
+    "D2": {
+        "name": "Contrôle de la Pompe à Eau Électrique",
+        "shortName": "Pompe à Eau Élec.",
+        "whatIsIt": "Signal du rapport cyclique envoyé à la pompe à eau électrique variable.",
+        "function": "Réguler la circulation du liquide selon les besoins, indépendamment du régime.",
+        "impact": "Permet une montée en température rapide et réduit la charge moteur."
+    },
+    "DF": {
+        "name": "Statut du Contrôle d'Échappement (FAP/NOx)",
+        "shortName": "Statut Échappement",
+        "whatIsIt": "État des cycles de nettoyage et régénération des filtres d'échappement.",
+        "function": "Informer si l'ECU exécute la régénération du FAP.",
+        "impact": "Pendant la régénération, la température d'échappement s'élève pour brûler les suies."
+    },
+    "E3": {
+        "name": "Température Moteur du Compresseur de Climatisation",
+        "shortName": "Temp. Comp. Clim",
+        "whatIsIt": "Capteur thermique sur le moteur du compresseur électrique de climatisation (Hybride/EV).",
+        "function": "Surveiller la température du compresseur de climatisation.",
+        "impact": "Désactive temporairement la clim pour éviter de griller le moteur électrique du compresseur."
+    },
+    "EA": {
+        "name": "Température de l'Onduleur (Hybrides)",
+        "shortName": "Temp. Onduleur",
+        "whatIsIt": "Capteur de température installé sur l'onduleur haute tension.",
+        "function": "Surveiller la température des semi-conducteurs de puissance de l'onduleur.",
+        "impact": "L'onduleur transforme le courant continu de la batterie en alternatif. Une surchauffe réduit la puissance."
     }
 }

@@ -1,14 +1,730 @@
 {
+    "01": {
+        "name": "Status der DTC-Monitore",
+        "shortName": "Status MIL/DTC",
+        "whatIsIt": "Interne ECU-Anzeige, die informiert, ob die Motorkontrollleuchte (MIL) leuchtet und wie viele Fehlercodes im Speicher hinterlegt sind.",
+        "function": "Sofortige Rückmeldung über den Status der Einspritzwarnung im Armaturenbrett und die Gesamtzahl der diagnostizierten Fehler.",
+        "impact": "Wird für schnelle Fahrzeuginspektionen und die Erstdiagnose im Speicher abgelegter Codes verwendet."
+    },
+    "03": {
+        "name": "Status des Kraftstoffsystems",
+        "shortName": "Status Regelkreis",
+        "whatIsIt": "Betriebszustand der Regelungsstrategie für das Luft-Kraftstoff-Gemisch (Offener Regelkreis / Open Loop oder Geschlossener Regelkreis / Closed Loop).",
+        "function": "Zeigt an, ob die ECU die Einspritzung basierend auf den Werten der Lambdasonden in Echtzeit anpasst.",
+        "impact": "Im offenen Regelkreis (kalter Motor oder Vollgas) nutzt die ECU feste Kennfelder; im geschlossenen Regelkreis wird das stöchiometrische Idealverhältnis angestrebt."
+    },
+    "04": {
+        "name": "Berechnete Motorlast",
+        "shortName": "Motorlast",
+        "whatIsIt": "Prozentualer Anteil des aktuellen Luftmassenstroms im Vergleich zum theoretischen Maximum bei gleicher Drehzahl.",
+        "function": "Zeigt den prozentualen Anteil des theoretischen Motordrehmoments an, der aktuell gefordert wird.",
+        "impact": "Wird von der ECU zur Bestimmung der Einspritzmenge und des Zündwinkels verwendet."
+    },
     "05": {
         "name": "Kühlmitteltemperatur (ECT)",
-        "whatIsIt": "Ein Thermistor, der sich im Motorblock oder Thermostatgehäuse befindet.",
-        "function": "Misst die Temperatur des Motorkühlmittels.",
-        "impact": "Die ECU nutzt dies zur Berechnung der Kraftstoffeinspritzung und Lüftersteuerung."
+        "shortName": "ECT",
+        "whatIsIt": "NTC-Temperatursensor im Motorblock, Zylinderkopf oder Thermostatgehäuse.",
+        "function": "Misst die Temperatur der Kühlflüssigkeit, die den Motor kühlt.",
+        "impact": "Kritischer Parameter für die Kaltstartanreicherung, Zündwinkelanpassung und die Ansteuerung der Kühlerlüfter."
+    },
+    "06": {
+        "name": "Kurzzeit-Kraftstofftrimm (Bank 1)",
+        "shortName": "STFT Bank 1",
+        "whatIsIt": "Dynamische und sofortige Korrektur der Einspritzzeit basierend auf dem aktuellen Signal der Lambdasonde.",
+        "function": "Kompensiert kurzzeitige Gemischschwankungen, um das stöchiometrische Verhältnis zu halten.",
+        "impact": "Positive Werte reichern das Gemisch an (mageres Gemisch); negative Werte magern es ab (fettes Gemisch)."
+    },
+    "07": {
+        "name": "Langzeit-Kraftstofftrimm (Bank 1)",
+        "shortName": "LTFT Bank 1",
+        "whatIsIt": "Langfristiger adaptiver Speicher der ECU zur Korrektur dauerhafter Gemischabweichungen.",
+        "function": "Kompensiert systematische Abweichungen wie verschlissene Einspritzventile oder Falschluft.",
+        "impact": "Abweichungen von mehr als ±10% bis ±15% deuten auf Falschluft, fehlerhaften Kraftstoff oder Probleme im Kraftstoffsystem hin."
+    },
+    "08": {
+        "name": "Kurzzeit-Kraftstofftrimm (Bank 2)",
+        "shortName": "STFT Bank 2",
+        "whatIsIt": "Sofortige Einspritzzeitkorrektur für die zweite Zylinderbank bei V6-, V8- oder Boxermotoren.",
+        "function": "Hält das Gemisch auf der zweiten Zylinderbank im Gleichgewicht.",
+        "impact": "Ermöglicht den Vergleich des Einspritzverhaltens zwischen beiden Motorseiten."
+    },
+    "09": {
+        "name": "Langzeit-Kraftstofftrimm (Bank 2)",
+        "shortName": "LTFT Bank 2",
+        "whatIsIt": "Langfristig akkumulierter adaptiver Speicher für das Gemisch der zweiten Zylinderbank.",
+        "function": "Passt die Einspritzung von Bank 2 dauerhaft an, um Bauteilverschleiß auszugleichen.",
+        "impact": "Deutliche Abweichungen gegenüber Bank 1 weisen auf spezifische Probleme einer einzelnen Zylinderbank hin."
+    },
+    "0A": {
+        "name": "Kraftstoffdruck (Pumpe)",
+        "shortName": "Kraftstoffdruck",
+        "whatIsIt": "Messwert des Drucksensors in der Niederdruck-Kraftstoffleitung.",
+        "function": "Überwacht den Förderdruck der Kraftstoffpumpe zum Einspritzverteilerrohr.",
+        "impact": "Zu niedriger Druck führt zu Magerruckeln und Leistungseinbußen; zu hoher Druck führt zu Überfettung."
+    },
+    "0B": {
+        "name": "Saugrohr-Absolutdruck (MAP)",
+        "shortName": "MAP",
+        "whatIsIt": "Piezoresistiver Sensor zur Messung des Absolutdrucks im Saugrohr.",
+        "function": "Erfasst das Unterdruckniveau bei Saugmotoren oder den Ladedruck bei Turbomotoren.",
+        "impact": "Wichtiger Parameter im Speed-Density-Verfahren zur Berechnung der angesaugten Luftmasse."
     },
     "0C": {
         "name": "Motordrehzahl (RPM)",
-        "whatIsIt": "Signal des Kurbelwellenpositionssensors (CKP).",
-        "function": "Misst die Umdrehungen pro Minute des Motors.",
-        "impact": "Wichtig zur Synchronisierung von Einspritzung und Zündung."
+        "shortName": "RPM",
+        "whatIsIt": "Signal des Kurbelwellendersensors (CKP).",
+        "function": "Misst die Anzahl der Kurbelwellenumdrehungen pro Minute.",
+        "impact": "Grundlegende Eingangsgröße für Einspritzsynchronisation, Zündauslösung und Drehmomentberechnung."
+    },
+    "0D": {
+        "name": "Fahrzeuggeschwindigkeit",
+        "shortName": "Geschwindigkeit",
+        "whatIsIt": "Signal vom Raddrehzahlsensor (VSS) am Getriebe oder vom ABS-Steuergerät.",
+        "function": "Liefert die tatsächliche Fahrgeschwindigkeit des Fahrzeugs in km/h.",
+        "impact": "Wird für Tempomat, Traktionskontrolle und Schubabschaltung (Cut-off) verwendet."
+    },
+    "0E": {
+        "name": "Zündwinkelverstellung (Zündwinkel)",
+        "shortName": "Zündwinkel",
+        "whatIsIt": "Winkel des Zündzeitpunkts bezogen auf den oberen Totpunkt (OT) des Kolbens.",
+        "function": "Gibt an, wann die Zündkerze während des Verdichtungstakts den Zündfunken auslöst.",
+        "impact": "Optimaler Zündwinkel sorgt für höchste Effizienz; zu frühe Zündung führt zu schädlichem Klopfen."
+    },
+    "0F": {
+        "name": "Ansauglufttemperatur (IAT)",
+        "shortName": "IAT",
+        "whatIsIt": "NTC-Sensor im Ansaugtrakt oder integriert im Luftmassenmesser (MAF).",
+        "function": "Misst die Temperatur der frischen Ansaugluft.",
+        "impact": "Da kalte Luft dichter ist, nutzt die ECU diesen Wert zur Korrektur der berechneten Luftmasse."
+    },
+    "10": {
+        "name": "Luftmassenstrom (MAF)",
+        "shortName": "MAF",
+        "whatIsIt": "Heißfilm- oder Hitzdrahtsensor im Luftfiltergehäuse.",
+        "function": "Misst direkt die in den Motor strömende Luftmenge in Gramm pro Sekunde (g/s).",
+        "impact": "Ermöglicht die präzise Berechnung der erforderlichen Kraftstoffmenge."
+    },
+    "11": {
+        "name": "Drosselklappenstellung (TPS)",
+        "shortName": "TPS",
+        "whatIsIt": "Potentiometer oder Hall-Sensor an der Drosselklappeneinheit.",
+        "function": "Gibt den prozentualen Öffnungswinkel der Drosselklappe an.",
+        "impact": "Meldet den Fahrerwunsch (Leerlauf, Teillast oder Vollgas) an das Steuergerät."
+    },
+    "13": {
+        "name": "Vorhandene Sauerstoffsensoren",
+        "shortName": "Sonden vorhanden",
+        "whatIsIt": "Bitmaske, welche die Anzahl und Position der verbauten Lambdasonden angibt.",
+        "function": "Mappt das Vorhandensein von Vor- und Nachkat-Sonden in der Abgasanlage.",
+        "impact": "Zeigt dem Diagnosegerät, welche Lambdasondenpositionen abgefragt werden können."
+    },
+    "14": {
+        "name": "Lambdasondenspannung (B1S1)",
+        "shortName": "Sonde B1S1",
+        "whatIsIt": "Erste Lambdasonde (Regelsonde) der Bank 1 vor dem Katalysator.",
+        "function": "Ezeugt eine Spannung (0,1V bis 0.9V) proportional zum Restsauerstoff im Abgas.",
+        "impact": "Primärsignal für die geschlossene Gemischregelung im Steuergerät."
+    },
+    "15": {
+        "name": "Lambdasondenspannung (B1S2)",
+        "shortName": "Sonde B1S2",
+        "whatIsIt": "Zweite Lambdasonde (Diagnosesonde) der Bank 1 hinter dem Katalysator.",
+        "function": "Überwacht die Sauerstoffspeicherfähigkeit des Katalysators.",
+        "impact": "Eine stabile Spannung zwischen 0,6V und 0,8V zeigt einen intakten Katalysator an."
+    },
+    "16": {
+        "name": "Lambdasondenspannung (B2S1)",
+        "shortName": "Sonde B2S1",
+        "whatIsIt": "Regelsonde der Bank 2 vor dem Katalysator bei V- oder Boxermotoren.",
+        "function": "Misst die Abgaszusammensetzung der zweiten Zylinderbank.",
+        "impact": "Ermöglicht die unabhängige Gemischregelung für Bank 2."
+    },
+    "17": {
+        "name": "Lambdasondenspannung (B2S2)",
+        "shortName": "Sonde B2S2",
+        "whatIsIt": "Diagnosesonde der Bank 2 hinter dem Katalysator.",
+        "function": "Überwacht die Katalysatoreffizienz der zweiten Zylinderbank.",
+        "impact": "Wird von der ECU zur Beurteilung der Katalysatorfunktion von Bank 2 genutzt."
+    },
+    "1C": {
+        "name": "Unterstützter OBD-Standard",
+        "shortName": "OBD-Standard",
+        "whatIsIt": "Spezifikationscode, dem das Diagnosesystem des Steuergeräts entspricht.",
+        "function": "Identifiziert den regionalen Diagnosestandard (OBD-II, EOBD, JOBD, OBDBr etc.).",
+        "impact": "Sichert die korrekte Interpretation der Kommunikationsprotokolle."
+    },
+    "1F": {
+        "name": "Motorlaufzeit",
+        "shortName": "Laufzeit",
+        "whatIsIt": "Zähler in Sekunden seit dem erfolgreichen Motorstart.",
+        "function": "Misst die kontinuierliche Betriebsdauer des Motors in der aktuellen Fahrt.",
+        "impact": "Wird für die Freigabe von Verdunstungstests (EVAP) oder Heizphasen genutzt."
+    },
+    "21": {
+        "name": "Fahrstrecke mit eingeschalteter MKL",
+        "shortName": "Strecke MIL",
+        "whatIsIt": "Akkumulierte Kilometerleistung bei aktiver Motorkontrollleuchte.",
+        "function": "Zeigt an, wie weit das Fahrzeug trotz erkanntem Fehler gefahren wurde.",
+        "impact": "Gibt Auskunft über die Dauer des Betriebs im Fehlerzustand."
+    },
+    "22": {
+        "name": "Kraftstoffverteilerrohrdruck (Relativ)",
+        "shortName": "Raildruck Rel.",
+        "whatIsIt": "Kraftstoffdruck im Verteilerrohr relativ zum Saugrohrunterdruck.",
+        "function": "Überwacht den wirksamen Differenzdruck am Einspritzventil.",
+        "impact": "Garantiert die exakte Einspritzmenge unabhängig vom Unterdruckniveau."
+    },
+    "23": {
+        "name": "Kraftstoffverteilerrohrdruck (Absolut)",
+        "shortName": "Raildruck Abs.",
+        "whatIsIt": "Gemessener Gesamtdruck im Verteilerrohr bezogen auf das absolute Vakuum.",
+        "function": "Misst den Druck bei Direkteinspritzern (GDI/FSI) oder Common-Rail-Diesel.",
+        "impact": "Essenziell für eine feine Zerstäubung des Kraftstoffs unter Hochdruck."
+    },
+    "2C": {
+        "name": "Ansteuerung AGR-Ventil",
+        "shortName": "Ansteuerung AGR",
+        "whatIsIt": "Soll-Öffnungsgrad des Abgasrückführungsventils (AGR) in Prozent.",
+        "function": "Regelt die Menge des in den Ansaugtrakt zurückgeführten Abgases.",
+        "impact": "Senkt die Verbrennungstemperatur und reduziert Stickoxide (NOx)."
+    },
+    "2D": {
+        "name": "AGR-Systemfehler",
+        "shortName": "Fehler AGR",
+        "whatIsIt": "Prozentuale Abweichung zwischen Soll- und Ist-Position des AGR-Ventils.",
+        "function": "Erkennt mechanische oder elektrische Fehlfunktionen des AGR-Ventils.",
+        "impact": "Hohe Werte deuten auf Verkokung, Klemmen oder elektrische Defekte hin."
+    },
+    "2E": {
+        "name": "Ansteuerung Aktivkohlefilter-Spülventil",
+        "shortName": "Spülventil EVAP",
+        "whatIsIt": "Tastverhältnis (Duty Cycle) der Ansteuerung des EVAP-Regulierventils.",
+        "function": "Steuert die Zuführung der Kraftstoffdämpfe aus dem Aktivkohlebehälter zum Motor.",
+        "impact": "Führt Kraftstoffdämpfe der Verbrennung zu und verhindert Verdunstungsemissionen."
+    },
+    "2F": {
+        "name": "Kraftstoffstand",
+        "shortName": "Füllstand",
+        "whatIsIt": "Signal des Tankgebers im Kraftstoffbehälter an das Steuergerät.",
+        "function": "Zeigt den relativen Füllstand des Tanks in Prozent an.",
+        "impact": "Die ECU nutzt dies zur Freigabe von EVAP-Dichtigkeitsprüfungen (15% bis 85% Füllstand)."
+    },
+    "30": {
+        "name": "Anzahl der Fehlercode-Löschungen",
+        "shortName": "DTC-Löschungen",
+        "whatIsIt": "Zähler, wie oft der Fehlerspeicher via Diagnosegerät zurückgesetzt wurde.",
+        "function": "Dokumentiert die Historie von Speicherlöschungen.",
+        "impact": "Nützlich zur Überprüfung, ob Fehler ohne Reparatur wiederholt gelöscht wurden."
+    },
+    "31": {
+        "name": "Fahrstrecke seit Fehlercode-Löschung",
+        "shortName": "Strecke Reset",
+        "whatIsIt": "Zurückgelegte Strecke seit dem letzten Zurücksetzen des Fehlerspeichers.",
+        "function": "Zeigt, ob das Fahrzeug lange genug gefahren wurde, um Selbsttests auszuführen.",
+        "impact": "Gibt Aufschluss darüber, ob die OBD-Bereitschaftsmonitore bereits durchgelaufen sind."
+    },
+    "32": {
+        "name": "EVAP-System Dampfdruck",
+        "shortName": "EVAP-Druck",
+        "whatIsIt": "Hochpräziser Drucksensor zur Erfassung minimaler Druckschwankungen im Tankanlagensystem.",
+        "function": "Überwacht die Dichtigkeit von Leitungen und Tank während des EVAP-Tests.",
+        "impact": "Spürt kleinste Leckagen im Kraftstoffdampfsystem auf."
+    },
+    "33": {
+        "name": "Barometrischer Druck (Umgebung)",
+        "shortName": "Umgebungsdruck",
+        "whatIsIt": "Erfasst den aktuellen atmosphärischen Umgebungsdruck.",
+        "function": "Ermittelt die Höhe über dem Meeresspiegel bzw. die Luftdichte.",
+        "impact": "Kompensiert das Gemisch und begrenzt den Ladedruck bei Bergfahrten."
+    },
+    "34": {
+        "name": "Lambdasonde 1 (B1S1) - Äquivalenzverhältnis",
+        "shortName": "Lambda B1S1",
+        "whatIsIt": "Gemessener Lambda-Wert (λ) einer Breitband-Lambdasonde in Bank 1.",
+        "function": "Gibt das genaue Kraftstoff-Luft-Verhältnis im Abgas an.",
+        "impact": "Ermöglicht eine extrem schnelle und präzise Einspritzkorrektur."
+    },
+    "35": {
+        "name": "Lambdasonde 2 (B1S2) - Äquivalenzverhältnis",
+        "shortName": "Lambda B1S2",
+        "whatIsIt": "Gemessener Lambda-Wert (λ) einer Breitband-Breitbandsonde hinter dem Katalysator.",
+        "function": "Überwacht die Zusammensetzung des Abgases nach dem Katalysator.",
+        "impact": "Dient der ECU zur Feststellung des Katalysatorzustands."
+    },
+    "3C": {
+        "name": "Katalysatortemperatur (Bank 1, Sensor 1)",
+        "shortName": "Kat-Temp. B1S1",
+        "whatIsIt": "Gemessene oder berechnete Temperatur am Eingang des ersten Katalysators (Bank 1).",
+        "function": "Überwacht die Arbeitstemperatur der chemischen Umwandlungselemente.",
+        "impact": "Normalbereich 400°C bis 800°C. Temperaturen über 950°C führen zu Schmelzschäden am Monolithen."
+    },
+    "3D": {
+        "name": "Katalysatortemperatur (Bank 2, Sensor 1)",
+        "shortName": "Kat-Temp. B2S1",
+        "whatIsIt": "Temperatur des ersten Katalysatorelements der Zylinderbank 2.",
+        "function": "Überwacht die thermische Belastung der zweiten Bank.",
+        "impact": "Schützt den Katalysator vor Hitzeschäden durch unverbrannten Kraftstoff bei Zündaussetzern."
+    },
+    "3E": {
+        "name": "Katalysatortemperatur (Bank 1, Sensor 2)",
+        "shortName": "Kat-Temp. B1S2",
+        "whatIsIt": "Temperatur am Auslass oder der zweiten Stufe des Katalysators (Bank 1).",
+        "function": "Erfasst die Wärmeabgabe im hinteren Bereich der Abgasanlage.",
+        "impact": "Unterstützt das Emissionsmanagement und die Katalysatordiagnose."
+    },
+    "3F": {
+        "name": "Katalysatortemperatur (Bank 2, Sensor 2)",
+        "shortName": "Kat-Temp. B2S2",
+        "whatIsIt": "Temperatur am hinteren Katalysatorelement der Bank 2.",
+        "function": "Überwacht die Abgastemperatur nach dem Katalysator von Bank 2.",
+        "impact": "Sichert die thermische Stabilität im gesamten Auspufftrakt."
+    },
+    "41": {
+        "name": "Status Monitores (Aktueller Fahrzyklus)",
+        "shortName": "Status Fahrzyklus",
+        "whatIsIt": "Statusübersicht der emissionsrelevanten Selbsttests während des aktuellen Fahrzyklus.",
+        "function": "Zeigt, ob alle kontinuierlichen Prüfungen seit dem Motorstart absolviert wurden.",
+        "impact": "Wird verwendet, um die Prüfbereitschaft für AU-Untersuchungen festzustellen."
+    },
+    "42": {
+        "name": "Spannung Steuergerät (ECU / Batterie)",
+        "shortName": "ECU-Spannung",
+        "whatIsIt": "Anliegende Bordspannung an den Versorgungspins des Motorsteuergeräts.",
+        "function": "Überwacht die Spannungsversorgung durch Batterie und Lichtmaschine.",
+        "impact": "Spannungen unter 12V beim Start führen zu Kommunikationsstörungen und Fehloblagen."
+    },
+    "43": {
+        "name": "Absolute Last",
+        "shortName": "Absolute Last",
+        "whatIsIt": "Korrigierter und normierter volumetrischer Wirkungsgrad der Zylinderfüllung.",
+        "function": "Gibt die Luftfüllung unabhängig von Umgebungseinflüssen wie Höhe oder Temperatur an.",
+        "impact": "Wichtige Größe zur Drehmomentberechnung bei modernen Turbomotoren."
+    },
+    "44": {
+        "name": "Luft-Kraftstoff-Äquivalenzverhältnis",
+        "shortName": "Gemisch (A/F)",
+        "whatIsIt": "Verhältnis zwischen aktuellem Luft-Kraftstoff-Gemisch und stöchiometrischem Idealwert.",
+        "function": "Zeigt den globalen Lambda-Wert in Echtzeit an.",
+        "impact": "Wert 1,0 entspricht dem Ideal Gemisch. < 1,0 bedeutet fett; > 1,0 bedeutet mager."
+    },
+    "45": {
+        "name": "Relative Drosselklappenstellung",
+        "shortName": "Drosselkl. Rel.",
+        "whatIsIt": "Nutzbarer Öffnungswinkel der Drosselklappe abzüglich der Leerlaufgrundstellung.",
+        "function": "Zeigt die effektiv angeforderte Drosselklappenöffnung an.",
+        "impact": "Liefert die feinfühlige Rückmeldung der Pedalbetätigung."
+    },
+    "46": {
+        "name": "Umgebungslufttemperatur",
+        "shortName": "Außentemp.",
+        "whatIsIt": "Außentemperatursensor in der Stoßstange, im Außenspiegel oder der Frontmaske.",
+        "function": "Misst die Temperatur der Umgebungsluft außerhalb des Fahrzeugs.",
+        "impact": "Wird für Klimaanlagensteuerung, Bordcomputer und Kaltstartroutinen genutzt."
+    },
+    "47": {
+        "name": "Absolute Drosselklappenstellung B",
+        "shortName": "Drosselkl. B",
+        "whatIsIt": "Elektrisches Signal der zweiten Potentiometerbahn (Spur B) des Drosselklappenstellers.",
+        "function": "Redundantes Sicherheits-Signal zur Plausibilitätsprüfung.",
+        "impact": "Bei Abweichungen zwischen Spur A und B schaltet die ECU in den Notlauf."
+    },
+    "48": {
+        "name": "Absolute Drosselklappenstellung C",
+        "shortName": "Drosselkl. C",
+        "whatIsIt": "Signal der dritten Messspur bei E-Gas-Systemen mit dreifacher Redundanz.",
+        "function": "Erhöht die Ausfallsicherheit bei elektronischen Drosselklappen.",
+        "impact": "Verhindert ungewolltes Gasgeben bei Fehlern auf den Hauptspuren."
+    },
+    "49": {
+        "name": "Fahrpedalstellung D",
+        "shortName": "Pedal D",
+        "whatIsIt": "Signal der ersten Schleifbahn (Spur D) des elektronischen Gaspedalgebers.",
+        "function": "Erfasst die Betätigung des Gaspedals durch den Fahrer.",
+        "impact": "Übermittelt den Drehmomentwunsch des Fahrers an die Motorsteuerung."
+    },
+    "4A": {
+        "name": "Fahrpedalstellung E",
+        "shortName": "Pedal E",
+        "whatIsIt": "Signal der zweiten Schleifbahn (Spur E) im Gaspedalmodul.",
+        "function": "Plausibilitätsprüfung des Signals von Spur D.",
+        "impact": "Verhindert unbeabsichtigtes Beschleunigen durch defekte Sensoren."
+    },
+    "4B": {
+        "name": "Fahrpedalstellung F",
+        "shortName": "Pedal F",
+        "whatIsIt": "Zusätzliche redundante Messspur im Fahrpedalwertgeber.",
+        "function": "Bietet dreifache Absicherung im E-Gas-System.",
+        "impact": "Erhöht die Systemzuverlässigkeit von Drive-by-Wire-Systemen."
+    },
+    "4C": {
+        "name": "Ansteuerung Drosselklappenaktuator",
+        "shortName": "Stellantrieb Drosselkl.",
+        "whatIsIt": "Prozentualer Strom/Pulsweiten-Wert zur Ansteuerung des Drosselklappenstellmotors.",
+        "function": "Gibt die aufgewendete Kraft an, um die Drosselklappe in Position zu halten.",
+        "impact": "Hohe Werte im Leerlauf deuten auf Schwergängigkeit oder Verkokung hin."
+    },
+    "4D": {
+        "name": "Motorlaufzeit mit eingeschalteter MKL",
+        "shortName": "Zeit MIL",
+        "whatIsIt": "Akkumulierte Motorlaufzeit in Minuten bei leuchtender Motorkontrollleuchte.",
+        "function": "Misst, wie lange der Motor im Fehlerzustand betrieben wurde.",
+        "impact": "Wird zur Beurteilung von Folgeschäden durch ignorierte Warnungen genutzt."
+    },
+    "4E": {
+        "name": "Motorlaufzeit seit Fehlercode-Löschung",
+        "shortName": "Zeit Reset",
+        "whatIsIt": "Gesamte Motorlaufzeit in Minuten seit dem letzten Zurücksetzen des Speichers.",
+        "function": "Bewertet die Betriebsdauer nach einer Reparatur oder Diagnose.",
+        "impact": "Zeigt, ob der Motor ausreichend lief, um alle Selbstdiagnosen auszuführen."
+    },
+    "51": {
+        "name": "Kraftstoffart des Fahrzeugs",
+        "shortName": "Kraftstoffart",
+        "whatIsIt": "Codierung des im Steuergerät erkannten oder eingestellten Kraftstofftyps.",
+        "function": "Gibt an, ob Benzin, Ethanol, Diesel, Flex-Fuel, Erdgas oder Elektro genutzt wird.",
+        "impact": "Passt Zündwinkel, Einspritzzeiten und Emissionsstrategien an."
+    },
+    "52": {
+        "name": "Ethanol-Anteil im Kraftstoff",
+        "shortName": "Ethanol %",
+        "whatIsIt": "Ermittelter prozentualer Alkoholgehalt im Tank bei Flex-Fuel-Fahrzeugen.",
+        "function": "Zeigt den Ethanol-Gehalt im Kraftstoff an (0% bis 100%).",
+        "impact": "Steuert Kennfelder für Zündung und Einspritzmenge je nach Mischungsverhältnis."
+    },
+    "53": {
+        "name": "Absoluter EVAP-Dampfdruck",
+        "shortName": "EVAP-Druck Abs.",
+        "whatIsIt": "Absoluter Druckmesswert in der Tankentlüftungsleitung in Pascal (Pa).",
+        "function": "Erfasst den Druckaufbau in geschlossenen Kraftstoffbehältern.",
+        "impact": "Verhindert das Entweichen umweltschädlicher Kohlenwasserstoffe."
+    },
+    "59": {
+        "name": "Absoluter Kraftstoffverteilerrohrdruck",
+        "shortName": "Raildruck Abs.",
+        "whatIsIt": "Hochauflösender Absolutdruck in der Kraftstoffverteilerleiste.",
+        "function": "Überwacht Hochdrucksysteme bei Direkteinspritzern.",
+        "impact": "Gewährleistet exakte Druckverhältnisse für eine saubere Kraftstoffzerstäubung."
+    },
+    "5A": {
+        "name": "Relative Fahrpedalstellung",
+        "shortName": "Pedal Relativ",
+        "whatIsIt": "Effektiver Pedalweg abzüglich des anfänglichen Leerwegs.",
+        "function": "Misst den unmittelbaren Beschleunigungswunsch des Fahrers.",
+        "impact": "Steuerungsgröße für Schaltung und Beschleunigungsanforderung."
+    },
+    "5B": {
+        "name": "Restlebensdauer der Batterie (Hybrid)",
+        "shortName": "Hybridbatterie",
+        "whatIsIt": "Gesundheitszustand (SOH in %) der Hochvolt-Traktionsbatterie.",
+        "function": "Informiert über Kapazität und Alterung des Akkus bei Hybrid-/Elektrofahrzeugen.",
+        "impact": "Bestimmt die Notwendigkeit von Zell-Balancing oder Batteriewechsel."
+    },
+    "5C": {
+        "name": "Motoröltemperatur",
+        "shortName": "Öltemp.",
+        "whatIsIt": "Temperatursensor in der Ölwanne oder am Ölfiltergehäuse.",
+        "function": "Misst die Temperatur des Schmierstoffs im Motor.",
+        "impact": "Optimalbereich 80°C bis 110°C. Öltemperaturen über 125°C schwächen den Schmierfilm."
+    },
+    "5D": {
+        "name": "Kraftstoffeinspritzbeginn",
+        "shortName": "Einspritzbeginn",
+        "whatIsIt": "Kurbelwellenwinkel vor OT, an dem die Einspritzung beginnt.",
+        "function": "Synchronisiert den Einspritzbeginn bei Diesel- oder Direkteinspritzern.",
+        "impact": "Optimiert die Verbrennung, verringert Rußbildung und Motorgeräusche."
+    },
+    "5E": {
+        "name": "Kraftstoffverbrauch (Durchfluss)",
+        "shortName": "Verbrauch L/h",
+        "whatIsIt": "Momentaner Kraftstoffdurchsatz des Motors in Litern pro Stunde.",
+        "function": "Misst die verbrauchte Kraftstoffmenge pro Zeiteinheit.",
+        "impact": "Dient als Berechnungsgrundlage für Durchschnittsverbrauch und Reichweite."
+    },
+    "5F": {
+        "name": "Ausgelegte Emissionsnorm",
+        "shortName": "Emissionsnorm",
+        "whatIsIt": "Codierung der gesetzlichen Abgasnorm, nach der das Steuergerät arbeitet.",
+        "function": "Identifiziert die Umweltgesetzgebung des Fahrzeugs (Euro 4/5/6 etc.).",
+        "impact": "Bestimmt die Schwellenwerte für das Auslösen der Motorkontrollleuchte."
+    },
+    "61": {
+        "name": "Angefordertes Motordrehmoment",
+        "shortName": "Anford. Drehmoment",
+        "whatIsIt": "Prozentualer Drehmomentwunsch basierend auf der Gaspedalstellung.",
+        "function": "Wandelt den Pedaldruck in ein Anforderungsdrehmoment um.",
+        "impact": "Berechnungsgrundlage für Drosselklappe, Ladedruck und Getriebeschaltung."
+    },
+    "62": {
+        "name": "Tatsächliches Motordrehmoment",
+        "shortName": "Ist-Drehmoment",
+        "whatIsIt": "Vom Steuergerät berechnetes Abgabedrehmoment an der Kurbelwelle.",
+        "function": "Gibt die aktuell erzeugte mechanische Antriebskraft an.",
+        "impact": "Wird von Getriebesteuerung und Fahrstabilitätssystemen (ESP) benötigt."
+    },
+    "63": {
+        "name": "Referenz-Motordrehmoment",
+        "shortName": "Ref.-Drehmoment",
+        "whatIsIt": "Fester Maximaldrehmomentwert des Motors in Newtonmetern (Nm).",
+        "function": "Liefert die Nm-Skalierung zur Umrechnung prozentualer Drehmomente.",
+        "impact": "Ermöglicht dem Diagnosegerät die Ausgabe von Drehmomenten in Nm."
+    },
+    "66": {
+        "name": "Luftmassenstrom (Sensor A)",
+        "shortName": "Luftmasse MAF A",
+        "whatIsIt": "Luftmassenmesser für erweiterte Messbereiche im primären Ansaugtrakt.",
+        "function": "Misst hohe Luftdurchsätze bei Leistungs- oder Bi-Turbomotoren.",
+        "impact": "Erhöht die Einspritzpräzision bei großvolumigen Motoren."
+    },
+    "67": {
+        "name": "Kühlmitteltemperatur (Mehrere Sensoren)",
+        "shortName": "Kühlmittel Mult.",
+        "whatIsIt": "Kombinierte Messung von Sensoren am Motorblock und Kühler.",
+        "function": "Überwacht die Temperaturdifferenz vor und nach dem Kühler.",
+        "impact": "Erkennt klemmende Thermostate und mangelnde Kühlleistung."
+    },
+    "68": {
+        "name": "Ansauglufttemperatur (Mehrere Sensoren)",
+        "shortName": "Ansaugluft Mult.",
+        "whatIsIt": "Sensoren vor und nach dem Ladeluftkühler (Intercooler).",
+        "function": "Bewertet die Kühlwirkung der komprimierten Ladeluft.",
+        "impact": "Schützt vor zu hoher Ladelufttemperatur und Leistungsverlust."
+    },
+    "6F": {
+        "name": "Turbo-Eingangsdruck",
+        "shortName": "Ladedruck Eing.",
+        "whatIsIt": "Drucksensor am Lufteinlass des Turboladers.",
+        "function": "Misst Unterdruck durch den Luftfilter oder Druck vor dem Verdichter.",
+        "impact": "Spürt zugesetzte Luftfilter und Druckverluste auf."
+    },
+    "78": {
+        "name": "Abgastemperatur (EGT) - Bank 1",
+        "shortName": "Abgastemp. B1",
+        "whatIsIt": "Hochtemperatursensor im Abgaskrümmer der Zylinderbank 1.",
+        "function": "Misst die extremen Temperaturen der Abgase von Bank 1.",
+        "impact": "Schützt Turbolader und Katalysator vor Hitzeschäden."
+    },
+    "79": {
+        "name": "Abgastemperatur (EGT) - Bank 2",
+        "shortName": "Abgastemp. B2",
+        "whatIsIt": "Hochtemperatursensor der Zylinderbank 2.",
+        "function": "Überwacht die Abgastemperatur der zweiten Bank.",
+        "impact": "Sichert den thermischen Schutz und den Abgleich beider Bänke."
+    },
+    "81": {
+        "name": "Motorlaufzeit mit aktiver Emissionssteuerung",
+        "shortName": "Zeit Emissionen",
+        "whatIsIt": "Laufzeit in Minuten mit voll aktiven Abgasreinigungsfunktionen.",
+        "function": "Erfasst die Dauer des emissonskonformen Betriebs im Zyklus.",
+        "impact": "Dient dem Nachweis der Einhaltung von Umweltstandards."
+    },
+    "82": {
+        "name": "Motorlaufzeit seit Start der Emissionssteuerung",
+        "shortName": "Zeit Nachbehandl.",
+        "whatIsIt": "Zeit seit Erreichen der Betriebstemperatur von Katalysator/DPF.",
+        "function": "Misst die Dauer bis zur vollen Wirksamkeit der Abgasnachbehandlung.",
+        "impact": "Analysiert die Aufheizgeschwindigkeit von Sonden und Katalysatoren."
+    },
+    "83": {
+        "name": "EVAP-System Dampfdruck (Alt)",
+        "shortName": "EVAP-Druck Alt",
+        "whatIsIt": "Alternativer Messkanal für Tankdampfdruck in Pascal (Pa).",
+        "function": "Erfasst Druckänderungen für Dichtigkeitsprüfungen.",
+        "impact": "Ermöglicht präzise Leckerkennung in modernen EVAP-Systemen."
+    },
+    "84": {
+        "name": "Einspritzwinkel / Einspritzzeit",
+        "shortName": "Einspritzbeginn",
+        "whatIsIt": "Kurbelwellenwinkel für den Beginn des Einspritzimpulses.",
+        "function": "Synchronisiert den Einspritzvorgang mit dem Kolbenhub.",
+        "impact": "Verhindert Wandanlagerung von Kraftstoff und reduziert Ruß."
+    },
+    "85": {
+        "name": "Kraftstoffverbrauchsrack (Alt)",
+        "shortName": "Verbrauch L/h Alt",
+        "whatIsIt": "Alternativer Messkanal für den Verbrauch in Litern pro Stunde.",
+        "function": "Kontinuierliche Verbrauchserfassung in hoher Auflösung.",
+        "impact": "Nützlich für Flottentelematik und Verbrauchsmessungen."
+    },
+    "91": {
+        "name": "Motoröltemperatur (Alt)",
+        "shortName": "Öltemp. Alt",
+        "whatIsIt": "Zweiter Öltemperatursensor im Zylinderkopf.",
+        "function": "Überwacht die Schmiermitteltemperatur im oberen Motorbereich.",
+        "impact": "Schützt den Ventiltrieb vor Ölfilmabriss durch Überhitzung."
+    },
+    "92": {
+        "name": "Einspritzzeit-Korrektur",
+        "shortName": "Einspritzkorrektur",
+        "whatIsIt": "Korrekturwert in Mikrosekunden für die Einspritzdauer.",
+        "function": "Gleicht Totzeiten der Injektoren bei Spannungsschwankungen aus.",
+        "impact": "Sichert exakte Kraftstoffmengen unabhängig von der Bordspannung."
+    },
+    "98": {
+        "name": "NOx-Sensorkonzentration",
+        "shortName": "NOx-Konz.",
+        "whatIsIt": "Spezialsensor zur Messung von Stickoxiden im Abgas.",
+        "function": "Misst die NOx-Konzentration in Teilen pro Million (ppm).",
+        "impact": "Steuert die Dosierung der AdBlue-/Harnstoffeinspritzung."
+    },
+    "A1": {
+        "name": "Einspritzdaten (Rate und Zeit)",
+        "shortName": "Einspritzdaten",
+        "whatIsIt": "Kombiniertes Signal aus Einspritzmenge und Öffnungsdauer.",
+        "function": "Liefert zusammenfassende Diagnosedaten der Injektoren.",
+        "impact": "Bewertet Abweichungen und Verschleiß der Einspritzventile."
+    },
+    "A2": {
+        "name": "Kraftstoffmenge pro Zylinder",
+        "shortName": "Kraftst. Zylinder",
+        "whatIsIt": "Eingespritzte Kraftstoffmasse pro Arbeitsspiel für jeden Zylinder.",
+        "function": "Überwacht die Gleichmäßigkeit der Einspritzung zwischen den Zylindern.",
+        "impact": "Erkennt fehlerhafte Injektoren, die zu Unruhe im Motorlauf führen."
+    },
+    "A3": {
+        "name": "Reibungsmoment des Motors",
+        "shortName": "Reibmoment",
+        "whatIsIt": "Berechneter Drehmomentverlust durch innere Reibung der Bauteile.",
+        "function": "Gibt den inneren Widerstand an, den der Motor überwinden muss.",
+        "impact": "Erhöhte Werte deuten auf falsches Öl, Lagerschäden oder Nebenaggregate hin."
+    },
+    "A4": {
+        "name": "Abgasleitungs-Temperatur",
+        "shortName": "Abgasleit.-Temp.",
+        "whatIsIt": "Temperaturmessung im Abgas-Bypassrohr.",
+        "function": "Regelt die Abgastemperatur zum schnellen Aufheizen von Katalysatoren.",
+        "impact": "Beschleunigt das Anspringen der Abgasreinigung und schützt den Turbo."
+    },
+    "A6": {
+        "name": "Kilometerstand (ECU-Kilometerstand)",
+        "shortName": "ECU-Kilometerst.",
+        "whatIsIt": "Im nichtflüchtigen Speicher des Steuergeräts abgelegte Gesamtlaufleistung.",
+        "function": "Speichert die vom Fahrzeug tatsächlich zurückgelegte Strecke.",
+        "impact": "Essenziell zur Überprüfung der Echtheit des Tacho-Kilometerstands."
+    },
+    "A7": {
+        "name": "NOx-Sensor (Bank 1)",
+        "shortName": "NOx-Sensor B1",
+        "whatIsIt": "Stickoxidsensor im Abgastrakt von Bank 1.",
+        "function": "Misst die NOx-Emissionen vor/nach dem SCR-Katalysator.",
+        "impact": "Regelt die AdBlue-Menge oder begrenzt das Drehmoment bei Grenzwertüberschreitung."
+    },
+    "A8": {
+        "name": "NOx-Sensor (Bank 2)",
+        "shortName": "NOx-Sensor B2",
+        "whatIsIt": "Stickoxidsensor der zweiten Zylinderbank.",
+        "function": "Überwacht NOx-Emissionen bei zweiflutigen Abgasanlagen.",
+        "impact": "Sichert die Einhaltung der Abgasgrenzwerte bei großvolumigen Motoren."
+    },
+    "AA": {
+        "name": "Ladeluftkühlertemperatur (Intercooler)",
+        "shortName": "Ladeluftkühler",
+        "whatIsIt": "Temperatursensor nach dem Ladeluftkühler.",
+        "function": "Misst die Temperatur der gekühlten Ladeluft vor dem Saugrohr.",
+        "impact": "Kalte Luft bringt mehr Leistung. Bei Werten über 60°C sinkt der Wirkungsgrad."
+    },
+    "AB": {
+        "name": "Einspritzsystemdruck",
+        "shortName": "Einspritzdruck",
+        "whatIsIt": "Druck im Verteilerrohr bei Benzin-Direkteinspritzern.",
+        "function": "Überwacht den erforderlichen Hochdruck für die Direkteinspritzung.",
+        "impact": "Fehler führen zu Aussetzern, Ruckeln und Ruckartigem Absterben."
+    },
+    "AF": {
+        "name": "Sekundärluftsystem-Steuerung",
+        "shortName": "Sekundärluft",
+        "whatIsIt": "Ansteuerungsgrad der elektrischen Sekundärluftpumpe.",
+        "function": "Bläst beim Kaltstart Zusatzluft in den Krümmer.",
+        "impact": "Reagiert mit unverbranntem Kraftstoff und heizt den Katalysator rasch auf."
+    },
+    "B4": {
+        "name": "Lambdasondentemperatur (B1, B2)",
+        "shortName": "Sondentemp.",
+        "whatIsIt": "Keramiktemperatur der Lambdasonden auf Bank 1 und 2.",
+        "function": "Stellt sicher, dass die Sonde ihre Arbeitstemperatur (>350°C) erreicht.",
+        "impact": "Regelt die Sondenheizung, um Hitzeschock und Fehlmessungen zu vermeiden."
+    },
+    "C4": {
+        "name": "AGR-Ventilsteuerung (Erweitert)",
+        "shortName": "AGR Erweitert",
+        "whatIsIt": "Erweitertes Positions- und Ansteuersignal des AGR-Ventils.",
+        "function": "Feindosierung der zurückgeführten Abgasmenge.",
+        "impact": "Maximiert die NOx-Reduktion ohne den Leerlauf zu destabilisieren."
+    },
+    "C5": {
+        "name": "VTG-Turboladersteuerung (VGT)",
+        "shortName": "VTG-Lader",
+        "whatIsIt": "Ansteuerung der verstellbaren Leitschaufeln des VTG-Turboladers.",
+        "function": "Regelt den Anstellwinkel der Schaufeln im Turbolader.",
+        "impact": "Sorgt für schnellen Ladedruckaufbau bei niedrigen Drehzahlbereichen."
+    },
+    "C6": {
+        "name": "DPF-Differenzdruck (Dieselpartikelfilter)",
+        "shortName": "DPF-Druck",
+        "whatIsIt": "Differenzdrucksensor zur Messung des Druckabfalls über den DPF.",
+        "function": "Bestimmt den Beladungszustand des Partikelfilters mit Ruß.",
+        "impact": "Hoher Differenzdruck zeigt einen vollen Filter an und stößt die Regeneration an."
+    },
+    "C8": {
+        "name": "Injektor-Lernzeit",
+        "shortName": "Injektor-Lernzeit",
+        "whatIsIt": "Lernwertdauer in Millisekunden ($ms$) für die Voreinspritzungsanpassung.",
+        "function": "Korrigiert Injektorabweichungen durch mechanischen Verschleiß automatisch.",
+        "impact": "Verhindert Injektornageln und sorgt für einen ruhigen Motorlauf."
+    },
+    "CB": {
+        "name": "NOx-Sensor (Nach Katalysator)",
+        "shortName": "NOx Nach-Kat",
+        "whatIsIt": "NOx-Messung am Auspuffende hinter dem SCR-Katalysator.",
+        "function": "Bestätigt die wirksame Reduzierung der Stickoxide durch SCR.",
+        "impact": "Prüft die korrekte Dosierung der AdBlue-Einspritzung."
+    },
+    "CD": {
+        "name": "Partikelsensor (PM)",
+        "shortName": "Partikelsensor",
+        "whatIsIt": "Sensor im Abgasrohr zur Rußgehaltsmessung in $mg/m^3$.",
+        "function": "Überwacht die Filterwirkung des Dieselpartikelfilters.",
+        "impact": "Erkennt Brüche oder Beschädigungen der DPF-Keramik."
+    },
+    "CE": {
+        "name": "Ansaugluftvorwärmung",
+        "shortName": "Ansaugheizung",
+        "whatIsIt": "Ansteuerung des Heizgitters (Grid Heater) im Ansaugtrakt.",
+        "function": "Wärmt die Ansaugluft beim Kaltstart von Dieselmotoren vor.",
+        "impact": "Erleichtert das Anspringen bei Frost und unterdrückt Weißrauch."
+    },
+    "D0": {
+        "name": "Kraftstoffsystemdruck (Hochdruck)",
+        "shortName": "Hochdruck Kraftst.",
+        "whatIsIt": "Messung des Systemdrucks im Common-Rail- oder GDI-Hochdruckspeicher.",
+        "function": "Misst den Druck im Rail (von 200 bis über 2000 bar).",
+        "impact": "Ermöglicht mikrobrenngenaue Dosierung unter extremem Druck."
+    },
+    "D2": {
+        "name": "Elektrische Kühlmittelpumpensteuerung",
+        "shortName": "Elek. Wasserpumpe",
+        "whatIsIt": "Ansteuersignal für die kennfeldgesteuerte elektrische Kühlmittelpumpe.",
+        "function": "Regelt den Kühlmitteldurchfluss bedarfsgerecht unabhängig von der Drehzahl.",
+        "impact": "Sorgt für schnelles Warmlaufen und spart Kraftstoff."
+    },
+    "DF": {
+        "name": "Abgassteuerungsstatus (DPF/NOx)",
+        "shortName": "Abgasstatus",
+        "whatIsIt": "Statusanzeige für aktive Regeneration und Reinigungsprozesse.",
+        "function": "Gibt an, ob die ECU aktuell den Partikelfilter freibrennt.",
+        "impact": "Bei der Regeneration steigen die Abgastemperaturen stark an, um Ruß zu verbrennen."
+    },
+    "E3": {
+        "name": "Kompressormotortemperatur Kälteanlage",
+        "shortName": "Klimakomp.-Temp.",
+        "whatIsIt": "Temperatursensor am elektrischen Klimakompressor von Elektro-/Hybridfahrzeugen.",
+        "function": "Überwacht die thermische Belastung des Klimakompressors.",
+        "impact": "Schaltet die Klimaanlage ab, um Überhitzungsschäden am E-Motor zu vermeiden."
+    },
+    "EA": {
+        "name": "Wechselrichtertemperatur (Hybrid)",
+        "shortName": "Inverter-Temp.",
+        "whatIsIt": "Temperatursensor am Hochvolt-Inverter der Leistungselektronik.",
+        "function": "Überwacht die Temperatur der Leistungshalbleiter im Wechselrichter.",
+        "impact": "Der Inverter wandelt Akkustrom für den E-Motor um. Überhitzt er, wird die Leistung reduziert."
     }
 }

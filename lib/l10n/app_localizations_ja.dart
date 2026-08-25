@@ -443,141 +443,70 @@ class AppLocalizationsJa extends AppLocalizations {
   String get unitCounts => 'カウント';
 
   @override
-  String midO2Sensor(Object hex) {
-    return 'O2センサー - センサー 0x$hex';
+  String get btnCopy => 'コピー';
+
+  @override
+  String infoCopiedSnack(String item) {
+    return '$item をクリップボードにコピーしました！';
   }
 
   @override
-  String midCatalyst(Object bank) {
-    return '触媒 - バンク $bank';
-  }
+  String get infoExportTooltip => 'JSON をエクスポート';
 
   @override
-  String midEgr(Object bank) {
-    return 'EGRシステム - バンク $bank';
-  }
+  String get infoShareSubject => '車両情報 - OBD2 Tools';
 
   @override
-  String midVvt(Object bank) {
-    return 'VVTシステム - バンク $bank';
-  }
+  String get monMisfire => 'Misfire';
 
   @override
-  String get midEvapGeneral => 'EVAP - タンク総合モニター';
+  String get monFuelSystem => 'Fuel System';
 
   @override
-  String get midEvapVacuumInit => 'EVAP - 密閉性/初期負圧';
+  String get monComponents => 'Comprehensive Components';
 
   @override
-  String get midEvapGrossLeak => 'EVAP - 大漏れテスト (0.090\")';
+  String get monCatalyst => 'Catalyst';
 
   @override
-  String get midEvapMedLeak => 'EVAP - 中漏れテスト (0.040\")';
+  String get monHeatedCatalyst => 'Heated Catalyst';
 
   @override
-  String get midEvapSmallLeak => 'EVAP - 微小漏れテスト (0.020\")';
+  String get monEvaporativeSystem => 'Evaporative System';
 
   @override
-  String get midEvapPurgeValve => 'EVAP - パージバルブ';
+  String get monSecondaryAir => 'Secondary Air System';
 
   @override
-  String get midEvapVentValve => 'EVAP - ベントバルブ';
+  String get monGpfFilter => 'Gasoline Particulate Filter';
 
   @override
-  String midO2Heater(Object hex) {
-    return 'O2ヒーター - センサー 0x$hex';
-  }
+  String get monOxygenSensor => 'Oxygen Sensor';
 
   @override
-  String midSecAir(Object bank) {
-    return '二次エアシステム - バンク $bank';
-  }
+  String get monOxygenHeater => 'Oxygen Sensor Heater';
 
   @override
-  String midFuelSystem(Object bank) {
-    return '燃料システム - バンク $bank';
-  }
+  String get monEgrVvt => 'EGR and/or VVT System';
 
   @override
-  String midMisfireCylinder(Object cylinder) {
-    return '失火 - シリンダー $cylinder';
-  }
+  String get monNmhcCatalyst => 'NMHC Catalyst';
 
   @override
-  String get midMisfireAll => '失火 - 全シリンダー';
+  String get monNoxScr => 'NOx/SCR Monitor';
 
   @override
-  String midProprietary(Object hex) {
-    return '独自モニター (0x$hex)';
-  }
+  String get monBoostPressure => 'Boost Pressure System';
 
   @override
-  String midObd(Object hex) {
-    return 'OBDモニター (0x$hex)';
-  }
+  String get monExhaustGasSensor => 'Exhaust Gas Sensor';
 
   @override
-  String get tidO2RichToLean => '応答時間（リッチからリーン）';
+  String get monPmFilter => 'PM Filter Monitoring';
 
   @override
-  String get tidO2LeanToRich => '応答時間（リーンからリッチ）';
+  String get statusComplete => 'Complete';
 
   @override
-  String get tidO2MinVoltage => '最小計測電圧';
-
-  @override
-  String get tidO2MaxVoltage => '最大計測電圧';
-
-  @override
-  String get tidMisfireEwma => '失火回数（EWMA移動平均）';
-
-  @override
-  String get tidMisfireCurrent => '失火回数（現在サイクル）';
-
-  @override
-  String get tidEvapPurgeRate => 'EVAP パージ/リーク率';
-
-  @override
-  String get tidEvapInitGrad => 'EVAP 初期圧力勾配';
-
-  @override
-  String get tidEvapTankDelta => 'タンク内圧変動';
-
-  @override
-  String get tidEvapVacDecay => 'EVAP 負圧保持率';
-
-  @override
-  String get tidEvapInitStab => '初期タンク圧力安定性';
-
-  @override
-  String get tidEvapCanisterVac => 'キャニスタ残留負圧保持';
-
-  @override
-  String get tidEvapVentFlow => 'ベントバルブ流量';
-
-  @override
-  String get tidEvapSolResponse => 'パージソレノイド応答';
-
-  @override
-  String get tidEvapLinePress => '負荷時パージライン圧力';
-
-  @override
-  String get tidEvapSensorResp => 'EVAP圧力センサー応答時間';
-
-  @override
-  String get tidEvapSmallDecay => '負圧減衰（微小漏れ 0.020\"）';
-
-  @override
-  String get tidEvapMedDecay => '圧力変動（中漏れ 0.040\"）';
-
-  @override
-  String get tidEvapGrossHold => '負圧保持（大漏れ 0.090\"）';
-
-  @override
-  String get tidEvapMinPurgePress => 'パージ時到達最小圧力';
-
-  @override
-  String tidGeneric(Object hex) {
-    return 'テスト 0x$hex';
-  }
+  String get statusIncomplete => 'Incomplete';
 }

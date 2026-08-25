@@ -1,0 +1,57 @@
+{
+    "pids": {
+        "01": {
+            "name": "Contagem de Msg (Chassi)"
+        },
+        "02": {
+            "name": "Chassi (VIN)"
+        },
+        "03": {
+            "name": "Contagem de Msg (Calibração)"
+        },
+        "04": {
+            "name": "ID de Calibração da ECU"
+        },
+        "05": {
+            "name": "Contagem de Msg (CVN)"
+        },
+        "06": {
+            "name": "Núm. de Verificação de Calibração (CVN)"
+        },
+        "07": {
+            "name": "Contagem de Msg (Rastreamento Otto)"
+        },
+        "08": {
+            "name": "Rastreamento de Desempenho (Otto)"
+        },
+        "09": {
+            "name": "Contagem de Msg (Nome ECU)"
+        },
+        "0A": {
+            "name": "Nome da ECU"
+        },
+        "0B": {
+            "name": "Rastreamento de Desempenho (Diesel)"
+        }
+    },
+    "labels": {
+        "packets": "pacote(s)",
+        "globalConditions": "Condições Globais (Monitoradas)",
+        "ignitionCycles": "Ciclos de Ignição",
+        "testsCompleted": "Testes Concluídos",
+        "conditionsMet": "Condições Atingidas",
+        "insufficientData": "Dados insuficientes",
+        "extraMonitor": "Monitor Extra",
+        "monitors": {
+            "catalyst": "Catalisador",
+            "catalystB2": "Catalisador (B2)",
+            "primaryO2": "Sonda Lambda Primária",
+            "primaryO2B2": "Sonda Lambda Primária (B2)",
+            "evap": "Sistema Evaporativo",
+            "egrVvt": "Sistema EGR / VVT",
+            "secondaryO2": "Sonda Lambda Secundária",
+            "secondaryO2B2": "Sonda Lambda Secundária (B2)",
+            "secondaryAir": "Ar Secundário"
+        }
+    }
+}

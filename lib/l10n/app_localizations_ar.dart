@@ -455,142 +455,70 @@ class AppLocalizationsAr extends AppLocalizations {
   String get unitCounts => 'عدات';
 
   @override
-  String midO2Sensor(Object hex) {
-    return 'حساس الأكسجين (O2) - الحساس 0x$hex';
+  String get btnCopy => 'نسخ';
+
+  @override
+  String infoCopiedSnack(String item) {
+    return 'تم نسخ $item إلى الحافظة!';
   }
 
   @override
-  String midCatalyst(Object bank) {
-    return 'المحول الحفاز - الصف $bank';
-  }
+  String get infoExportTooltip => 'تصدير JSON';
 
   @override
-  String midEgr(Object bank) {
-    return 'نظام إعادة تدوير العادم (EGR) - الصف $bank';
-  }
+  String get infoShareSubject => 'معلومات السيارة - OBD2 Tools';
 
   @override
-  String midVvt(Object bank) {
-    return 'نظام توقيت الصمامات المتغير (VVT) - الصف $bank';
-  }
+  String get monMisfire => 'Misfire';
 
   @override
-  String get midEvapGeneral => 'EVAP - مراقب الخزان العام';
+  String get monFuelSystem => 'Fuel System';
 
   @override
-  String get midEvapVacuumInit => 'EVAP - الإحكام / التفريغ الأولي';
+  String get monComponents => 'Comprehensive Components';
 
   @override
-  String get midEvapGrossLeak => 'EVAP - اختبار التسريب الكبير (0.090 بوصة)';
+  String get monCatalyst => 'Catalyst';
 
   @override
-  String get midEvapMedLeak => 'EVAP - اختبار التسريب المتوسط (0.040 بوصة)';
+  String get monHeatedCatalyst => 'Heated Catalyst';
 
   @override
-  String get midEvapSmallLeak => 'EVAP - اختبار التسريب الدقيق (0.020 بوصة)';
+  String get monEvaporativeSystem => 'Evaporative System';
 
   @override
-  String get midEvapPurgeValve => 'EVAP - صمام تطهير الكانستر';
+  String get monSecondaryAir => 'Secondary Air System';
 
   @override
-  String get midEvapVentValve => 'EVAP - صمام التهوية';
+  String get monGpfFilter => 'Gasoline Particulate Filter';
 
   @override
-  String midO2Heater(Object hex) {
-    return 'سخان حساس الأكسجين - الحساس 0x$hex';
-  }
+  String get monOxygenSensor => 'Oxygen Sensor';
 
   @override
-  String midSecAir(Object bank) {
-    return 'نظام الهواء الثانوي - الصف $bank';
-  }
+  String get monOxygenHeater => 'Oxygen Sensor Heater';
 
   @override
-  String midFuelSystem(Object bank) {
-    return 'نظام الوقود - الصف $bank';
-  }
+  String get monEgrVvt => 'EGR and/or VVT System';
 
   @override
-  String midMisfireCylinder(Object cylinder) {
-    return 'فقدان الإشعال (Misfire) - الاسطوانة $cylinder';
-  }
+  String get monNmhcCatalyst => 'NMHC Catalyst';
 
   @override
-  String get midMisfireAll => 'فقدان الإشعال (Misfire) - جميع الاسطوانات';
+  String get monNoxScr => 'NOx/SCR Monitor';
 
   @override
-  String midProprietary(Object hex) {
-    return 'مراقب خاص بالمصنع (0x$hex)';
-  }
+  String get monBoostPressure => 'Boost Pressure System';
 
   @override
-  String midObd(Object hex) {
-    return 'مراقب قياسي OBD (0x$hex)';
-  }
+  String get monExhaustGasSensor => 'Exhaust Gas Sensor';
 
   @override
-  String get tidO2RichToLean => 'زمن الاستجابة (من غني إلى فقير)';
+  String get monPmFilter => 'PM Filter Monitoring';
 
   @override
-  String get tidO2LeanToRich => 'زمن الاستجابة (من فقير إلى غني)';
+  String get statusComplete => 'Complete';
 
   @override
-  String get tidO2MinVoltage => 'أدنى جهد مقاس';
-
-  @override
-  String get tidO2MaxVoltage => 'أقصى جهد مقاس';
-
-  @override
-  String get tidMisfireEwma => 'عدد مرات فقدان الإشعال (المتوسط المتحرك EWMA)';
-
-  @override
-  String get tidMisfireCurrent => 'عدد مرات فقدان الإشعال (الدورة الحالية)';
-
-  @override
-  String get tidEvapPurgeRate => 'معدل التطهير/التسريب بنظام EVAP';
-
-  @override
-  String get tidEvapInitGrad => 'مدرج الضغط الأولي لـ EVAP';
-
-  @override
-  String get tidEvapTankDelta => 'تغير ضغط الخزان (Delta)';
-
-  @override
-  String get tidEvapVacDecay => 'احتفاظ/هبوط التفريغ لـ EVAP';
-
-  @override
-  String get tidEvapInitStab => 'استقرار ضغط الخزان الأولي';
-
-  @override
-  String get tidEvapCanisterVac => 'الاحتفاظ بالتفريغ المتبقي للكانستر';
-
-  @override
-  String get tidEvapVentFlow => 'تدفق/انسداد صمام تهوية الكانستر';
-
-  @override
-  String get tidEvapSolResponse => 'استجابة ملف تطهير الكانستر';
-
-  @override
-  String get tidEvapLinePress => 'ضغط خط التطهير تحت الحمل';
-
-  @override
-  String get tidEvapSensorResp => 'زمن استجابة حساس ضغط EVAP';
-
-  @override
-  String get tidEvapSmallDecay => 'هبوط التفريغ (تسريب دقيق 0.020 بوصة)';
-
-  @override
-  String get tidEvapMedDecay => 'تغير الضغط (تسريب متوسط 0.040 بوصة)';
-
-  @override
-  String get tidEvapGrossHold =>
-      'احتفاظ التفريغ تحت الحمل (تسريب كبير 0.090 بوصة)';
-
-  @override
-  String get tidEvapMinPurgePress => 'أدنى ضغط تم الوصول إليه أثناء التطهير';
-
-  @override
-  String tidGeneric(Object hex) {
-    return 'اختبار 0x$hex';
-  }
+  String get statusIncomplete => 'Incomplete';
 }

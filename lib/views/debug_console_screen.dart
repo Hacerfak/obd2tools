@@ -7,6 +7,7 @@ import 'package:math_expressions/math_expressions.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../state/obd_providers.dart';
+import 'package:flutter/foundation.dart';
 
 class DebugConsoleScreen extends ConsumerStatefulWidget {
   const DebugConsoleScreen({super.key});
@@ -34,11 +35,9 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
   @override
   void initState() {
     super.initState();
-    // Assume o controle da comunicação e limpa a fila do painel
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(obdManagerProvider).setPollingPids([]);
     });
-
     _rawSubscription = ref.read(obdManagerProvider).logStream.listen((data) {
       _processResponse(data);
     });
@@ -52,6 +51,36 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
     _formulaController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  /// Formata uma String Hexadecimal para o padrão espaçado (ex: "410C1AF8" -> "41 0C 1A F8")
+  String _formatHex(String input) {
+    String trimmed = input.trim();
+    if (trimmed.isEmpty) return trimmed;
+
+    // Se for comando AT, texto especial do ELM327 ou log do sistema, mantém o texto original
+    if (trimmed.toUpperCase().startsWith("AT") ||
+        trimmed.contains("NO DATA") ||
+        trimmed.contains("ERROR") ||
+        trimmed.contains("OK") ||
+        trimmed.contains("?")) {
+      return trimmed;
+    }
+
+    String cleanHex = trimmed
+        .replaceAll(RegExp(r'[^0-9A-Fa-f]'), '')
+        .toUpperCase();
+    if (cleanHex.length < 2) return trimmed;
+
+    List<String> chunks = [];
+    for (int i = 0; i < cleanHex.length; i += 2) {
+      if (i + 2 <= cleanHex.length) {
+        chunks.add(cleanHex.substring(i, i + 2));
+      } else {
+        chunks.add(cleanHex.substring(i));
+      }
+    }
+    return chunks.join(" ");
   }
 
   void _printToConsole(
@@ -68,7 +97,6 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
         _consoleLogs.add("$prefix$text");
       }
     });
-
     Future.delayed(const Duration(milliseconds: 100), () {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
@@ -81,20 +109,26 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
   }
 
   void _sendCommand() {
-    if (_isScanning) return; // Bloqueia envio manual durante a varredura
-
+    if (_isScanning) return;
     final obdManager = ref.read(obdManagerProvider);
     final header = _headerController.text.trim().toUpperCase();
     final command = _commandController.text.trim().toUpperCase();
 
-    if (command.isEmpty) return;
+    if (header.isEmpty && command.isEmpty) return;
 
+    // Permite o envio apenas do cabeçalho (Header)
     if (header.isNotEmpty) {
-      _printToConsole("AT SH $header", isCommand: true);
-      obdManager.sendCustomCommand("AT SH $header");
+      final headerCmd = "AT SH $header";
+      _printToConsole(headerCmd, isCommand: true);
+      obdManager.sendCustomCommand(headerCmd);
     }
-    _printToConsole(command, isCommand: true);
-    obdManager.sendCustomCommand(command);
+
+    // Permite o envio do comando com formatação espaçada no console
+    if (command.isNotEmpty) {
+      final formattedCmd = _formatHex(command);
+      _printToConsole(formattedCmd, isCommand: true);
+      obdManager.sendCustomCommand(command);
+    }
   }
 
   // --- EXPORTAR LOGS PARA ARQUIVO TXT ---
@@ -108,7 +142,7 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
     }
     try {
       final text = _consoleLogs.join('\n');
-      if (Platform.isAndroid || Platform.isIOS) {
+      if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
         final directory = await getTemporaryDirectory();
         final file = File('${directory.path}/obd2_terminal_log.txt');
         await file.writeAsString(text);
@@ -145,7 +179,6 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
     final prefixCtrl = TextEditingController(text: "22");
     final startCtrl = TextEditingController(text: "1100");
     final endCtrl = TextEditingController(text: "11FF");
-
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -215,14 +248,11 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
       _scanStart = int.parse(startHex.trim(), radix: 16);
       _scanCurrent = _scanStart;
       _scanEnd = int.parse(endHex.trim(), radix: 16);
-
       if (_scanCurrent > _scanEnd) throw Exception(l10n.dbgErrorBounds);
-
       setState(() {
         _isScanning = true;
         _consoleLogs.clear();
       });
-
       _printToConsole(
         l10n.dbgScanStarting(
           "$_scanPrefix${startHex.toUpperCase()}",
@@ -230,7 +260,6 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
         ),
         isSuccess: true,
       );
-
       if (_scanHeader.isNotEmpty) {
         ref.read(obdManagerProvider).sendCustomCommand("AT SH $_scanHeader");
         Future.delayed(const Duration(milliseconds: 300), () {
@@ -248,14 +277,12 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
 
   void _sendNextScanCommand() {
     if (!_isScanning || !mounted) return;
-
     final l10n = AppLocalizations.of(context)!;
     if (_scanCurrent > _scanEnd) {
       setState(() => _isScanning = false);
       _printToConsole(l10n.dbgScanComplete, isSuccess: true);
       return;
     }
-
     String hexSuffix = _scanCurrent
         .toRadixString(16)
         .padLeft(4, '0')
@@ -268,26 +295,25 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
   void _processResponse(String response) {
     if (!mounted) return;
     final l10n = AppLocalizations.of(context)!;
+    final formattedResponse = _formatHex(response);
 
     if (_isScanning) {
       String cleanHex = response.replaceAll(RegExp(r'[^0-9A-Fa-f]'), '');
       if (!response.contains("NO DATA") &&
           !response.contains("ERROR") &&
           !cleanHex.startsWith("7F")) {
-        _printToConsole(response, isSuccess: true);
+        _printToConsole(formattedResponse, isSuccess: true);
       }
-
       setState(() {
         _scanCurrent++;
       });
-
       Future.delayed(const Duration(milliseconds: 50), () {
         if (_isScanning) _sendNextScanCommand();
       });
       return;
     }
 
-    _printToConsole(response);
+    _printToConsole(formattedResponse);
 
     final formula = _formulaController.text.trim().toUpperCase();
     if (formula.isEmpty ||
@@ -311,11 +337,9 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
         Expression exp = p.parse(formula);
         ContextModel cm = ContextModel();
         List<String> variableNames = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
-
         for (var v in variableNames) {
           cm.bindVariable(Variable(v), Number(0.0));
         }
-
         int byteIndex = 0;
         for (
           int i = 0;
@@ -332,7 +356,6 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
             byteIndex++;
           }
         }
-
         double result = exp.evaluate(EvaluationType.REAL, cm);
         String formattedResult = result == result.truncateToDouble()
             ? result.toInt().toString()
@@ -353,7 +376,6 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
     final onSurface = colorScheme.onSurface;
     final l10n = AppLocalizations.of(context)!;
 
-    // Calcula o progresso dinamicamente
     double progress = 0.0;
     if (_isScanning && _scanEnd > _scanStart) {
       progress = (_scanCurrent - _scanStart) / (_scanEnd - _scanStart);
@@ -375,8 +397,6 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
               ),
             ),
             const SizedBox(height: 16),
-
-            // CARD DE CONTROLES OTIMIZADO PARA RESPONSIVIDADE
             Card(
               elevation: 0,
               color: colorScheme.surfaceContainer,
@@ -388,7 +408,6 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // LINHA 1: Header e Comando
                     Row(
                       children: [
                         Expanded(
@@ -429,8 +448,6 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
                       ],
                     ),
                     const SizedBox(height: 12),
-
-                    // LINHA 2: Fórmula (Isolada para não espremer)
                     TextField(
                       controller: _formulaController,
                       enabled: !_isScanning,
@@ -446,15 +463,12 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-
-                    // LINHA 3: Botões de Ação com WRAP (Quebram linha se não couberem)
                     Wrap(
                       alignment: WrapAlignment.spaceBetween,
                       crossAxisAlignment: WrapCrossAlignment.center,
                       spacing: 8,
                       runSpacing: 12,
                       children: [
-                        // Grupo Esquerdo (Ícones)
                         Wrap(
                           spacing: 8,
                           children: [
@@ -496,7 +510,6 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
                             ),
                           ],
                         ),
-                        // Grupo Direito (Botão Enviar)
                         FilledButton.icon(
                           onPressed: _isScanning ? null : _sendCommand,
                           icon: const Icon(Icons.send_rounded),
@@ -513,8 +526,6 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
                         ),
                       ],
                     ),
-
-                    // BARRA DE PROGRESSO VISÍVEL APENAS DURANTE O SCAN
                     if (_isScanning) ...[
                       const SizedBox(height: 16),
                       Row(
@@ -549,8 +560,6 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
               ),
             ),
             const SizedBox(height: 16),
-
-            // TERMINAL (Expandido)
             Expanded(
               child: Container(
                 width: double.infinity,
@@ -567,7 +576,6 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
                     final log = _consoleLogs[index];
                     final isCommand = log.startsWith(">>");
                     final isSuccess = log.startsWith("[OK]");
-
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 6.0),
                       child: Text(

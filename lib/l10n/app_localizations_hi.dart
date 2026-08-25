@@ -456,141 +456,70 @@ class AppLocalizationsHi extends AppLocalizations {
   String get unitCounts => 'गिनती';
 
   @override
-  String midO2Sensor(Object hex) {
-    return 'O2 सेंसर - सेंसर 0x$hex';
+  String get btnCopy => 'कॉपी करें';
+
+  @override
+  String infoCopiedSnack(String item) {
+    return '$item क्लिपबोर्ड पर कॉपी किया गया!';
   }
 
   @override
-  String midCatalyst(Object bank) {
-    return 'उत्प्रेरक - बैंक $bank';
-  }
+  String get infoExportTooltip => 'JSON एक्सपोर्ट करें';
 
   @override
-  String midEgr(Object bank) {
-    return 'EGR सिस्टम - बैंक $bank';
-  }
+  String get infoShareSubject => 'वाहन की जानकारी - OBD2 Tools';
 
   @override
-  String midVvt(Object bank) {
-    return 'VVT सिस्टम - बैंक $bank';
-  }
+  String get monMisfire => 'Misfire';
 
   @override
-  String get midEvapGeneral => 'EVAP - टैंक सामान्य मॉनिटर';
+  String get monFuelSystem => 'Fuel System';
 
   @override
-  String get midEvapVacuumInit => 'EVAP - सीलिंग / प्रारंभिक वैक्यूम';
+  String get monComponents => 'Comprehensive Components';
 
   @override
-  String get midEvapGrossLeak => 'EVAP - बड़ा रिसाव परीक्षण (0.090\")';
+  String get monCatalyst => 'Catalyst';
 
   @override
-  String get midEvapMedLeak => 'EVAP - मध्यम रिसाव परीक्षण (0.040\")';
+  String get monHeatedCatalyst => 'Heated Catalyst';
 
   @override
-  String get midEvapSmallLeak => 'EVAP - छोटा रिसाव परीक्षण (0.020\")';
+  String get monEvaporativeSystem => 'Evaporative System';
 
   @override
-  String get midEvapPurgeValve => 'EVAP - कैनिस्टर पर्ज वाल्व';
+  String get monSecondaryAir => 'Secondary Air System';
 
   @override
-  String get midEvapVentValve => 'EVAP - वेंट वाल्व';
+  String get monGpfFilter => 'Gasoline Particulate Filter';
 
   @override
-  String midO2Heater(Object hex) {
-    return 'O2 हीटर - सेंसर 0x$hex';
-  }
+  String get monOxygenSensor => 'Oxygen Sensor';
 
   @override
-  String midSecAir(Object bank) {
-    return 'माध्यमिक वायु प्रणाली - बैंक $bank';
-  }
+  String get monOxygenHeater => 'Oxygen Sensor Heater';
 
   @override
-  String midFuelSystem(Object bank) {
-    return 'ईंधन प्रणाली - बैंक $bank';
-  }
+  String get monEgrVvt => 'EGR and/or VVT System';
 
   @override
-  String midMisfireCylinder(Object cylinder) {
-    return 'मिसफायर - सिलेंडर $cylinder';
-  }
+  String get monNmhcCatalyst => 'NMHC Catalyst';
 
   @override
-  String get midMisfireAll => 'मिसफायर - सभी सिलेंडर';
+  String get monNoxScr => 'NOx/SCR Monitor';
 
   @override
-  String midProprietary(Object hex) {
-    return 'प्रोप्राइटरी मॉनिटर (0x$hex)';
-  }
+  String get monBoostPressure => 'Boost Pressure System';
 
   @override
-  String midObd(Object hex) {
-    return 'OBD मॉनिटर (0x$hex)';
-  }
+  String get monExhaustGasSensor => 'Exhaust Gas Sensor';
 
   @override
-  String get tidO2RichToLean => 'प्रतिक्रिया समय (रिच से लीन)';
+  String get monPmFilter => 'PM Filter Monitoring';
 
   @override
-  String get tidO2LeanToRich => 'प्रतिक्रिया समय (लीन से रिच)';
+  String get statusComplete => 'Complete';
 
   @override
-  String get tidO2MinVoltage => 'न्यूनतम मापा गया वोल्टेज';
-
-  @override
-  String get tidO2MaxVoltage => 'अधिकतम मापा गया वोल्टेज';
-
-  @override
-  String get tidMisfireEwma => 'मिसफायर गणना (EWMA औसत)';
-
-  @override
-  String get tidMisfireCurrent => 'मिसफायर गणना (वर्तमान चक्र)';
-
-  @override
-  String get tidEvapPurgeRate => 'EVAP पर्ज/रिसाव दर';
-
-  @override
-  String get tidEvapInitGrad => 'EVAP प्रारंभिक दबाव ढाल';
-
-  @override
-  String get tidEvapTankDelta => 'टैंक दबाव परिवर्तन';
-
-  @override
-  String get tidEvapVacDecay => 'EVAP वैक्यूम अवधारण';
-
-  @override
-  String get tidEvapInitStab => 'प्रारंभिक टैंक दबाव स्थिरता';
-
-  @override
-  String get tidEvapCanisterVac => 'कैनिस्टर अवशिष्ट वैक्यूम';
-
-  @override
-  String get tidEvapVentFlow => 'वेंट वाल्व प्रवाह';
-
-  @override
-  String get tidEvapSolResponse => 'पर्ज सोलेनोइड प्रतिक्रिया';
-
-  @override
-  String get tidEvapLinePress => 'भार के तहत पर्ज लाइन दबाव';
-
-  @override
-  String get tidEvapSensorResp => 'EVAP दबाव सेंसर प्रतिक्रिया समय';
-
-  @override
-  String get tidEvapSmallDecay => 'वैक्यूम क्षय (छोटा रिसाव 0.020\")';
-
-  @override
-  String get tidEvapMedDecay => 'दबाव परिवर्तन (मध्यम रिसाव 0.040\")';
-
-  @override
-  String get tidEvapGrossHold => 'वैक्यूम अवधारण (बड़ा रिसाव 0.090\")';
-
-  @override
-  String get tidEvapMinPurgePress => 'पर्ज के दौरान न्यूनतम दबाव';
-
-  @override
-  String tidGeneric(Object hex) {
-    return 'परीक्षण 0x$hex';
-  }
+  String get statusIncomplete => 'Incomplete';
 }

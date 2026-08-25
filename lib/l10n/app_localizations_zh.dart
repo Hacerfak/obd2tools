@@ -440,141 +440,70 @@ class AppLocalizationsZh extends AppLocalizations {
   String get unitCounts => '计数';
 
   @override
-  String midO2Sensor(Object hex) {
-    return '氧传感器 - 传感器 0x$hex';
+  String get btnCopy => '复制';
+
+  @override
+  String infoCopiedSnack(String item) {
+    return '$item 已复制到剪贴板！';
   }
 
   @override
-  String midCatalyst(Object bank) {
-    return '催化转换器 - 气缸排 $bank';
-  }
+  String get infoExportTooltip => '导出 JSON';
 
   @override
-  String midEgr(Object bank) {
-    return 'EGR系统 - 气缸排 $bank';
-  }
+  String get infoShareSubject => '车辆信息 - OBD2 Tools';
 
   @override
-  String midVvt(Object bank) {
-    return 'VVT系统 - 气缸排 $bank';
-  }
+  String get monMisfire => 'Misfire';
 
   @override
-  String get midEvapGeneral => 'EVAP - 油箱综合监测';
+  String get monFuelSystem => 'Fuel System';
 
   @override
-  String get midEvapVacuumInit => 'EVAP - 密封性/初始真空';
+  String get monComponents => 'Comprehensive Components';
 
   @override
-  String get midEvapGrossLeak => 'EVAP - 大泄漏测试 (0.090\")';
+  String get monCatalyst => 'Catalyst';
 
   @override
-  String get midEvapMedLeak => 'EVAP - 中泄漏测试 (0.040\")';
+  String get monHeatedCatalyst => 'Heated Catalyst';
 
   @override
-  String get midEvapSmallLeak => 'EVAP - 微泄漏测试 (0.020\")';
+  String get monEvaporativeSystem => 'Evaporative System';
 
   @override
-  String get midEvapPurgeValve => 'EVAP - 碳罐清除阀';
+  String get monSecondaryAir => 'Secondary Air System';
 
   @override
-  String get midEvapVentValve => 'EVAP - 通气阀';
+  String get monGpfFilter => 'Gasoline Particulate Filter';
 
   @override
-  String midO2Heater(Object hex) {
-    return '氧传感器加热器 - 传感器 0x$hex';
-  }
+  String get monOxygenSensor => 'Oxygen Sensor';
 
   @override
-  String midSecAir(Object bank) {
-    return '二次空气系统 - 气缸排 $bank';
-  }
+  String get monOxygenHeater => 'Oxygen Sensor Heater';
 
   @override
-  String midFuelSystem(Object bank) {
-    return '燃油系统 - 气缸排 $bank';
-  }
+  String get monEgrVvt => 'EGR and/or VVT System';
 
   @override
-  String midMisfireCylinder(Object cylinder) {
-    return '失火 - 气缸 $cylinder';
-  }
+  String get monNmhcCatalyst => 'NMHC Catalyst';
 
   @override
-  String get midMisfireAll => '失火 - 所有气缸';
+  String get monNoxScr => 'NOx/SCR Monitor';
 
   @override
-  String midProprietary(Object hex) {
-    return '专用监测器 (0x$hex)';
-  }
+  String get monBoostPressure => 'Boost Pressure System';
 
   @override
-  String midObd(Object hex) {
-    return 'OBD监测器 (0x$hex)';
-  }
+  String get monExhaustGasSensor => 'Exhaust Gas Sensor';
 
   @override
-  String get tidO2RichToLean => '响应时间（浓到稀）';
+  String get monPmFilter => 'PM Filter Monitoring';
 
   @override
-  String get tidO2LeanToRich => '响应时间（稀到浓）';
+  String get statusComplete => 'Complete';
 
   @override
-  String get tidO2MinVoltage => '最小测量电压';
-
-  @override
-  String get tidO2MaxVoltage => '最大测量电压';
-
-  @override
-  String get tidMisfireEwma => '失火次数（EWMA滑动平均）';
-
-  @override
-  String get tidMisfireCurrent => '失火次数（当前行程）';
-
-  @override
-  String get tidEvapPurgeRate => 'EVAP 清除/泄漏率';
-
-  @override
-  String get tidEvapInitGrad => 'EVAP 初始压力梯度';
-
-  @override
-  String get tidEvapTankDelta => '油箱压力变化';
-
-  @override
-  String get tidEvapVacDecay => 'EVAP 真空保持率';
-
-  @override
-  String get tidEvapInitStab => '初始油箱压力稳定性';
-
-  @override
-  String get tidEvapCanisterVac => '碳罐残余真空保持';
-
-  @override
-  String get tidEvapVentFlow => '通气阀流量';
-
-  @override
-  String get tidEvapSolResponse => '清除电磁阀响应';
-
-  @override
-  String get tidEvapLinePress => '负载下清除管路压力';
-
-  @override
-  String get tidEvapSensorResp => 'EVAP压力传感器响应时间';
-
-  @override
-  String get tidEvapSmallDecay => '真空衰减（微泄漏 0.020\"）';
-
-  @override
-  String get tidEvapMedDecay => '压力变化（中泄漏 0.040\"）';
-
-  @override
-  String get tidEvapGrossHold => '真空保持（大泄漏 0.090\"）';
-
-  @override
-  String get tidEvapMinPurgePress => '清除时达到最小压力';
-
-  @override
-  String tidGeneric(Object hex) {
-    return '测试 0x$hex';
-  }
+  String get statusIncomplete => 'Incomplete';
 }

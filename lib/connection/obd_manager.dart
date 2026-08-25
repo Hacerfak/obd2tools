@@ -7,6 +7,7 @@ import '../parser/parsers/mode_06_parser.dart';
 import '../parser/parsers/mode_09_parser.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../state/obd_providers.dart';
+import '../state/technical_data_service.dart';
 import '../parser/parsers/dtc_parser.dart';
 import '../parser/parsers/mode_02_parser.dart';
 import '../models/dtc_fault.dart';
@@ -426,7 +427,12 @@ class ObdManager {
         }
         // Se for a resposta com os dados em si (ex: 4902...)
         else {
-          Map<String, String> parsedInfo = Mode09Parser.parse(cleanHex);
+          // ✅ Como deve ficar:
+          final mode09Json = ref.read(technicalDataProvider).mode09Data;
+          Map<String, String> parsedInfo = Mode09Parser.parse(
+            cleanHex,
+            mode09Json,
+          );
           if (parsedInfo.isNotEmpty) {
             ref.read(vehicleInfoStateProvider.notifier).updateInfo(parsedInfo);
           }

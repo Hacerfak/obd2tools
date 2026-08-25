@@ -1,14 +1,848 @@
 {
+    "01": {
+        "name": "DTC Monitor Status",
+        "shortName": "MIL/DTC Status",
+        "whatIsIt": "Internal ECU indicator that informs whether the Check Engine Light (MIL) is illuminated and the total number of fault codes stored.",
+        "function": "Immediately report the injection alert status on the dashboard and the total diagnosed faults.",
+        "impact": "Used for quick vehicle inspections and initial diagnosis of codes stored in memory.",
+        "valueMap": {
+            "milOn": "MIL ON",
+            "milOff": "MIL OFF",
+            "format": "{mil} ({count} Errors)"
+        }
+    },
+    "03": {
+        "name": "Fuel System Status",
+        "shortName": "Loop Status",
+        "whatIsIt": "Operational state of the air/fuel mixture control strategy (Open Loop or Closed Loop).",
+        "function": "Indicate whether the ECU is adjusting fuel injection in real-time based on oxygen sensor readings.",
+        "impact": "In Open Loop (cold engine or full throttle), the ECU uses fixed maps; in Closed Loop, it targets the ideal stoichiometric ratio.",
+        "valueMap": {
+            "0": "Engine Off",
+            "1": "Open loop (Cold Engine)",
+            "2": "Closed loop (O2 Feedback)",
+            "4": "Open loop (High Load / Cut-off)",
+            "8": "Open loop (System Fault)",
+            "16": "Closed loop (With Fault Detected)"
+        }
+    },
+    "04": {
+        "name": "Calculated Engine Load",
+        "shortName": "Engine Load",
+        "whatIsIt": "Percentage of current engine airflow relative to theoretical maximum airflow at the same RPM.",
+        "function": "Indicate the theoretical percentage of engine torque currently being requested.",
+        "impact": "Used by the ECU to determine fuel injection quantity and ignition spark advance."
+    },
     "05": {
         "name": "Engine Coolant Temperature (ECT)",
-        "whatIsIt": "It is a thermistor (a resistor that changes its electrical resistance based on temperature) located in the engine block, cylinder head, or thermostat housing.",
-        "function": "It measures the temperature of the coolant fluid refrigerating the engine and sends this data as a voltage signal to the ECU.",
-        "impact": "The ECU uses this information as a primary parameter to calculate the required fuel injection (enriching the mixture when the engine is cold), adjust ignition timing, and engage the radiator cooling fans."
+        "shortName": "ECT",
+        "whatIsIt": "Thermistor located in the engine block, cylinder head, or thermostat housing.",
+        "function": "Measure the temperature of the coolant fluid circulating to cool the engine.",
+        "impact": "Critical parameter for cold-start fuel enrichment, ignition timing adjustment, and cooling fan activation."
+    },
+    "06": {
+        "name": "Short Term Fuel Trim (Bank 1)",
+        "shortName": "STFT Bank 1",
+        "whatIsIt": "Dynamic and instantaneous injection time correction based on immediate oxygen sensor feedback.",
+        "function": "Compensate for momentary mixture variations to maintain the stoichiometric ratio.",
+        "impact": "Positive values add fuel (lean mixture); negative values reduce fuel (rich mixture)."
+    },
+    "07": {
+        "name": "Long Term Fuel Trim (Bank 1)",
+        "shortName": "LTFT Bank 1",
+        "whatIsIt": "Long-term adaptive memory accumulated by the ECU to correct constant mixture deviations.",
+        "function": "Compensate for systematic deviations, such as fuel injector wear or small vacuum leaks.",
+        "impact": "Variations beyond ±10% to ±15% indicate vacuum leaks, contaminated fuel, or fuel delivery issues."
+    },
+    "08": {
+        "name": "Short Term Fuel Trim (Bank 2)",
+        "shortName": "STFT Bank 2",
+        "whatIsIt": "Instantaneous injection time correction for the second cylinder bank in V6, V8, or Boxer engines.",
+        "function": "Maintain balanced air/fuel mixture in the engine's secondary bank.",
+        "impact": "Allows comparing injection response between both sides of the engine in dual-bank configurations."
+    },
+    "09": {
+        "name": "Long Term Fuel Trim (Bank 2)",
+        "shortName": "LTFT Bank 2",
+        "whatIsIt": "Long-term accumulated adaptive memory for the mixture in the second cylinder bank.",
+        "function": "Permanently adjust Bank 2 injection to compensate for component wear.",
+        "impact": "Significant differences compared to Bank 1 point to specific issues in one of the banks."
+    },
+    "0A": {
+        "name": "Fuel Rail Pressure (Pump)",
+        "shortName": "Fuel Pressure",
+        "whatIsIt": "Reading from the pressure sensor installed in the low-pressure fuel supply line.",
+        "function": "Monitor supply pressure delivered by the fuel pump to the fuel rail.",
+        "impact": "Pressures below specification cause misfires and lean mixture; high pressures cause fuel excess."
+    },
+    "0B": {
+        "name": "Intake Manifold Absolute Pressure (MAP)",
+        "shortName": "MAP",
+        "whatIsIt": "Piezoresistive sensor measuring absolute pressure inside the intake manifold.",
+        "function": "Report vacuum level in naturally aspirated engines or boost pressure in turbocharged engines.",
+        "impact": "Essential parameter in the Speed-Density method to calculate intake air mass and fuel injection."
     },
     "0C": {
-        "name": "Engine RPM",
+        "name": "Engine Speed (RPM)",
+        "shortName": "RPM",
         "whatIsIt": "Signal generated by the crankshaft position sensor (CKP).",
-        "function": "Measures how many revolutions per minute the engine crankshaft is making.",
-        "impact": "Crucial for synchronizing fuel injection timing and ignition spark."
+        "function": "Measure engine revolutions per minute.",
+        "impact": "Fundamental data for injection timing, ignition spark firing, and torque calculation."
+    },
+    "0D": {
+        "name": "Vehicle Speed",
+        "shortName": "Speed",
+        "whatIsIt": "Signal from the vehicle speed sensor (VSS) located on the gearbox or coming from the ABS module.",
+        "function": "Report the actual travel speed of the vehicle in km/h.",
+        "impact": "Used for cruise control, traction control, and deceleration fuel cut-off (Cut-off)."
+    },
+    "0E": {
+        "name": "Ignition Timing Advance",
+        "shortName": "Ignition Advance",
+        "whatIsIt": "Spark timing angle relative to Top Dead Center (TDC) of the piston.",
+        "function": "Report when the spark plug fires during the compression stroke.",
+        "impact": "Optimized ignition timing delivers maximum mechanical efficiency; excessive advance causes knocking (pinging)."
+    },
+    "0F": {
+        "name": "Intake Air Temperature (IAT)",
+        "shortName": "IAT",
+        "whatIsIt": "Thermistor located in the intake duct or integrated into the MAF sensor.",
+        "function": "Measure the temperature of fresh air entering the intake system.",
+        "impact": "Since cold air is denser, the ECU uses this data to calculate actual air mass and adjust fuel density."
+    },
+    "10": {
+        "name": "Air Flow Rate (MAF)",
+        "shortName": "MAF",
+        "whatIsIt": "Hot-wire or hot-film sensor located in the air filter duct.",
+        "function": "Directly measure the amount of air entering the engine in grams per second (g/s).",
+        "impact": "Enables precise calculation of fuel required to maintain the stoichiometric mixture."
+    },
+    "11": {
+        "name": "Throttle Position (TPS)",
+        "shortName": "TPS",
+        "whatIsIt": "Potentiometric or Hall-effect sensor installed on the throttle body.",
+        "function": "Indicate the opening percentage of the intake throttle plate.",
+        "impact": "Informs the ECU of driver intent (idle, rapid acceleration, or wide-open throttle)."
+    },
+    "13": {
+        "name": "Oxygen Sensors Present",
+        "shortName": "Sensors Present",
+        "whatIsIt": "Bitmask indicating the number and location of oxygen sensors in the vehicle.",
+        "function": "Map the presence of pre- and post-catalyst sensors in the exhaust system.",
+        "impact": "Instructs the scanner on which oxygen sensor positions should be queried.",
+        "valueMap": {
+            "format": "{count} Sensor(s) Detected"
+        }
+    },
+    "14": {
+        "name": "Oxygen Sensor Voltage (B1S1)",
+        "shortName": "O2 B1S1",
+        "whatIsIt": "Primary oxygen sensor for Bank 1, located in the manifold before the catalytic converter.",
+        "function": "Generate a voltage signal (0.1V to 0.9V) proportional to residual exhaust oxygen.",
+        "impact": "Primary signal used by the ECU to adjust closed-loop air/fuel mixture."
+    },
+    "15": {
+        "name": "Oxygen Sensor Voltage (B1S2)",
+        "shortName": "O2 B1S2",
+        "whatIsIt": "Secondary oxygen sensor for Bank 1, located downstream of the catalytic converter.",
+        "function": "Monitor oxygen storage capacity of the catalytic converter.",
+        "impact": "A stable voltage between 0.6V and 0.8V indicates a healthy catalyst; frequent fluctuations indicate degradation."
+    },
+    "16": {
+        "name": "Oxygen Sensor Voltage (B2S1)",
+        "shortName": "O2 B2S1",
+        "whatIsIt": "Primary pre-catalyst oxygen sensor for Bank 2 in V-type or Boxer engines.",
+        "function": "Measure exhaust gases from the second cylinder bank.",
+        "impact": "Enables independent air/fuel mixture control for Bank 2."
+    },
+    "17": {
+        "name": "Oxygen Sensor Voltage (B2S2)",
+        "shortName": "O2 B2S2",
+        "whatIsIt": "Secondary post-catalyst oxygen sensor for Bank 2.",
+        "function": "Monitor catalytic conversion efficiency for Bank 2.",
+        "impact": "Used by the ECU to evaluate second-bank catalytic converter operation."
+    },
+    "1C": {
+        "name": "OBD Standards Conformity",
+        "shortName": "OBD Standard",
+        "whatIsIt": "Regulatory specification code to which the ECU diagnostic system complies.",
+        "function": "Identify the regional diagnostic standard (OBD-II, EOBD, JOBD, OBDBr, etc.).",
+        "impact": "Ensures proper interpretation of communication protocols and environmental tests.",
+        "valueMap": {
+            "1": "OBD-II as defined by CARB",
+            "2": "OBD as defined by EPA",
+            "3": "OBD and OBD-II",
+            "4": "OBD-I",
+            "5": "Not OBD compliant",
+            "6": "EOBD (Europe)",
+            "7": "EOBD and OBD-II",
+            "8": "EOBD and OBD",
+            "9": "EOBD, OBD and OBD II",
+            "10": "JOBD (Japan)",
+            "11": "JOBD and OBD II",
+            "12": "JOBD and EOBD",
+            "13": "JOBD, EOBD, and OBD II",
+            "14": "OBD, EOBD, and KOBD",
+            "15": "OBD, OBD II, EOBD, and KOBD",
+            "16": "Reserved",
+            "17": "Engine Manufacturer Diagnostics (EMD)",
+            "18": "Engine Manufacturer Diagnostics Enhanced (EMD+)",
+            "19": "Heavy Duty On-Board Diagnostics (Child/Partial) (HD OBD-C)",
+            "20": "Heavy Duty On-Board Diagnostics (HD OBD)",
+            "21": "World Wide Harmonized OBD (WWH OBD)",
+            "22": "Reserved",
+            "23": "Heavy Duty Euro OBD Stage I without NOx control (HD EOBD-I)",
+            "24": "Heavy Duty Euro OBD Stage I with NOx control (HD EOBD-I N)",
+            "25": "Heavy Duty Euro OBD Stage II without NOx control (HD EOBD-II)",
+            "26": "Heavy Duty Euro OBD Stage II with NOx control (HD EOBD-II N)",
+            "27": "Heavy Duty ZEV",
+            "28": "Brazil OBD Phase 1 (OBDBr-1)",
+            "29": "Brazil OBD Phase 2 (OBDBr-2)",
+            "30": "Korean OBD (KOBD)",
+            "31": "India OBD I (IOBD I)",
+            "32": "India OBD II (IOBD II)",
+            "33": "Heavy Duty Euro OBD Stage VI (HD EOBD-VI)",
+            "34": "OBD, OBD-II, and HD OBD",
+            "35": "Brazil OBD Phase 3 (OBDBr-3)"
+        }
+    },
+    "1F": {
+        "name": "Engine Run Time",
+        "shortName": "Run Time",
+        "whatIsIt": "Timer in seconds since the engine was successfully started.",
+        "function": "Measure continuous engine operation duration during the current trip.",
+        "impact": "Used by the ECU to enable evaporative diagnostic tests or component warmup procedures."
+    },
+    "21": {
+        "name": "Distance Traveled with MIL On",
+        "shortName": "MIL Distance",
+        "whatIsIt": "Accumulated mileage traveled by the vehicle while the Check Engine light remained illuminated.",
+        "function": "Record how far the vehicle was driven without resolving detected faults.",
+        "impact": "Indicates duration of operation under fault conditions and fault severity."
+    },
+    "22": {
+        "name": "Fuel Rail Pressure (Relative)",
+        "shortName": "Rel. Rail Press.",
+        "whatIsIt": "Fuel rail pressure measured relative to intake manifold vacuum.",
+        "function": "Monitor differential pressure acting across fuel injectors.",
+        "impact": "Ensures exact fuel delivery regardless of manifold vacuum level."
+    },
+    "23": {
+        "name": "Fuel Rail Pressure (Absolute)",
+        "shortName": "Abs. Rail Press.",
+        "whatIsIt": "Total pressure measured in the fuel rail relative to absolute vacuum.",
+        "function": "Measure injection pressure in Direct Injection (GDI) or Diesel (Common Rail) systems.",
+        "impact": "Essential in high-pressure systems to ensure proper fuel atomization."
+    },
+    "2C": {
+        "name": "Commanded EGR",
+        "shortName": "EGR Duty",
+        "whatIsIt": "Percentage opening requested by the ECU for the Exhaust Gas Recirculation (EGR) valve.",
+        "function": "Regulate exhaust gas volume recirculated into the intake.",
+        "impact": "Lowers combustion temperature inside cylinders, drastically reducing NOx emissions."
+    },
+    "2D": {
+        "name": "EGR Error",
+        "shortName": "EGR Error",
+        "whatIsIt": "Percentage difference between target EGR position and actual position reported by the sensor.",
+        "function": "Detect mechanical or electrical operational deviations in the EGR valve.",
+        "impact": "High values indicate a stuck valve, carbon buildup clogging, or electrical fault."
+    },
+    "2E": {
+        "name": "Commanded Evaporative Purge",
+        "shortName": "Purge Duty",
+        "whatIsIt": "Duty cycle percentage applied to the canister purge valve.",
+        "function": "Control entry of fuel vapors accumulated in the charcoal canister into the manifold.",
+        "impact": "Recycles fuel tank vapors, preventing evaporative emissions."
+    },
+    "2F": {
+        "name": "Fuel Tank Level Input",
+        "shortName": "Fuel Level",
+        "whatIsIt": "Signal sent to the ECU from the fuel tank float sensor.",
+        "function": "Report remaining fuel percentage in the tank.",
+        "impact": "Used by the ECU to permit EVAP leak tests, which typically require fuel levels between 15% and 85%."
+    },
+    "30": {
+        "name": "Number of Warm-ups Since Codes Cleared",
+        "shortName": "DTC Clears",
+        "whatIsIt": "Numeric count of how many times ECU fault memory has been cleared via scanner.",
+        "function": "Maintain a history of fault code clearing interventions.",
+        "impact": "Useful for auditing frequent memory resets performed without physical repairs."
+    },
+    "31": {
+        "name": "Distance Traveled Since Codes Cleared",
+        "shortName": "Dist. Since Clear",
+        "whatIsIt": "Distance traveled by the vehicle after the last fault memory clear command.",
+        "function": "Evaluate if the vehicle was driven far enough for the ECU to complete self-tests.",
+        "impact": "Indicates whether OBD2 readiness monitors had sufficient time to evaluate systems."
+    },
+    "32": {
+        "name": "Evaporative System Vapor Pressure",
+        "shortName": "EVAP Pressure",
+        "whatIsIt": "Ultra-sensitive sensor measuring small pressure or vacuum variations in the fuel vapor line.",
+        "function": "Monitor piping and tank tightness during EVAP leak testing.",
+        "impact": "Detects micro-leaks in the fuel storage system."
+    },
+    "33": {
+        "name": "Absolute Barometric Pressure",
+        "shortName": "Baro Pressure",
+        "whatIsIt": "Piezoelectric sensor measuring local ambient atmospheric pressure.",
+        "function": "Report altitude or ambient air density where the vehicle is operating.",
+        "impact": "Allows air/fuel mixture compensation and turbo boost limiting at high altitudes."
+    },
+    "34": {
+        "name": "Oxygen Sensor 1 (B1S1) - Equivalence Ratio",
+        "shortName": "Lambda B1S1",
+        "whatIsIt": "Lambda ratio (λ) measurement provided by a wideband oxygen sensor in Bank 1.",
+        "function": "Indicate precise air/fuel mixture ratio in the exhaust stream.",
+        "impact": "Enables instant, highly accurate mixture corrections."
+    },
+    "35": {
+        "name": "Oxygen Sensor 2 (B1S2) - Equivalence Ratio",
+        "shortName": "Lambda B1S2",
+        "whatIsIt": "Lambda ratio (λ) measured by wideband sensor downstream of Bank 1 catalyst.",
+        "function": "Monitor composition of gases exiting the catalytic converter.",
+        "impact": "Used by ECU to evaluate catalyst chemical efficiency."
+    },
+    "3C": {
+        "name": "Catalyst Temperature (Bank 1, Sensor 1)",
+        "shortName": "Cat Temp B1S1",
+        "whatIsIt": "Measured or estimated temperature at the inlet of Bank 1 primary catalyst.",
+        "function": "Monitor operational temperature of catalytic chemical conversion elements.",
+        "impact": "Normal temperatures range from 400°C to 800°C. Values above 950°C cause ceramic substrate melting."
+    },
+    "3D": {
+        "name": "Catalyst Temperature (Bank 2, Sensor 1)",
+        "shortName": "Cat Temp B2S1",
+        "whatIsIt": "Temperature of Bank 2 primary catalytic element.",
+        "function": "Monitor thermal reaction in secondary bank manifold.",
+        "impact": "Prevents structural catalyst damage caused by unburned fuel from misfires."
+    },
+    "3E": {
+        "name": "Catalyst Temperature (Bank 1, Sensor 2)",
+        "shortName": "Cat Temp B1S2",
+        "whatIsIt": "Temperature measured at secondary stage or outlet of Bank 1 catalyst.",
+        "function": "Evaluate heat dissipation in secondary exhaust line.",
+        "impact": "Assists in emissions control and catalyst health diagnosis."
+    },
+    "3F": {
+        "name": "Catalyst Temperature (Bank 2, Sensor 2)",
+        "shortName": "Cat Temp B2S2",
+        "whatIsIt": "Temperature recorded at secondary catalytic element of Bank 2.",
+        "function": "Monitor Bank 2 post-catalyst temperature.",
+        "impact": "Ensures extended exhaust filtration integrity and efficiency."
+    },
+    "41": {
+        "name": "Monitor Status (Current Drive Cycle)",
+        "shortName": "Cycle Status",
+        "whatIsIt": "Summary of emission monitor status during active drive cycle.",
+        "function": "Report if all continuous tests have run since last start.",
+        "impact": "Used to verify vehicle readiness for inspection emission testing.",
+        "valueMap": {
+            "noFaults": "No Faults in Drive Cycle",
+            "faultsFormat": "{count} Fault(s) in Drive Cycle"
+        }
+    },
+    "42": {
+        "name": "Control Module Voltage (ECU / Battery)",
+        "shortName": "ECU Voltage",
+        "whatIsIt": "Electrical voltage supplied by battery and alternator to ECU power pins.",
+        "function": "Monitor main engine electrical system health.",
+        "impact": "Voltages below 12V during cranking cause communication faults and false error codes."
+    },
+    "43": {
+        "name": "Absolute Load Value",
+        "shortName": "Abs. Load",
+        "whatIsIt": "Normalized, corrected volumetric efficiency of air inducted by cylinders.",
+        "function": "Indicate cylinder air filling independent of altitude or temperature.",
+        "impact": "Used for torque calculation in turbocharged engines and advanced management systems."
+    },
+    "44": {
+        "name": "Air/Fuel Equivalence Ratio",
+        "shortName": "A/F Ratio (λ)",
+        "whatIsIt": "Ratio between measured air/fuel ratio and ideal fuel stoichiometry.",
+        "function": "Display global Lambda value in real time.",
+        "impact": "1.0 represents ideal mixture. Less than 1.0 is rich; greater than 1.0 is lean."
+    },
+    "45": {
+        "name": "Relative Throttle Position",
+        "shortName": "Rel. Throttle",
+        "whatIsIt": "Effective percentage throttle opening excluding idle stop position.",
+        "function": "Show effective acceleration input requested from electronic throttle body.",
+        "impact": "Provides precise throttle pedal response sensitivity."
+    },
+    "46": {
+        "name": "Ambient Air Temperature",
+        "shortName": "Ambient Temp",
+        "whatIsIt": "Temperature sensor located on bumper, side mirror, or front grille.",
+        "function": "Report outside air temperature surrounding the vehicle.",
+        "impact": "Used for A/C strategies, trip computer, and cold-start parameters."
+    },
+    "47": {
+        "name": "Absolute Throttle Position B",
+        "shortName": "Throttle B",
+        "whatIsIt": "Electrical signal from second potentiometer track (Track B) of electronic throttle body.",
+        "function": "Provide redundant signal for acceleration safety verification.",
+        "impact": "If discrepancy occurs between tracks A and B, ECU enters reduced power limp mode."
+    },
+    "48": {
+        "name": "Absolute Throttle Position C",
+        "shortName": "Throttle C",
+        "whatIsIt": "Signal from third position sensor track in high-redundancy throttle bodies.",
+        "function": "Ensure fault tolerance in safety-critical accelerator systems.",
+        "impact": "Prevents unintended acceleration in case of track failures."
+    },
+    "49": {
+        "name": "Accelerator Pedal Position D",
+        "shortName": "Pedal D",
+        "whatIsIt": "Signal from first sensor circuit (Track D) of accelerator pedal assembly.",
+        "function": "Read driver pedal depression position.",
+        "impact": "Transmits driver torque demand for electronic throttle control."
+    },
+    "4A": {
+        "name": "Accelerator Pedal Position E",
+        "shortName": "Pedal E",
+        "whatIsIt": "Signal from second circuit (Track E) integrated into accelerator pedal.",
+        "function": "Validate readings from pedal Track D.",
+        "impact": "Ensures safe pedal operation without unintended throttle runaway."
+    },
+    "4B": {
+        "name": "Accelerator Pedal Position F",
+        "shortName": "Pedal F",
+        "whatIsIt": "Redundant signal from third accelerator pedal circuit.",
+        "function": "Provide triple-checking on electronic accelerator pedals.",
+        "impact": "Enhances Drive-by-Wire system reliability."
+    },
+    "4C": {
+        "name": "Commanded Throttle Actuator",
+        "shortName": "Throttle Actuator",
+        "whatIsIt": "Percentage current/duty cycle applied to throttle DC motor.",
+        "function": "Report force exerted by ECU to hold throttle plate at target opening.",
+        "impact": "High effort at idle indicates dirt buildup obstruction or mechanical binding."
+    },
+    "4D": {
+        "name": "Engine Run Time with MIL On",
+        "shortName": "MIL Run Time",
+        "whatIsIt": "Accumulated minutes running with Check Engine light illuminated.",
+        "function": "Measure engine operating duration under active fault conditions.",
+        "impact": "Used to verify fault persistence and driver neglect duration."
+    },
+    "4E": {
+        "name": "Time Since Trouble Codes Cleared",
+        "shortName": "Time Since Clear",
+        "whatIsIt": "Total engine run time in minutes since last ECU fault memory clear.",
+        "function": "Evaluate post-repair operating time.",
+        "impact": "Ensures vehicle was driven sufficiently to validate diagnostic monitors."
+    },
+    "51": {
+        "name": "Fuel Type",
+        "shortName": "Fuel Type",
+        "whatIsIt": "Identification code for fuel type configured or recognized by ECU.",
+        "function": "Report whether fuel is Gasoline, Ethanol, Diesel, Flex, NGV, or Electric.",
+        "impact": "Adjusts ignition advance, injection timing, and emissions logic.",
+        "valueMap": {
+            "0": "Not Available",
+            "1": "Gasoline",
+            "2": "Methanol",
+            "3": "Ethanol",
+            "4": "Diesel",
+            "5": "LPG",
+            "6": "CNG",
+            "7": "Propane",
+            "8": "Electric",
+            "9": "Bifuel running Gasoline",
+            "10": "Bifuel running Methanol",
+            "11": "Bifuel running Ethanol",
+            "12": "Bifuel running LPG",
+            "13": "Bifuel running CNG",
+            "14": "Bifuel running Propane",
+            "15": "Bifuel running Electricity",
+            "16": "Bifuel running electric and combustion engine",
+            "17": "Hybrid Gasoline",
+            "18": "Hybrid Ethanol",
+            "19": "Hybrid Diesel",
+            "20": "Hybrid Electric",
+            "21": "Hybrid running electric and combustion engine",
+            "22": "Methane",
+            "23": "Hydrogen",
+            "24": "Dual fuel running Diesel"
+        }
+    },
+    "52": {
+        "name": "Ethanol Fuel Percentage",
+        "shortName": "Ethanol %",
+        "whatIsIt": "Estimated percentage of alcohol present in fuel tank.",
+        "function": "Display alcohol ratio (0% to 100%) in Flex-Fuel engines.",
+        "impact": "Adjusts injection maps and ignition timing according to blend."
+    },
+    "53": {
+        "name": "Absolute EVAP System Vapor Pressure",
+        "shortName": "Abs. EVAP Press.",
+        "whatIsIt": "Extended absolute pressure reading in fuel tank vapor line.",
+        "function": "Measure vapor retention in sealed and pressurized tanks.",
+        "impact": "Prevents evaporative hydrocarbon emissions in modern vehicles."
+    },
+    "59": {
+        "name": "Fuel Rail Absolute Pressure",
+        "shortName": "Abs. Rail Press.",
+        "whatIsIt": "High-resolution total pressure measured in fuel rail.",
+        "function": "Monitor high-pressure direct injection fuel systems.",
+        "impact": "Ensures ideal pressure for proper cylinder fuel atomization."
+    },
+    "5A": {
+        "name": "Relative Accelerator Pedal Position",
+        "shortName": "Rel. Pedal",
+        "whatIsIt": "Effective percentage accelerator pedal opening excluding freeplay.",
+        "function": "Measure immediate acceleration demand commanded by driver.",
+        "impact": "Command input for acceleration strategies and transmission shift points."
+    },
+    "5B": {
+        "name": "Hybrid Battery Pack Remaining Life",
+        "shortName": "Hybrid Battery",
+        "whatIsIt": "Percentage of traction battery State of Health (SOH%).",
+        "function": "Report high-voltage battery health and degradation in hybrid/EVs.",
+        "impact": "Determines when battery cell balancing or replacement is required."
+    },
+    "5C": {
+        "name": "Engine Oil Temperature",
+        "shortName": "Oil Temp",
+        "whatIsIt": "Thermal sensor in oil pan, gallery, or filter housing.",
+        "function": "Measure engine lubricating oil temperature.",
+        "impact": "Oil operates ideally between 80°C and 110°C; temperatures above 125°C degrade viscosity and protective film."
+    },
+    "5D": {
+        "name": "Fuel Injection Timing",
+        "shortName": "Inj. Timing",
+        "whatIsIt": "Crankshaft angle relative to TDC where fuel injection begins.",
+        "function": "Synchronize injection timing in Diesel or Direct Injection engines.",
+        "impact": "Improves combustion efficiency, reduces noise, and minimizes soot."
+    },
+    "5E": {
+        "name": "Engine Fuel Rate",
+        "shortName": "Fuel Rate L/h",
+        "whatIsIt": "Instantaneous fuel flow consumed by engine in liters per hour.",
+        "function": "Measure rate of fuel consumption.",
+        "impact": "Serves as baseline for calculating average fuel economy and range."
+    },
+    "5F": {
+        "name": "Emission Requirements Designed For",
+        "shortName": "Emission Std.",
+        "whatIsIt": "Code specifying environmental control legislation adopted by ECU.",
+        "function": "Identify vehicle regulatory environmental standard.",
+        "impact": "Defines fault thresholds required to illuminate Check Engine light.",
+        "valueMap": {
+            "0": "Reserved",
+            "1": "OBD-II (CARB)",
+            "2": "OBD (EPA)",
+            "3": "OBD and OBD-II",
+            "4": "OBD-I",
+            "5": "Not OBD compliant",
+            "6": "EOBD (Europe)",
+            "7": "EOBD and OBD-II",
+            "8": "EOBD and OBD",
+            "9": "EOBD, OBD and OBD-II",
+            "10": "JOBD (Japan)",
+            "11": "JOBD and OBD-II",
+            "12": "JOBD and EOBD",
+            "13": "JOBD, EOBD and OBD-II",
+            "14": "Euro IV",
+            "15": "Euro V",
+            "16": "Euro VI",
+            "31": "OBDBr-1",
+            "32": "OBDBr-2",
+            "35": "OBDBr-3"
+        }
+    },
+    "61": {
+        "name": "Driver's Demanded Engine Torque",
+        "shortName": "Demanded Torque",
+        "whatIsIt": "Percentage torque level requested by accelerator pedal position.",
+        "function": "Convert pedal input into target engine torque requirement.",
+        "impact": "Baseline calculation for throttle opening, turbo boost, and gear shifts."
+    },
+    "62": {
+        "name": "Actual Engine Torque",
+        "shortName": "Actual Torque",
+        "whatIsIt": "Estimated percentage torque produced by engine at crankshaft.",
+        "function": "Report current mechanical output force generated by combustion.",
+        "impact": "Used by automatic transmission modules and stability control (ESP)."
+    },
+    "63": {
+        "name": "Engine Reference Torque",
+        "shortName": "Ref. Torque",
+        "whatIsIt": "Constant nominal maximum torque rating of engine in Newton-meters (Nm).",
+        "function": "Provide physical scale in Nm to convert percentage torque values.",
+        "impact": "Allows scanner to convert percentage torque into actual Newton-meters."
+    },
+    "66": {
+        "name": "Mass Air Flow Sensor A",
+        "shortName": "MAF Sensor A",
+        "whatIsIt": "Extended range air flow sensor on primary intake duct A.",
+        "function": "Measure high airflow rates in performance or dual-intake engines.",
+        "impact": "Improves fuel calculation accuracy in large or twin-turbo engines."
+    },
+    "67": {
+        "name": "Engine Coolant Temp. (Multiple Sensors)",
+        "shortName": "Mult. Coolant",
+        "whatIsIt": "Combined thermal readings at engine outlet and radiator.",
+        "function": "Monitor coolant temperature differential across radiator.",
+        "impact": "Enables diagnosis of stuck thermostat valves and radiator inefficiency."
+    },
+    "68": {
+        "name": "Intake Air Temp. (Multiple Sensors)",
+        "shortName": "Mult. Air Temp",
+        "whatIsIt": "Thermal sensors installed before and after charge air cooler (Intercooler).",
+        "function": "Evaluate cooling efficiency of turbo boosted air.",
+        "impact": "Protects against improper air density in combustion chamber."
+    },
+    "6F": {
+        "name": "Turbocharger Inlet Pressure",
+        "shortName": "Turbo Inlet",
+        "whatIsIt": "Pressure sensor located at turbocompressor air inlet.",
+        "function": "Measure air filter restriction or compressor inlet pressure.",
+        "impact": "Identifies clogged air filters and pressure drops at turbo intake."
+    },
+    "78": {
+        "name": "Exhaust Gas Temp. (EGT) - Bank 1",
+        "shortName": "EGT Temp B1",
+        "whatIsIt": "Exhaust stream temperature measurement across up to 4 sensors in Bank 1.",
+        "function": "Measure real-time exhaust gas temperature for Bank 1.",
+        "impact": "Protects turbochargers and catalytic converters/filters from thermal destruction.",
+        "valueMap": {
+            "sensorLabel": "Sensor",
+            "noSensors": "No Active Sensor"
+        }
+    },
+    "79": {
+        "name": "Exhaust Gas Temp. (EGT) - Bank 2",
+        "shortName": "EGT Temp B2",
+        "whatIsIt": "Exhaust stream temperature measurement across up to 4 sensors in secondary Bank 2.",
+        "function": "Monitor exhaust temperature for the second cylinder bank in V or Boxer engines.",
+        "impact": "Ensures thermal shock protection and bank-to-bank balance.",
+        "valueMap": {
+            "sensorLabel": "Sensor",
+            "noSensors": "No Active Sensor"
+        }
+    },
+    "81": {
+        "name": "Engine Run Time for Emissions Control",
+        "shortName": "Emission Time",
+        "whatIsIt": "Accumulated minutes with engine operating under clean emission controls.",
+        "function": "Record duration of eco-friendly operation in current cycle.",
+        "impact": "Used to validate compliance with environmental norms."
+    },
+    "82": {
+        "name": "Time Since Engine Start for Emission Control",
+        "shortName": "Aftertreatment Time",
+        "whatIsIt": "Elapsed minutes since catalysts/filters reached operating temperature.",
+        "function": "Evaluate time required for aftertreatment to reach full efficiency.",
+        "impact": "Analyzes warmup speed of sensors and catalysts."
+    },
+    "83": {
+        "name": "EVAP System Vapor Pressure (Alt)",
+        "shortName": "EVAP Press. Alt",
+        "whatIsIt": "Alternative fuel tank vapor pressure measurement channel in Pascals (Pa).",
+        "function": "Measure tank pressure changes for leak testing.",
+        "impact": "Enables precise leak detection in modern EVAP systems."
+    },
+    "84": {
+        "name": "Fuel Injection Timing / Advance",
+        "shortName": "Inj. Advance",
+        "whatIsIt": "Crankshaft angle where injection pulse starts relative to TDC.",
+        "function": "Synchronize injector firing with intake/compression stroke.",
+        "impact": "Prevents fuel wetting on cold cylinder walls and reduces soot."
+    },
+    "85": {
+        "name": "Engine Fuel Rate (Alt)",
+        "shortName": "Fuel Rate Alt",
+        "whatIsIt": "Alternative continuous consumption measurement channel in L/h.",
+        "function": "Record fuel consumption in high resolution.",
+        "impact": "Used in fleet telemetry and technical fuel logging."
+    },
+    "91": {
+        "name": "Engine Oil Temperature (Alt)",
+        "shortName": "Oil Temp Alt",
+        "whatIsIt": "Secondary oil temperature sensor in cylinder head gallery.",
+        "function": "Monitor top-end lubrication temperature.",
+        "impact": "Protects valvetrain against oil film breakdown from extreme heat."
+    },
+    "92": {
+        "name": "Fuel Injection Pulse Correction",
+        "shortName": "Inj. Correction",
+        "whatIsIt": "Compensation applied in microseconds to fuel injection pulse width.",
+        "function": "Adjust mechanical injector opening time based on electrical voltage.",
+        "impact": "Prevents fuel volume variations caused by battery voltage fluctuations."
+    },
+    "98": {
+        "name": "NOx Sensor Concentration",
+        "shortName": "NOx Conc.",
+        "whatIsIt": "Specialized ceramic sensor measuring exhaust nitrogen oxide emissions.",
+        "function": "Measure NOx pollutant concentration in parts per million (ppm).",
+        "impact": "Determines required reductant fluid (DEF / AdBlue) injection quantity."
+    },
+    "A1": {
+        "name": "Fuel Injection Data (Rate & Timing)",
+        "shortName": "Inj. Data",
+        "whatIsIt": "Combined flow rate and pulse width signal from fuel system.",
+        "function": "Provide consolidated injector performance diagnostics.",
+        "impact": "Allows evaluation of fuel injector wear and delivery drift."
+    },
+    "A2": {
+        "name": "Cylinder Fuel Rate",
+        "shortName": "Cyl. Fuel Rate",
+        "whatIsIt": "Fuel mass metered per cycle individually for each cylinder.",
+        "function": "Monitor cylinder-to-cylinder fuel balance.",
+        "impact": "Detects uncalibrated or clogged injectors causing engine vibration."
+    },
+    "A3": {
+        "name": "Engine Friction Torque",
+        "shortName": "Friction Torque",
+        "whatIsIt": "Calculated torque loss caused by internal friction of moving parts.",
+        "function": "Report internal resistance engine must overcome to rotate.",
+        "impact": "Sudden increases indicate wrong lubricant, worn bearings, or excessive accessory drag."
+    },
+    "A4": {
+        "name": "Exhaust Gas Routing Temperature",
+        "shortName": "EGT Routing Temp",
+        "whatIsIt": "Temperature measured in exhaust gas bypass duct.",
+        "function": "Regulate gas flow temperature to preheat catalysts or turbine.",
+        "impact": "Speeds up exhaust system light-off and prevents turbo thermal shock."
+    },
+    "A6": {
+        "name": "Odometer (ECU Mileage)",
+        "shortName": "ECU Odometer",
+        "whatIsIt": "Actual mileage stored in non-volatile engine ECU memory.",
+        "function": "Store total distance traveled by vehicle.",
+        "impact": "Essential for verifying odometer accuracy indicated on instrument cluster."
+    },
+    "A7": {
+        "name": "NOx Sensor (Bank 1)",
+        "shortName": "NOx Sensor B1",
+        "whatIsIt": "Sensor measuring nitrogen oxides in Bank 1 exhaust line.",
+        "function": "Evaluate NOx pollutant level produced by Bank 1.",
+        "impact": "Adjusts DEF dosing rate or limits torque if NOx levels exceed regulatory limits."
+    },
+    "A8": {
+        "name": "NOx Sensor (Bank 2)",
+        "shortName": "NOx Sensor B2",
+        "whatIsIt": "Secondary exhaust NOx sensor for Bank 2.",
+        "function": "Monitor Bank 2 exhaust emissions.",
+        "impact": "Ensures environmental compliance on large displacement engines."
+    },
+    "AA": {
+        "name": "Charge Air Cooler Temp. (Intercooler)",
+        "shortName": "Intercooler",
+        "whatIsIt": "Temperature sensor located after turbo charge air cooler.",
+        "function": "Measure compressed air temperature after cooling.",
+        "impact": "Cool air increases engine power. If intercooler exceeds 60°C, engine efficiency drops."
+    },
+    "AB": {
+        "name": "Injection Rail Pressure",
+        "shortName": "Inj. Pressure",
+        "whatIsIt": "Fuel rail pressure reading in direct fuel injection systems.",
+        "function": "Monitor high pressure required for direct injectors.",
+        "impact": "Faults cause immediate engine stumbling, acceleration hesitation, or stalling."
+    },
+    "AF": {
+        "name": "Secondary Air System Control",
+        "shortName": "Sec. Air System",
+        "whatIsIt": "Operating percentage of electric secondary air pump.",
+        "function": "Inject fresh air into exhaust manifold during cold starts.",
+        "impact": "Promotes reaction with unburned fuel, rapidly heating catalyst within seconds."
+    },
+    "B4": {
+        "name": "Oxygen Sensor Temperature (B1, B2)",
+        "shortName": "O2 Sensor Temp",
+        "whatIsIt": "Ceramic temperature of oxygen sensors in Bank 1 and Bank 2.",
+        "function": "Ensure sensors reach active operating range (above 350°C).",
+        "impact": "Adjusts power to sensor electric heaters to prevent thermal shock damage."
+    },
+    "C4": {
+        "name": "EGR Valve Control (Advanced)",
+        "shortName": "Adv. EGR Control",
+        "whatIsIt": "Command signal and extended position of EGR recirculation valve.",
+        "function": "Precisely adjust recirculated exhaust gas rate.",
+        "impact": "Maximizes emission reduction without destabilizing engine idle."
+    },
+    "C5": {
+        "name": "Variable Geometry Turbo Control (VGT)",
+        "shortName": "VGT Turbo",
+        "whatIsIt": "Actuation percentage of Variable Geometry Turbocharger (VGT) vanes.",
+        "function": "Regulate angle of internal turbocompressor vanes.",
+        "impact": "Ensures instant boost at low RPM while preventing dangerous overboost spikes."
+    },
+    "C6": {
+        "name": "Diesel Particulate Filter Pressure (DPF)",
+        "shortName": "DPF Pressure",
+        "whatIsIt": "Differential pressure sensor measuring restriction across DPF filter.",
+        "function": "Measure soot saturation accumulated inside particulate filter.",
+        "impact": "High differential pressure indicates clogged filter, triggering DPF regeneration."
+    },
+    "C8": {
+        "name": "Injector Learning Time",
+        "shortName": "Injector Learn",
+        "whatIsIt": "Time in milliseconds ($ms$) for injector micro-shot learning calculation.",
+        "function": "Self-correct injection pulse width due to mechanical nozzle wear.",
+        "impact": "Eliminates injector clatter and guarantees smooth, quiet engine idling."
+    },
+    "CB": {
+        "name": "NOx Sensor (Post-Catalyst)",
+        "shortName": "Post-Cat NOx",
+        "whatIsIt": "NOx measurement at exhaust outlet downstream of SCR system.",
+        "function": "Confirm SCR catalyst reduced NOx contamination.",
+        "impact": "Validates correct DEF / AdBlue dosing operation."
+    },
+    "CD": {
+        "name": "Particulate Matter Sensor (PM)",
+        "shortName": "PM Sensor",
+        "whatIsIt": "Exhaust sensor measuring soot concentration in $mg/m^3$.",
+        "function": "Monitor DPF filter soot retention efficiency.",
+        "impact": "Detects cracks or pinholes in DPF ceramic filter substrate."
+    },
+    "CE": {
+        "name": "Intake Air Heater",
+        "shortName": "Intake Heater",
+        "whatIsIt": "Actuation percentage of intake grid heater element.",
+        "function": "Warm intake air for cold starting in Diesel engines.",
+        "impact": "Facilitates cold fuel ignition and eliminates white start-up smoke."
+    },
+    "D0": {
+        "name": "Fuel System Pressure (High Pressure)",
+        "shortName": "High Fuel Press.",
+        "whatIsIt": "High pressure rail reading in Diesel Common Rail or GDI Direct Injection.",
+        "function": "Measure injection pressure (ranging from 200 to over 2000 bar).",
+        "impact": "Enables precise fuel metering in milligrams under extreme pressure."
+    },
+    "D2": {
+        "name": "Electric Water Pump Control",
+        "shortName": "Elec. Water Pump",
+        "whatIsIt": "Duty cycle signal sent to variable electric coolant pump.",
+        "function": "Regulate coolant circulation on demand, independent of engine speed.",
+        "impact": "Promotes rapid warm-up of cold engine and reduces parasitic engine drag."
+    },
+    "DF": {
+        "name": "Exhaust Control Status (DPF/NOx)",
+        "shortName": "Exhaust Status",
+        "whatIsIt": "Control status of exhaust filter cleaning and regeneration cycles.",
+        "function": "Inform if ECU is performing DPF filter regeneration.",
+        "impact": "During regeneration, exhaust reaches elevated temperatures to burn off trapped soot.",
+        "valueMap": {
+            "0": "Normal Mode",
+            "1": "Active Regeneration / Heating"
+        }
+    },
+    "E3": {
+        "name": "A/C Compressor Motor Temp.",
+        "shortName": "A/C Comp. Temp",
+        "whatIsIt": "Thermal sensor attached to electric A/C compressor motor in Hybrid/EVs.",
+        "function": "Monitor climate control compressor motor temperature.",
+        "impact": "Temporarily disables A/C to prevent electric compressor motor burnout."
+    },
+    "EA": {
+        "name": "Inverter Temperature (Hybrids)",
+        "shortName": "Inverter Temp",
+        "whatIsIt": "Temperature sensor installed on high-voltage power inverter.",
+        "function": "Monitor heating in EV/Hybrid power semiconductor modules.",
+        "impact": "Inverter converts battery DC to AC motor power. Overheating limits available drive power."
     }
 }

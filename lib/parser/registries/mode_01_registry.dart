@@ -7,33 +7,14 @@ final Map<int, ObdPid> pidRegistry = {
     name: "Status dos Monitores DTC",
     unit: "",
     expectedBytes: 4,
-    calculate: (bytes) => bytes[0].toDouble(), // Analisamos o Byte A
-    formatValue: (value) {
-      int val = value.toInt();
-      // O 8º bit (128) indica se a Luz de Injeção (MIL) está acesa
-      bool isMilOn = (val & 0x80) != 0;
-      // Os 7 bits restantes (0 a 127) indicam a quantidade de falhas gravadas
-      int dtcCount = val & 0x7F;
-      return "Luz ${isMilOn ? 'Acesa' : 'Apagada'} ($dtcCount Erros)";
-    },
+    calculate: (bytes) => bytes[0].toDouble(),
   ),
   0x03: ObdPid(
     id: 0x03,
     name: "Status do Sistema de Combustível",
     unit: "",
     expectedBytes: 2,
-    calculate: (bytes) => bytes[0].toDouble(), // Analisa apenas o sistema 1
-    // NOVO: O tradutor humano
-    formatValue: (value) {
-      int val = value.toInt();
-      if (val == 0) return "Motor Desligado / Iniciando";
-      if (val == 1) return "Malha Aberta (Frio)";
-      if (val == 2) return "Malha Fechada (Lambda)";
-      if (val == 4) return "Malha Aberta (Carga/Falha)";
-      if (val == 8) return "Malha Fechada (Erro Lambda)";
-      if (val == 16) return "Malha Aberta (Defeito)";
-      return "Status: $val";
-    },
+    calculate: (bytes) => bytes[0].toDouble(),
   ),
   0x04: ObdPid(
     id: 0x04,
@@ -41,7 +22,7 @@ final Map<int, ObdPid> pidRegistry = {
     unit: "%",
     expectedBytes: 1,
     calculate: (bytes) => (bytes[0] / 255.0) * 100.0,
-    isFast: true, // NOVO
+    isFast: true,
   ),
   0x05: ObdPid(
     id: 0x05,
@@ -50,17 +31,12 @@ final Map<int, ObdPid> pidRegistry = {
     expectedBytes: 1,
     calculate: (bytes) => bytes[0] - 40.0,
     evaluateHealth: (value) {
-      if (value < 75) return SensorHealth.warning; // Motor frio
-      if (value >= 75 && value <= 105) {
-        return SensorHealth.normal;
-      } // Temperatura ideal de trabalho
-      if (value > 105 && value <= 115) {
-        return SensorHealth.warning;
-      } // Esquentar um pouco na subida
-      return SensorHealth.critical; // Ferveu!
+      if (value < 75) return SensorHealth.warning;
+      if (value >= 75 && value <= 105) return SensorHealth.normal;
+      if (value > 105 && value <= 115) return SensorHealth.warning;
+      return SensorHealth.critical;
     },
   ),
-  // --- COMPLEMENTOS DO BLOCO 1 (Fuel Trims e Pressão) ---
   0x06: ObdPid(
     id: 0x06,
     name: "Ajuste de Combustível a Curto Prazo (Banco 1)",
@@ -104,7 +80,7 @@ final Map<int, ObdPid> pidRegistry = {
     unit: "kPa",
     expectedBytes: 1,
     calculate: (bytes) => bytes[0].toDouble(),
-    isFast: true, // NOVO
+    isFast: true,
   ),
   0x0C: ObdPid(
     id: 0x0C,
@@ -112,7 +88,7 @@ final Map<int, ObdPid> pidRegistry = {
     unit: "RPM",
     expectedBytes: 2,
     calculate: (bytes) => ((bytes[0] * 256) + bytes[1]) / 4.0,
-    isFast: true, // NOVO
+    isFast: true,
   ),
   0x0D: ObdPid(
     id: 0x0D,
@@ -120,7 +96,7 @@ final Map<int, ObdPid> pidRegistry = {
     unit: "km/h",
     expectedBytes: 1,
     calculate: (bytes) => bytes[0].toDouble(),
-    isFast: true, // NOVO
+    isFast: true,
   ),
   0x0E: ObdPid(
     id: 0x0E,
@@ -137,10 +113,8 @@ final Map<int, ObdPid> pidRegistry = {
     calculate: (bytes) => bytes[0] - 40.0,
     evaluateHealth: (value) {
       if (value <= 50.0) return SensorHealth.normal;
-      if ((value > 50.0 && value <= 70.0)) {
-        return SensorHealth.warning;
-      }
-      return SensorHealth.critical; // Ar de admissão muito quente!
+      if (value > 50.0 && value <= 70.0) return SensorHealth.warning;
+      return SensorHealth.critical;
     },
   ),
   0x10: ObdPid(
@@ -149,7 +123,7 @@ final Map<int, ObdPid> pidRegistry = {
     unit: "g/s",
     expectedBytes: 2,
     calculate: (bytes) => ((bytes[0] * 256) + bytes[1]) / 100.0,
-    isFast: true, // NOVO
+    isFast: true,
   ),
   0x11: ObdPid(
     id: 0x11,
@@ -157,7 +131,7 @@ final Map<int, ObdPid> pidRegistry = {
     unit: "%",
     expectedBytes: 1,
     calculate: (bytes) => (bytes[0] / 255.0) * 100.0,
-    isFast: true, // NOVO
+    isFast: true,
   ),
   0x13: ObdPid(
     id: 0x13,
@@ -165,17 +139,6 @@ final Map<int, ObdPid> pidRegistry = {
     unit: "",
     expectedBytes: 1,
     calculate: (bytes) => bytes[0].toDouble(),
-    formatValue: (value) {
-      // Cada bit '1' representa uma Sonda Lambda presente no escapamento.
-      // Convertendo para binário e contando os '1's:
-      int count = value
-          .toInt()
-          .toRadixString(2)
-          .split('')
-          .where((e) => e == '1')
-          .length;
-      return "$count Sensor(es) Detectado(s)";
-    },
   ),
   0x14: ObdPid(
     id: 0x14,
@@ -215,89 +178,6 @@ final Map<int, ObdPid> pidRegistry = {
     unit: "",
     expectedBytes: 1,
     calculate: (bytes) => bytes[0].toDouble(),
-    formatValue: (value) {
-      int val = value.toInt();
-      switch (val) {
-        case 1:
-          return "OBD-II (EUA)";
-        case 2:
-          return "OBD (Federal EPA - EUA)";
-        case 3:
-          return "OBD e OBD-II";
-        case 4:
-          return "OBD-I";
-        case 5:
-          return "Não Projetado para OBD";
-        case 6:
-          return "EOBD (Europa)";
-        case 7:
-          return "EOBD e OBD-II";
-        case 8:
-          return "EOBD e OBD";
-        case 9:
-          return "EOBD, OBD e OBD-II";
-        case 10:
-          return "JOBD (Japão)";
-        case 11:
-          return "JOBD e OBD-II";
-        case 12:
-          return "JOBD e EOBD";
-        case 13:
-          return "JOBD, EOBD e OBD-II";
-        case 14:
-          return "Heavy Duty (Euro IV B1)";
-        case 15:
-          return "Heavy Duty (Euro V B2)";
-        case 16:
-          return "Heavy Duty (Euro EEV C)";
-        case 17:
-          return "EMD (Diagnóstico do Fabricante)";
-        case 18:
-          return "EMD+ (Diagnóstico Avançado)";
-        case 19:
-          return "HD OBD-C (Heavy Duty Parcial)";
-        case 20:
-          return "HD OBD (Heavy Duty EUA)";
-        case 21:
-          return "WWH OBD (Padrão Mundial Harmonizado)";
-        // O valor 22 é historicamente reservado/sem uso na tabela
-        case 23:
-          return "HD EOBD-I (Heavy Duty Euro I)";
-        case 24:
-          return "HD EOBD-I N (Com Controle de NOx)";
-        case 25:
-          return "HD EOBD-II";
-        case 26:
-          return "HD EOBD-II N (Com Controle de NOx)";
-        case 27:
-          return "HD EOBD-III";
-        case 28:
-          return "HD EOBD-IV";
-        case 29:
-          return "HD EOBD-V";
-        // O valor 30 também é reservado
-        case 31:
-          return "OBDBr-1 (Brasil)";
-        case 32:
-          return "OBDBr-2 (Brasil)";
-        case 33:
-          return "KOBD (Coreia do Sul)";
-        case 34:
-          return "India OBD I";
-        case 35:
-          return "India OBD II";
-        case 36:
-          return "HD EOBD-VI";
-        case 37:
-          return "OBDBr-3 (Brasil)";
-        case 38:
-          return "India OBD III";
-        case 39:
-          return "India OBD IV";
-        default:
-          return "Reservado/Desconhecido ($val)";
-      }
-    },
   ),
   0x1F: ObdPid(
     id: 0x1F,
@@ -358,10 +238,8 @@ final Map<int, ObdPid> pidRegistry = {
     calculate: (bytes) => (bytes[0] / 255.0) * 100.0,
     evaluateHealth: (value) {
       if (value >= 15.0) return SensorHealth.normal;
-      if ((value >= 5.0 && value < 15.0)) {
-        return SensorHealth.warning; //Tanque na reserva
-      }
-      return SensorHealth.critical; // Muito abaixo da reserva
+      if (value >= 5.0 && value < 15.0) return SensorHealth.warning;
+      return SensorHealth.critical;
     },
   ),
   0x30: ObdPid(
@@ -397,7 +275,6 @@ final Map<int, ObdPid> pidRegistry = {
     name: "Sonda Lambda 1 (B1S1) - Relação Equivalência",
     unit: "λ",
     expectedBytes: 4,
-    // Sensores de banda larga (Wideband) usam os Bytes A e B para Lambda, C e D para Tensão
     calculate: (bytes) => ((bytes[0] * 256) + bytes[1]) / 32768.0,
     isFast: true,
   ),
@@ -437,6 +314,7 @@ final Map<int, ObdPid> pidRegistry = {
     expectedBytes: 2,
     calculate: (bytes) => (((bytes[0] * 256) + bytes[1]) / 10.0) - 40.0,
   ),
+
   // --- BLOCO 3 (0x41 a 0x60) ---
   0x41: ObdPid(
     id: 0x41,
@@ -444,13 +322,6 @@ final Map<int, ObdPid> pidRegistry = {
     unit: "",
     expectedBytes: 4,
     calculate: (bytes) => bytes[0].toDouble(),
-    formatValue: (value) {
-      int val = value.toInt();
-      // Similar ao 0x01, mas focado no ciclo de direção atual
-      int dtcCount = val & 0x7F;
-      if (dtcCount == 0) return "Limpos (Sem Falhas)";
-      return "$dtcCount Falha(s) neste ciclo";
-    },
   ),
   0x42: ObdPid(
     id: 0x42,
@@ -472,7 +343,7 @@ final Map<int, ObdPid> pidRegistry = {
     unit: "%",
     expectedBytes: 2,
     calculate: (bytes) => (((bytes[0] * 256) + bytes[1]) / 255.0) * 100.0,
-    isFast: true, // NOVO
+    isFast: true,
   ),
   0x44: ObdPid(
     id: 0x44,
@@ -485,7 +356,7 @@ final Map<int, ObdPid> pidRegistry = {
       if ((value >= 0.90 && value < 0.95) || (value > 1.05 && value <= 1.10)) {
         return SensorHealth.warning;
       }
-      return SensorHealth.critical; // Mistura perigosamente rica ou pobre
+      return SensorHealth.critical;
     },
   ),
   0x45: ObdPid(
@@ -494,7 +365,7 @@ final Map<int, ObdPid> pidRegistry = {
     unit: "%",
     expectedBytes: 1,
     calculate: (bytes) => (bytes[0] / 255.0) * 100.0,
-    isFast: true, // NOVO
+    isFast: true,
   ),
   0x46: ObdPid(
     id: 0x46,
@@ -506,6 +377,13 @@ final Map<int, ObdPid> pidRegistry = {
   0x47: ObdPid(
     id: 0x47,
     name: "Posição Absoluta Borboleta B",
+    unit: "%",
+    expectedBytes: 1,
+    calculate: (bytes) => (bytes[0] / 255.0) * 100.0,
+  ),
+  0x48: ObdPid(
+    id: 0x48,
+    name: "Posição Absoluta Borboleta C",
     unit: "%",
     expectedBytes: 1,
     calculate: (bytes) => (bytes[0] / 255.0) * 100.0,
@@ -524,24 +402,16 @@ final Map<int, ObdPid> pidRegistry = {
     expectedBytes: 1,
     calculate: (bytes) => (bytes[0] / 255.0) * 100.0,
   ),
-  0x4C: ObdPid(
-    id: 0x4C,
-    name: "Atuação do Atuador da Borboleta",
-    unit: "%",
-    expectedBytes: 1,
-    calculate: (bytes) => (bytes[0] / 255.0) * 100.0,
-  ),
-  // --- COMPLEMENTOS DO BLOCO 3 (0x41 a 0x60) ---
-  0x48: ObdPid(
-    id: 0x48,
-    name: "Posição Absoluta Borboleta C",
-    unit: "%",
-    expectedBytes: 1,
-    calculate: (bytes) => (bytes[0] / 255.0) * 100.0,
-  ),
   0x4B: ObdPid(
     id: 0x4B,
     name: "Posição do Pedal Acelerador F",
+    unit: "%",
+    expectedBytes: 1,
+    calculate: (bytes) => (bytes[0] / 255.0) * 100.0,
+  ),
+  0x4C: ObdPid(
+    id: 0x4C,
+    name: "Atuação do Atuador da Borboleta",
     unit: "%",
     expectedBytes: 1,
     calculate: (bytes) => (bytes[0] / 255.0) * 100.0,
@@ -566,41 +436,6 @@ final Map<int, ObdPid> pidRegistry = {
     unit: "",
     expectedBytes: 1,
     calculate: (bytes) => bytes[0].toDouble(),
-    formatValue: (value) {
-      int val = value.toInt();
-      switch (val) {
-        case 0:
-          return "Não Disponível";
-        case 1:
-          return "Gasolina";
-        case 2:
-          return "Metanol";
-        case 3:
-          return "Etanol";
-        case 4:
-          return "Diesel";
-        case 5:
-          return "GPL (Gás Liquefeito de Petróleo)";
-        case 6:
-          return "GNV (Gás Natural Veicular)";
-        case 7:
-          return "Propano";
-        case 8:
-          return "Elétrico";
-        case 9:
-          return "Bifuel (Mistura Flex)";
-        case 10:
-          return "Híbrido (Gasolina/Elétrico)";
-        case 11:
-          return "Híbrido (Etanol/Elétrico)";
-        case 12:
-          return "Híbrido (Diesel/Elétrico)";
-        case 23:
-          return "E85 (85% Etanol)";
-        default:
-          return "Outro/Desconhecido ($val)";
-      }
-    },
   ),
   0x52: ObdPid(
     id: 0x52,
@@ -608,6 +443,20 @@ final Map<int, ObdPid> pidRegistry = {
     unit: "%",
     expectedBytes: 1,
     calculate: (bytes) => (bytes[0] / 255.0) * 100.0,
+  ),
+  0x53: ObdPid(
+    id: 0x53,
+    name: "Pressão Absoluta de Vapor (EVAP)",
+    unit: "kPa",
+    expectedBytes: 2,
+    calculate: (bytes) => ((bytes[0] * 256) + bytes[1]) / 200.0,
+  ),
+  0x59: ObdPid(
+    id: 0x59,
+    name: "Pressão Absoluta no Tubo Distribuidor (Fuel Rail)",
+    unit: "kPa",
+    expectedBytes: 2,
+    calculate: (bytes) => ((bytes[0] * 256) + bytes[1]) * 10.0,
   ),
   0x5A: ObdPid(
     id: 0x5A,
@@ -631,12 +480,10 @@ final Map<int, ObdPid> pidRegistry = {
     expectedBytes: 1,
     calculate: (bytes) => bytes[0] - 40.0,
     evaluateHealth: (value) {
-      if (value < 70) return SensorHealth.warning; // Óleo frio
-      if (value >= 70 && value <= 110) return SensorHealth.normal; // Ideal
-      if (value > 110 && value <= 125) {
-        return SensorHealth.warning;
-      } // Esquentando bem
-      return SensorHealth.critical; // Passando do limite de viscosidade segura
+      if (value < 70) return SensorHealth.warning;
+      if (value >= 70 && value <= 110) return SensorHealth.normal;
+      if (value > 110 && value <= 125) return SensorHealth.warning;
+      return SensorHealth.critical;
     },
   ),
   0x5D: ObdPid(
@@ -644,7 +491,6 @@ final Map<int, ObdPid> pidRegistry = {
     name: "Ponto de Injeção de Combustível",
     unit: "°",
     expectedBytes: 2,
-    // (A * 256 + B) / 128 - 210
     calculate: (bytes) => (((bytes[0] * 256) + bytes[1]) / 128.0) - 210.0,
   ),
   0x5E: ObdPid(
@@ -652,24 +498,8 @@ final Map<int, ObdPid> pidRegistry = {
     name: "Consumo de Combustível (Vazão)",
     unit: "L/h",
     expectedBytes: 2,
-    // (A * 256 + B) / 20
     calculate: (bytes) => ((bytes[0] * 256) + bytes[1]) / 20.0,
     isFast: true,
-  ),
-  // --- COMPLEMENTOS FINAIS DO BLOCO 3 ---
-  0x53: ObdPid(
-    id: 0x53,
-    name: "Pressão Absoluta de Vapor (EVAP)",
-    unit: "kPa",
-    expectedBytes: 2,
-    calculate: (bytes) => ((bytes[0] * 256) + bytes[1]) / 200.0,
-  ),
-  0x59: ObdPid(
-    id: 0x59,
-    name: "Pressão Absoluta no Tubo Distribuidor (Fuel Rail)",
-    unit: "kPa",
-    expectedBytes: 2,
-    calculate: (bytes) => ((bytes[0] * 256) + bytes[1]) * 10.0,
   ),
   0x5F: ObdPid(
     id: 0x5F,
@@ -677,19 +507,9 @@ final Map<int, ObdPid> pidRegistry = {
     unit: "",
     expectedBytes: 1,
     calculate: (bytes) => bytes[0].toDouble(),
-    formatValue: (value) {
-      int val = value.toInt();
-      // Retornos simplificados baseados na tabela de emissões da SAE
-      if (val == 1 || val == 2 || val == 3) return "Padrão OBD/OBD-II";
-      if (val >= 4 && val <= 8) return "Padrão Europeu (EOBD)";
-      if (val >= 9 && val <= 13) return "Padrão Japonês (JOBD)";
-      if (val == 14 || val == 15) return "Padrão Euro IV / V";
-      if (val >= 31 && val <= 37) return "Padrão Brasileiro (OBDBr)";
-      return "Padrão Regional ($val)";
-    },
   ),
 
-  // --- BLOCO 4 (0x61 a 0x80) - TORQUE E EXAUSTÃO ---
+  // --- BLOCO 4 (0x61 a 0x80) ---
   0x61: ObdPid(
     id: 0x61,
     name: "Torque Demandado pelo Motorista",
@@ -717,8 +537,7 @@ final Map<int, ObdPid> pidRegistry = {
     id: 0x66,
     name: "Fluxo de Massa de Ar (Sensor A)",
     unit: "g/s",
-    expectedBytes: 4, // Sensores MAF avançados usam mais bytes
-    // (A * 256 + B) / 32
+    expectedBytes: 4,
     calculate: (bytes) => ((bytes[0] * 256) + bytes[1]) / 32.0,
     isFast: true,
   ),
@@ -727,7 +546,6 @@ final Map<int, ObdPid> pidRegistry = {
     name: "Temp. Arrefecimento (Sensores Múltiplos)",
     unit: "°C",
     expectedBytes: 3,
-    // Byte A é a máscara, Byte B é o Sensor 1, Byte C é o Sensor 2
     calculate: (bytes) => bytes[1] - 40.0,
   ),
   0x68: ObdPid(
@@ -749,18 +567,22 @@ final Map<int, ObdPid> pidRegistry = {
     id: 0x78,
     name: "Temp. Gases de Escape (EGT) - Banco 1",
     unit: "°C",
-    expectedBytes: 4,
-    // (B * 256 + C) / 10 - 40 (Ignoramos o Byte A que é máscara)
-    calculate: (bytes) => (((bytes[1] * 256) + bytes[2]) / 10.0) - 40.0,
+    expectedBytes: 9,
+    calculate: (bytes) => bytes.length >= 3
+        ? (((bytes[1] * 256) + bytes[2]) / 10.0) - 40.0
+        : -40.0,
   ),
   0x79: ObdPid(
     id: 0x79,
     name: "Temp. Gases de Escape (EGT) - Banco 2",
     unit: "°C",
-    expectedBytes: 4,
-    calculate: (bytes) => (((bytes[1] * 256) + bytes[2]) / 10.0) - 40.0,
+    expectedBytes: 9,
+    calculate: (bytes) => bytes.length >= 3
+        ? (((bytes[1] * 256) + bytes[2]) / 10.0) - 40.0
+        : -40.0,
   ),
-  // --- BLOCO 5 (0x81 a 0xA0) - EMISSÕES AVANÇADAS E HÍBRIDOS ---
+
+  // --- BLOCO 5 (0x81 a 0xA0) ---
   0x81: ObdPid(
     id: 0x81,
     name: "Tempo de Motor com Controle de Emissão Ativo",
@@ -823,13 +645,13 @@ final Map<int, ObdPid> pidRegistry = {
     expectedBytes: 2,
     calculate: (bytes) => ((bytes[0] * 256) + bytes[1]) / 10.0,
   ),
-  // --- BLOCO 6 (0xA1 a 0xC0) - DADOS AVANÇADOS, TURBO E HODÔMETRO ---
+
+  // --- BLOCO 6 (0xA1 a 0xC0) ---
   0xA1: ObdPid(
     id: 0xA1,
     name: "Dados de Injeção (Taxa e Tempo)",
     unit: "",
     expectedBytes: 4,
-    // (A * 256 + B) para a taxa, C e D para o tempo. Retornando a Taxa.
     calculate: (bytes) => ((bytes[0] * 256) + bytes[1]).toDouble(),
   ),
   0xA2: ObdPid(
@@ -852,7 +674,6 @@ final Map<int, ObdPid> pidRegistry = {
     name: "Temperatura de Roteamento dos Gases de Escape",
     unit: "°C",
     expectedBytes: 4,
-    // Byte A é máscara. B e C formam a temperatura.
     calculate: (bytes) => (((bytes[1] * 256) + bytes[2]) / 10.0) - 40.0,
   ),
   0xA6: ObdPid(
@@ -860,7 +681,6 @@ final Map<int, ObdPid> pidRegistry = {
     name: "Hodômetro (Quilometragem da ECU)",
     unit: "km",
     expectedBytes: 4,
-    // A mágica de 4 bytes para distâncias gigantes: (A*2^24 + B*2^16 + C*2^8 + D) / 10
     calculate: (bytes) =>
         ((bytes[0] * 16777216) +
             (bytes[1] * 65536) +
@@ -873,8 +693,7 @@ final Map<int, ObdPid> pidRegistry = {
     name: "Sensor de NOx (Banco 1)",
     unit: "ppm",
     expectedBytes: 4,
-    calculate: (bytes) =>
-        (((bytes[1] * 256) + bytes[2]) / 10.0), // Ignora máscara no A
+    calculate: (bytes) => (((bytes[1] * 256) + bytes[2]) / 10.0),
   ),
   0xA8: ObdPid(
     id: 0xA8,
@@ -888,13 +707,11 @@ final Map<int, ObdPid> pidRegistry = {
     name: "Temp. Intercooler (Charge Air Cooler)",
     unit: "°C",
     expectedBytes: 4,
-    // Byte A é máscara. Lendo o Banco 1 (Byte B).
     calculate: (bytes) => bytes[1] - 40.0,
     evaluateHealth: (value) {
       if (value < 60) return SensorHealth.normal;
       if (value >= 60 && value < 90) return SensorHealth.warning;
-      return SensorHealth
-          .critical; // Intercooler muito quente, perdendo eficiência do turbo!
+      return SensorHealth.critical;
     },
   ),
   0xAB: ObdPid(
@@ -902,8 +719,7 @@ final Map<int, ObdPid> pidRegistry = {
     name: "Pressão do Sistema de Injeção",
     unit: "kPa",
     expectedBytes: 4,
-    calculate: (bytes) =>
-        ((bytes[1] * 256) + bytes[2]) * 10.0, // Ignora máscara no A
+    calculate: (bytes) => ((bytes[1] * 256) + bytes[2]) * 10.0,
   ),
   0xAF: ObdPid(
     id: 0xAF,
@@ -917,16 +733,15 @@ final Map<int, ObdPid> pidRegistry = {
     name: "Temperatura Sonda Lambda (B1, B2)",
     unit: "°C",
     expectedBytes: 4,
-    // Byte A (máscara). B e C (Banco 1, Sensor 1)
     calculate: (bytes) => (((bytes[1] * 256) + bytes[2]) / 10.0) - 40.0,
   ),
-  // --- BLOCOS 7 e 8 (0xC1 a 0xFF) - DIESEL, DPF E ELETRÓGENOS ---
+
+  // --- BLOCOS 7 e 8 (0xC1 a 0xFF) ---
   0xC4: ObdPid(
     id: 0xC4,
     name: "Controle da Válvula EGR (Avançado)",
     unit: "%",
     expectedBytes: 4,
-    // Byte A (máscara). B e C formam a porcentagem
     calculate: (bytes) => (((bytes[1] * 256) + bytes[2]) / 2.55) - 100.0,
   ),
   0xC5: ObdPid(
@@ -992,11 +807,6 @@ final Map<int, ObdPid> pidRegistry = {
     unit: "",
     expectedBytes: 1,
     calculate: (bytes) => bytes[0].toDouble(),
-    formatValue: (value) {
-      int val = value.toInt();
-      // Verificação simples por bitmask (se > 0, há regeneração ou controle ativo)
-      return val > 0 ? "Regeneração Ativa / Aquecimento" : "Modo Normal";
-    },
   ),
   0xE3: ObdPid(
     id: 0xE3,

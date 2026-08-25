@@ -1,0 +1,57 @@
+{
+    "pids": {
+        "01": {
+            "name": "Message Count (VIN)"
+        },
+        "02": {
+            "name": "Vehicle Identification Number (VIN)"
+        },
+        "03": {
+            "name": "Message Count (Calibration ID)"
+        },
+        "04": {
+            "name": "ECU Calibration ID"
+        },
+        "05": {
+            "name": "Message Count (CVN)"
+        },
+        "06": {
+            "name": "Calibration Verification Number (CVN)"
+        },
+        "07": {
+            "name": "Message Count (Spark Ignition Tracking)"
+        },
+        "08": {
+            "name": "In-Use Performance Tracking (Spark Ignition)"
+        },
+        "09": {
+            "name": "Message Count (ECU Name)"
+        },
+        "0A": {
+            "name": "ECU Name"
+        },
+        "0B": {
+            "name": "In-Use Performance Tracking (Compression Ignition)"
+        }
+    },
+    "labels": {
+        "packets": "packet(s)",
+        "globalConditions": "Global Conditions (Monitored)",
+        "ignitionCycles": "Ignition Cycles",
+        "testsCompleted": "Tests Completed",
+        "conditionsMet": "Conditions Met",
+        "insufficientData": "Insufficient data",
+        "extraMonitor": "Extra Monitor",
+        "monitors": {
+            "catalyst": "Catalyst",
+            "catalystB2": "Catalyst (B2)",
+            "primaryO2": "Primary O2 Sensor",
+            "primaryO2B2": "Primary O2 Sensor (B2)",
+            "evap": "EVAP System",
+            "egrVvt": "EGR / VVT System",
+            "secondaryO2": "Secondary O2 Sensor",
+            "secondaryO2B2": "Secondary O2 Sensor (B2)",
+            "secondaryAir": "Secondary Air System"
+        }
+    }
+}

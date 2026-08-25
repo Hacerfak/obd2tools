@@ -456,141 +456,70 @@ class AppLocalizationsFr extends AppLocalizations {
   String get unitCounts => 'comptes';
 
   @override
-  String midO2Sensor(Object hex) {
-    return 'Sonde Lambda - Capteur 0x$hex';
+  String get btnCopy => 'Copier';
+
+  @override
+  String infoCopiedSnack(String item) {
+    return '$item copié dans le presse-papiers !';
   }
 
   @override
-  String midCatalyst(Object bank) {
-    return 'Catalyseur - Banque $bank';
-  }
+  String get infoExportTooltip => 'Exporter en JSON';
 
   @override
-  String midEgr(Object bank) {
-    return 'Système EGR - Banque $bank';
-  }
+  String get infoShareSubject => 'Informations du véhicule - OBD2 Tools';
 
   @override
-  String midVvt(Object bank) {
-    return 'Système VVT - Banque $bank';
-  }
+  String get monMisfire => 'Misfire';
 
   @override
-  String get midEvapGeneral => 'EVAP - Moniteur Général du Réservoir';
+  String get monFuelSystem => 'Fuel System';
 
   @override
-  String get midEvapVacuumInit => 'EVAP - Étanchéité / Vide Initial';
+  String get monComponents => 'Comprehensive Components';
 
   @override
-  String get midEvapGrossLeak => 'EVAP - Fuite Majeure (0.090\")';
+  String get monCatalyst => 'Catalyst';
 
   @override
-  String get midEvapMedLeak => 'EVAP - Fuite Moyenne (0.040\")';
+  String get monHeatedCatalyst => 'Heated Catalyst';
 
   @override
-  String get midEvapSmallLeak => 'EVAP - Micro Fuite (0.020\")';
+  String get monEvaporativeSystem => 'Evaporative System';
 
   @override
-  String get midEvapPurgeValve => 'EVAP - Électrovanne de Purge';
+  String get monSecondaryAir => 'Secondary Air System';
 
   @override
-  String get midEvapVentValve => 'EVAP - Vanne de Mise à l\'Air';
+  String get monGpfFilter => 'Gasoline Particulate Filter';
 
   @override
-  String midO2Heater(Object hex) {
-    return 'Chauffage Sonde Lambda - Capteur 0x$hex';
-  }
+  String get monOxygenSensor => 'Oxygen Sensor';
 
   @override
-  String midSecAir(Object bank) {
-    return 'Air Secondaire - Banque $bank';
-  }
+  String get monOxygenHeater => 'Oxygen Sensor Heater';
 
   @override
-  String midFuelSystem(Object bank) {
-    return 'Circuit de Carburant - Banque $bank';
-  }
+  String get monEgrVvt => 'EGR and/or VVT System';
 
   @override
-  String midMisfireCylinder(Object cylinder) {
-    return 'Raté d\'Allumage - Cylindre $cylinder';
-  }
+  String get monNmhcCatalyst => 'NMHC Catalyst';
 
   @override
-  String get midMisfireAll => 'Raté d\'Allumage - Tous les Cylindres';
+  String get monNoxScr => 'NOx/SCR Monitor';
 
   @override
-  String midProprietary(Object hex) {
-    return 'Moniteur Propriétaire (0x$hex)';
-  }
+  String get monBoostPressure => 'Boost Pressure System';
 
   @override
-  String midObd(Object hex) {
-    return 'Moniteur OBD (0x$hex)';
-  }
+  String get monExhaustGasSensor => 'Exhaust Gas Sensor';
 
   @override
-  String get tidO2RichToLean => 'Temps de Réponse (Riche à Pauvre)';
+  String get monPmFilter => 'PM Filter Monitoring';
 
   @override
-  String get tidO2LeanToRich => 'Temps de Réponse (Pauvre à Riche)';
+  String get statusComplete => 'Complete';
 
   @override
-  String get tidO2MinVoltage => 'Tension Minimale Mesurée';
-
-  @override
-  String get tidO2MaxVoltage => 'Tension Maximale Mesurée';
-
-  @override
-  String get tidMisfireEwma => 'Nombre de Ratés (Moyenne EWMA)';
-
-  @override
-  String get tidMisfireCurrent => 'Nombre de Ratés (Cycle Actuel)';
-
-  @override
-  String get tidEvapPurgeRate => 'Taux de Purge/Fuite EVAP';
-
-  @override
-  String get tidEvapInitGrad => 'Gradient de Pression Initial EVAP';
-
-  @override
-  String get tidEvapTankDelta => 'Variation de Pression Réservoir';
-
-  @override
-  String get tidEvapVacDecay => 'Maintien de Vide EVAP';
-
-  @override
-  String get tidEvapInitStab => 'Stabilité Pression Initiale Réservoir';
-
-  @override
-  String get tidEvapCanisterVac => 'Maintien Vide Residual Canister';
-
-  @override
-  String get tidEvapVentFlow => 'Débit Vanne de Mise à l\'Air';
-
-  @override
-  String get tidEvapSolResponse => 'Réponse Solénoïde de Purge';
-
-  @override
-  String get tidEvapLinePress => 'Pression Ligne de Purge sous Charge';
-
-  @override
-  String get tidEvapSensorResp => 'Temps Réponse Capteur Pression EVAP';
-
-  @override
-  String get tidEvapSmallDecay => 'Chute de Vide (Micro Fuite 0.020\")';
-
-  @override
-  String get tidEvapMedDecay => 'Variation Pression (Fuite Moyenne 0.040\")';
-
-  @override
-  String get tidEvapGrossHold => 'Maintien de Vide (Fuite Majeure 0.090\")';
-
-  @override
-  String get tidEvapMinPurgePress => 'Pression Minimale Atteinte Purge';
-
-  @override
-  String tidGeneric(Object hex) {
-    return 'Test 0x$hex';
-  }
+  String get statusIncomplete => 'Incomplete';
 }
