@@ -20,16 +20,37 @@ class ObdGauge extends ConsumerWidget {
 
   const ObdGauge({super.key, required this.pid, required this.style});
 
-  double _getMaxValue() {
-    if (pid.unit == "RPM") return 8000;
-    if (pid.unit == "km/h") return 220;
-    if (pid.unit == "°C" || pid.unit == "C") return 130;
-    if (pid.unit == "%") return 100;
-    if (pid.unit == "V") return 16;
-    if (pid.unit == "kPa") return 255;
-    if (pid.unit == "°" || pid.unit == "Lambda") return 2.0;
-    if (pid.unit == "Pa") return 8192;
-    return 100;
+  /// Retorna os limites (Mínimo, Máximo) baseados no PID ou na Unidade
+  (double, double) _getMinMaxValues() {
+    // 1. PIDs Específicos com faixas negativas/dedicadas
+    if (pid.id == 0x0E) return (-64.0, 64.0); // Avanço de Ignição (°)
+    if (pid.id == 0x06 ||
+        pid.id == 0x07 ||
+        pid.id == 0x08 ||
+        pid.id == 0x09 ||
+        pid.id == 0x2D) {
+      return (-100.0, 100.0); // Trim de Combustível / Erro EGR (%)
+    }
+    if (pid.id == 0x32) return (-8192.0, 8192.0); // Pressão EVAP (Pa)
+    if (pid.id == 0x5D || pid.id == 0x84) {
+      return (-210.0, 300.0);
+    } // Ponto de Injeção (°)
+    if (pid.id == 0x61 || pid.id == 0x62 || pid.id == 0xA3) {
+      return (-125.0, 125.0); // Torque (%)
+    }
+
+    // 2. Mapeamento genérico por Unidade
+    if (pid.unit == "RPM") return (0.0, 8000.0);
+    if (pid.unit == "km/h") return (0.0, 220.0);
+    if (pid.unit == "°C" || pid.unit == "C") return (-40.0, 150.0);
+    if (pid.unit == "%") return (0.0, 100.0);
+    if (pid.unit == "V") return (0.0, 16.0);
+    if (pid.unit == "kPa") return (0.0, 255.0);
+    if (pid.unit == "°") return (-64.0, 64.0);
+    if (pid.unit == "λ" || pid.unit == "Lambda") return (0.0, 2.0);
+    if (pid.unit == "Pa") return (-8192.0, 8192.0);
+
+    return (0.0, 100.0);
   }
 
   @override
@@ -86,15 +107,26 @@ class ObdGauge extends ConsumerWidget {
 
     double currentValue = sensorData?.value ?? 0.0;
     List<double> history = sensorData?.history ?? [];
-    double maxValue = _getMaxValue();
-    double percent = (currentValue / maxValue).clamp(0.0, 1.0);
+
+    // RESOLUÇÃO DE MÍNIMO E MÁXIMO
+    final (minValue, maxValue) = _getMinMaxValues();
+
+    // NORMALIZAÇÃO AJUSTADA PARA ESCALAS COM VALORES NEGATIVOS
+    double range = maxValue - minValue;
+    double percent = range == 0
+        ? 0.0
+        : ((currentValue - minValue) / range).clamp(0.0, 1.0);
 
     SensorHealth? currentHealth = pid.evaluateHealth != null
         ? pid.evaluateHealth!(currentValue)
         : null;
 
     Color activeColor = getColorForHealth(currentHealth, appColors.primary);
-    ZoneGradient zones = buildZoneGradient(0, maxValue, appColors.primary);
+    ZoneGradient zones = buildZoneGradient(
+      minValue,
+      maxValue,
+      appColors.primary,
+    );
 
     return Container(
       decoration: BoxDecoration(
@@ -157,7 +189,6 @@ class ObdGauge extends ConsumerWidget {
                                           zones: zones,
                                         ),
                                 ),
-                                // UNIDADE DE MEDIDA NA BASE DO GAUGE (ABAIXO DO PIVÔ DO PONTEIRO)
                                 Positioned(
                                   bottom: size * 0.10,
                                   child: FittedBox(
