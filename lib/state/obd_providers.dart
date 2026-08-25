@@ -569,3 +569,32 @@ class HudFullscreenNotifier extends Notifier<bool> {
 final hudFullscreenProvider = NotifierProvider<HudFullscreenNotifier, bool>(() {
   return HudFullscreenNotifier();
 });
+
+// ============================================================================
+// CONTROLE DE FPS DOS GRÁFICOS
+// ============================================================================
+class GraphFpsNotifier extends Notifier<int> {
+  @override
+  int build() {
+    _loadFps();
+    return 30; // Padrão: 30 FPS
+  }
+
+  Future<void> _loadFps() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedFps = prefs.getInt('graph_fps');
+    if (savedFps != null) {
+      state = savedFps;
+    }
+  }
+
+  Future<void> updateFps(int value) async {
+    state = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('graph_fps', value);
+  }
+}
+
+final graphFpsProvider = NotifierProvider<GraphFpsNotifier, int>(() {
+  return GraphFpsNotifier();
+});

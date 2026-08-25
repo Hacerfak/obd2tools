@@ -4,8 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../parser/obd_pid.dart';
 import '../state/obd_providers.dart';
 import '../state/technical_data_service.dart';
+import 'hud_sensor_chart.dart';
 
-enum GaugeStyle { digital, analog, stats }
+enum GaugeStyle { digital, analog, stats, chart }
 
 class ZoneGradient {
   final List<Color> colors;
@@ -38,11 +39,9 @@ class ObdGauge extends ConsumerWidget {
     );
     final onSurface = Theme.of(context).colorScheme.onSurface;
     final appColors = ref.watch(appColorsProvider).current(context);
-    final techService = ref.watch(technicalDataProvider);
 
     final hexId = pid.id.toRadixString(16).padLeft(2, '0').toUpperCase();
-    final techData = techService.getSensorData(hexId);
-    final hasValueMap = techData?.valueMap != null;
+    final techData = ref.watch(technicalDataProvider).getSensorData(hexId);
     final String shortName = techData?.shortName.isNotEmpty == true
         ? techData!.shortName
         : pid.name;
@@ -52,6 +51,37 @@ class ObdGauge extends ConsumerWidget {
       if (health == SensorHealth.warning) return appColors.warning;
       if (health == SensorHealth.critical) return appColors.critical;
       return defaultColor;
+    }
+
+    ZoneGradient buildZoneGradient(
+      double minY,
+      double maxY,
+      Color defaultColor,
+    ) {
+      if (pid.evaluateHealth == null) {
+        return ZoneGradient([defaultColor, defaultColor], [0.0, 1.0]);
+      }
+      List<Color> colors = [];
+      List<double> stops = [];
+      SensorHealth? lastHealth;
+      int steps = 100;
+      for (int i = 0; i <= steps; i++) {
+        double percent = i / steps;
+        double val = minY + (percent * (maxY - minY));
+        SensorHealth health = pid.evaluateHealth!(val);
+        Color healthColor = getColorForHealth(health, defaultColor);
+        if (lastHealth != null && health != lastHealth) {
+          colors.add(getColorForHealth(lastHealth, defaultColor));
+          stops.add(percent);
+          colors.add(healthColor);
+          stops.add(percent);
+        } else if (i == 0 || i == steps) {
+          colors.add(healthColor);
+          stops.add(percent);
+        }
+        lastHealth = health;
+      }
+      return ZoneGradient(colors, stops);
     }
 
     double currentValue = sensorData?.value ?? 0.0;
@@ -64,10 +94,7 @@ class ObdGauge extends ConsumerWidget {
         : null;
 
     Color activeColor = getColorForHealth(currentHealth, appColors.primary);
-
-    final displayValue = sensorData != null
-        ? techService.getSensorValueDescription(hexId, currentValue)
-        : "--";
+    ZoneGradient zones = buildZoneGradient(0, maxValue, appColors.primary);
 
     return Container(
       decoration: BoxDecoration(
@@ -83,15 +110,20 @@ class ObdGauge extends ConsumerWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: style == GaugeStyle.stats
+        child: style == GaugeStyle.chart
+            ? HudSensorChart(
+                currentValue: currentValue,
+                color: activeColor,
+                unit: pid.unit,
+                shortName: shortName,
+              )
+            : style == GaugeStyle.stats
             ? _buildStatsPanel(
-                displayValue,
                 currentValue,
                 history,
                 onSurface,
                 activeColor,
                 shortName,
-                hasValueMap,
               )
             : Column(
                 children: [
@@ -112,36 +144,31 @@ class ObdGauge extends ConsumerWidget {
                               children: [
                                 CustomPaint(
                                   size: Size(size, size),
-                                  painter: DigitalGaugePainter(
-                                    percent: percent,
-                                    baseColor: onSurface,
-                                    zones: ZoneGradient(
-                                      [appColors.primary, appColors.primary],
-                                      [0.0, 1.0],
-                                    ),
-                                  ),
+                                  painter: style == GaugeStyle.digital
+                                      ? DigitalGaugePainter(
+                                          percent: percent,
+                                          baseColor: onSurface,
+                                          zones: zones,
+                                        )
+                                      : AnalogGaugePainter(
+                                          percent: percent,
+                                          baseColor: onSurface,
+                                          activeColor: activeColor,
+                                          zones: zones,
+                                        ),
                                 ),
-                                Center(
-                                  child: Padding(
-                                    padding: EdgeInsets.only(
-                                      bottom: style == GaugeStyle.analog
-                                          ? size * 0.12
-                                          : 0,
-                                    ),
-                                    child: FittedBox(
-                                      fit: BoxFit.scaleDown,
-                                      child: Text(
-                                        hasValueMap
-                                            ? ""
-                                            : (pid.unit.isEmpty
-                                                  ? "--"
-                                                  : pid.unit),
-                                        style: TextStyle(
-                                          fontSize: size * 0.14,
-                                          fontWeight: FontWeight.bold,
-                                          color: activeColor.withValues(
-                                            alpha: 0.75,
-                                          ),
+                                // UNIDADE DE MEDIDA NA BASE DO GAUGE (ABAIXO DO PIVÔ DO PONTEIRO)
+                                Positioned(
+                                  bottom: size * 0.10,
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text(
+                                      pid.unit.isEmpty ? "--" : pid.unit,
+                                      style: TextStyle(
+                                        fontSize: size * 0.13,
+                                        fontWeight: FontWeight.bold,
+                                        color: activeColor.withValues(
+                                          alpha: 0.75,
                                         ),
                                       ),
                                     ),
@@ -160,14 +187,16 @@ class ObdGauge extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 4.0),
                       child: Center(
                         child: FittedBox(
-                          fit: BoxFit.scaleDown,
+                          fit: BoxFit.contain,
                           child: Text(
-                            displayValue,
+                            currentValue.toStringAsFixed(
+                              pid.unit == "RPM" ? 0 : 1,
+                            ),
                             style: TextStyle(
-                              fontSize: hasValueMap ? 18 : 100,
+                              fontSize: 100,
                               fontWeight: FontWeight.w900,
                               color: activeColor,
-                              fontFamily: hasValueMap ? null : 'Monospace',
+                              fontFamily: 'Monospace',
                             ),
                           ),
                         ),
@@ -201,13 +230,11 @@ class ObdGauge extends ConsumerWidget {
   }
 
   Widget _buildStatsPanel(
-    String displayValue,
     double currentValue,
     List<double> history,
     Color onSurface,
     Color activeColor,
     String shortName,
-    bool hasValueMap,
   ) {
     double currentMin = currentValue;
     double currentMax = currentValue;
@@ -225,14 +252,14 @@ class ObdGauge extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: Center(
               child: FittedBox(
-                fit: BoxFit.scaleDown,
+                fit: BoxFit.contain,
                 child: Text(
-                  displayValue,
+                  formatVal(currentValue),
                   style: TextStyle(
-                    fontSize: hasValueMap ? 18 : 120,
+                    fontSize: 120,
                     fontWeight: FontWeight.w900,
                     color: activeColor,
-                    fontFamily: hasValueMap ? null : 'Monospace',
+                    fontFamily: 'Monospace',
                   ),
                 ),
               ),
@@ -245,7 +272,7 @@ class ObdGauge extends ConsumerWidget {
             child: FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
-                hasValueMap ? "" : (pid.unit.isEmpty ? "--" : pid.unit),
+                pid.unit.isEmpty ? "--" : pid.unit,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -255,33 +282,32 @@ class ObdGauge extends ConsumerWidget {
             ),
           ),
         ),
-        if (!hasValueMap)
-          Expanded(
-            flex: 24,
-            child: Center(
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildMiniStat(
-                      "MIN",
-                      formatVal(currentMin),
-                      onSurface,
-                      Colors.blueAccent,
-                    ),
-                    const SizedBox(height: 2),
-                    _buildMiniStat(
-                      "MAX",
-                      formatVal(currentMax),
-                      onSurface,
-                      Colors.redAccent,
-                    ),
-                  ],
-                ),
+        Expanded(
+          flex: 24,
+          child: Center(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildMiniStat(
+                    "MIN",
+                    formatVal(currentMin),
+                    onSurface,
+                    Colors.blueAccent,
+                  ),
+                  const SizedBox(height: 2),
+                  _buildMiniStat(
+                    "MAX",
+                    formatVal(currentMax),
+                    onSurface,
+                    Colors.redAccent,
+                  ),
+                ],
               ),
             ),
           ),
+        ),
         Expanded(
           flex: 14,
           child: Center(
@@ -346,6 +372,42 @@ class ObdGauge extends ConsumerWidget {
   }
 }
 
+// --- UTILITÁRIO DE GRADIENTE DE SWEEP PARA PAINTERS ---
+Shader _createSmartSweepShader(
+  List<Color> colors,
+  List<double> stops,
+  Rect rect,
+  double startAngle,
+  double sweepAngle,
+) {
+  final double sweepFraction = sweepAngle / (2 * pi);
+  List<Color> mappedColors = [];
+  List<double> mappedStops = [];
+
+  for (int i = 0; i < colors.length; i++) {
+    mappedColors.add(colors[i]);
+    mappedStops.add(stops[i] * sweepFraction);
+  }
+
+  Color firstColor = colors.first;
+  Color lastColor = colors.last;
+  mappedColors.add(lastColor);
+  mappedStops.add(sweepFraction + 0.05);
+  mappedColors.add(firstColor);
+  mappedStops.add(1.0 - 0.05);
+  mappedColors.add(firstColor);
+  mappedStops.add(1.0);
+
+  return SweepGradient(
+    startAngle: 0.0,
+    endAngle: 2 * pi,
+    colors: mappedColors,
+    stops: mappedStops,
+    transform: GradientRotation(startAngle),
+  ).createShader(rect);
+}
+
+// --- PAINTER DIGITAL ---
 class DigitalGaugePainter extends CustomPainter {
   final double percent;
   final Color baseColor;
@@ -365,13 +427,28 @@ class DigitalGaugePainter extends CustomPainter {
     const startAngle = 0.8 * pi;
     const sweepAngle = 1.4 * pi;
 
+    final trackShader = _createSmartSweepShader(
+      zones.colors.map((c) => c.withValues(alpha: 0.15)).toList(),
+      zones.stops,
+      rect,
+      startAngle,
+      sweepAngle,
+    );
+    final fillShader = _createSmartSweepShader(
+      zones.colors,
+      zones.stops,
+      rect,
+      startAngle,
+      sweepAngle,
+    );
+
     canvas.drawArc(
       rect,
       startAngle,
       sweepAngle,
       false,
       Paint()
-        ..color = baseColor.withValues(alpha: 0.15)
+        ..shader = trackShader
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke
         ..strokeWidth = 10,
@@ -382,7 +459,7 @@ class DigitalGaugePainter extends CustomPainter {
       sweepAngle * percent,
       false,
       Paint()
-        ..color = zones.colors.first
+        ..shader = fillShader
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke
         ..strokeWidth = 10,
@@ -392,4 +469,88 @@ class DigitalGaugePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant DigitalGaugePainter oldDelegate) =>
       oldDelegate.percent != percent;
+}
+
+// --- PAINTER ANALÓGICO COM PONTEIRO E MARCADORES ---
+class AnalogGaugePainter extends CustomPainter {
+  final double percent;
+  final Color baseColor;
+  final Color activeColor;
+  final ZoneGradient zones;
+
+  AnalogGaugePainter({
+    required this.percent,
+    required this.baseColor,
+    required this.activeColor,
+    required this.zones,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2 - 8;
+    final rect = Rect.fromCircle(center: center, radius: radius);
+    const startAngle = 0.8 * pi;
+    const sweepAngle = 1.4 * pi;
+
+    final trackShader = _createSmartSweepShader(
+      zones.colors.map((c) => c.withValues(alpha: 0.4)).toList(),
+      zones.stops,
+      rect,
+      startAngle,
+      sweepAngle,
+    );
+
+    canvas.drawArc(
+      rect,
+      startAngle,
+      sweepAngle,
+      false,
+      Paint()
+        ..shader = trackShader
+        ..strokeCap = StrokeCap.round
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 5,
+    );
+
+    final tickPaint = Paint()
+      ..color = baseColor.withValues(alpha: 0.54)
+      ..strokeWidth = 2;
+
+    for (int i = 0; i <= 10; i++) {
+      double angle = startAngle + (sweepAngle * (i / 10));
+      Offset inner = Offset(
+        center.dx + (radius - 7) * cos(angle),
+        center.dy + (radius - 7) * sin(angle),
+      );
+      Offset outer = Offset(
+        center.dx + radius * cos(angle),
+        center.dy + radius * sin(angle),
+      );
+      canvas.drawLine(inner, outer, tickPaint);
+    }
+
+    final pointerAngle = startAngle + (sweepAngle * percent);
+    final pointerLength = radius - 12;
+    final pointerPaint = Paint()
+      ..color = activeColor
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = 3.5;
+
+    canvas.drawLine(
+      center,
+      Offset(
+        center.dx + pointerLength * cos(pointerAngle),
+        center.dy + pointerLength * sin(pointerAngle),
+      ),
+      pointerPaint,
+    );
+
+    canvas.drawCircle(center, 7, Paint()..color = baseColor);
+    canvas.drawCircle(center, 3.5, Paint()..color = activeColor);
+  }
+
+  @override
+  bool shouldRepaint(covariant AnalogGaugePainter oldDelegate) =>
+      oldDelegate.percent != percent || oldDelegate.activeColor != activeColor;
 }

@@ -1085,6 +1085,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Incomplete'**
   String get statusIncomplete;
+
+  /// No description provided for @chartNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Now'**
+  String get chartNow;
+
+  /// No description provided for @chartTitle10s.
+  ///
+  /// In en, this message translates to:
+  /// **'Real-Time Chart'**
+  String get chartTitle10s;
+
+  /// No description provided for @sessionStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Session Statistics'**
+  String get sessionStats;
+
+  /// No description provided for @statMin.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum'**
+  String get statMin;
+
+  /// No description provided for @statMax.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum'**
+  String get statMax;
+
+  /// No description provided for @milTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check Engine Light (MIL)'**
+  String get milTitle;
+
+  /// No description provided for @milStatusOn.
+  ///
+  /// In en, this message translates to:
+  /// **'ON'**
+  String get milStatusOn;
+
+  /// No description provided for @milStatusOff.
+  ///
+  /// In en, this message translates to:
+  /// **'OFF'**
+  String get milStatusOff;
+
+  /// No description provided for @confirmedErrors.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed Errors'**
+  String get confirmedErrors;
+
+  /// No description provided for @dtcCountFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} DTC(s)'**
+  String dtcCountFormat(int count);
+
+  /// No description provided for @ignitionTypeFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Ignition Type: {type}'**
+  String ignitionTypeFormat(String type);
+
+  /// No description provided for @ignitionCompression.
+  ///
+  /// In en, this message translates to:
+  /// **'Compression (Diesel)'**
+  String get ignitionCompression;
+
+  /// No description provided for @ignitionSpark.
+  ///
+  /// In en, this message translates to:
+  /// **'Spark (Gasoline / Flex)'**
+  String get ignitionSpark;
+
+  /// No description provided for @readinessMonitorsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Readiness Checks'**
+  String get readinessMonitorsTitle;
+
+  /// No description provided for @supportedEgtSensors.
+  ///
+  /// In en, this message translates to:
+  /// **'Supported EGT Sensors (Bank {bank})'**
+  String supportedEgtSensors(int bank);
+
+  /// No description provided for @sensorLabelIndex.
+  ///
+  /// In en, this message translates to:
+  /// **'Sensor {index}'**
+  String sensorLabelIndex(int index);
+
+  /// No description provided for @cumulativeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cumulative Value / Status'**
+  String get cumulativeTitle;
+
+  /// No description provided for @cumulativeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Continuous count or text status sensors do not support oscillation statistics.'**
+  String get cumulativeDesc;
+
+  /// No description provided for @setGraphFps.
+  ///
+  /// In en, this message translates to:
+  /// **'Graph refresh rate'**
+  String get setGraphFps;
+
+  /// No description provided for @setGraphFpsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust visual smoothness (FPS) for sensor charts'**
+  String get setGraphFpsDesc;
 }
 
 class _AppLocalizationsDelegate

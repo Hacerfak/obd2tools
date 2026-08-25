@@ -217,6 +217,10 @@ class ObdManager {
     _cooldownTimer?.cancel();
     _ecuPingTimer?.cancel();
     ref.read(realTimeStateProvider.notifier).clearData();
+    ref.read(supportedPidsProvider.notifier).clear();
+    ref.read(vehicleInfoStateProvider.notifier).updateInfo({});
+    ref.read(dtcStateProvider.notifier).clearCodes();
+    ref.read(testResultsProvider.notifier).clear();
   }
 
   void _processQueue() {

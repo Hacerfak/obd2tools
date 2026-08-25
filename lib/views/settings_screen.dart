@@ -226,6 +226,30 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                     ),
                   ),
+                  Card(
+                    elevation: 0,
+                    color: onSurface.withValues(alpha: 0.05),
+                    child: ListTile(
+                      title: Text(l10n.setGraphFps),
+                      subtitle: Text(l10n.setGraphFpsDesc),
+                      trailing: DropdownButton<int>(
+                        value: ref.watch(graphFpsProvider),
+                        underline: const SizedBox(),
+                        items: const [
+                          DropdownMenuItem(value: 15, child: Text("15 FPS")),
+                          DropdownMenuItem(value: 30, child: Text("30 FPS")),
+                          DropdownMenuItem(value: 60, child: Text("60 FPS")),
+                        ],
+                        onChanged: (value) {
+                          if (value != null) {
+                            ref
+                                .read(graphFpsProvider.notifier)
+                                .updateFps(value);
+                          }
+                        },
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),

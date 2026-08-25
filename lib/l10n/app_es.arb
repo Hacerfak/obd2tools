@@ -143,5 +143,7 @@
     "btnCopy": "Copiar",
     "infoCopiedSnack": "¡{item} copiado al portapapeles!",
     "infoExportTooltip": "Exportar JSON",
-    "infoShareSubject": "Información del Vehículo - OBD2 Tools"
+    "infoShareSubject": "Información del Vehículo - OBD2 Tools",
+    "setGraphFps": "Tasa de actualización de gráficos",
+    "setGraphFpsDesc": "Ajuste la fluidez visual (FPS) de las curvas de sensores"
 }

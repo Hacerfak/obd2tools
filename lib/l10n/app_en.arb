@@ -206,5 +206,53 @@
     "monExhaustGasSensor": "Exhaust Gas Sensor",
     "monPmFilter": "PM Filter Monitoring",
     "statusComplete": "Complete",
-    "statusIncomplete": "Incomplete"
+    "statusIncomplete": "Incomplete",
+    "chartNow": "Now",
+    "chartTitle10s": "Real-Time Chart",
+    "sessionStats": "Session Statistics",
+    "statMin": "Minimum",
+    "statMax": "Maximum",
+    "milTitle": "Check Engine Light (MIL)",
+    "milStatusOn": "ON",
+    "milStatusOff": "OFF",
+    "confirmedErrors": "Confirmed Errors",
+    "dtcCountFormat": "{count} DTC(s)",
+    "@dtcCountFormat": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "ignitionTypeFormat": "Ignition Type: {type}",
+    "@ignitionTypeFormat": {
+        "placeholders": {
+            "type": {
+                "type": "String"
+            }
+        }
+    },
+    "ignitionCompression": "Compression (Diesel)",
+    "ignitionSpark": "Spark (Gasoline / Flex)",
+    "readinessMonitorsTitle": "Readiness Checks",
+    "supportedEgtSensors": "Supported EGT Sensors (Bank {bank})",
+    "@supportedEgtSensors": {
+        "placeholders": {
+            "bank": {
+                "type": "int"
+            }
+        }
+    },
+    "sensorLabelIndex": "Sensor {index}",
+    "@sensorLabelIndex": {
+        "placeholders": {
+            "index": {
+                "type": "int"
+            }
+        }
+    },
+    "cumulativeTitle": "Cumulative Value / Status",
+    "cumulativeDesc": "Continuous count or text status sensors do not support oscillation statistics.",
+    "setGraphFps": "Graph refresh rate",
+    "setGraphFpsDesc": "Adjust visual smoothness (FPS) for sensor charts"
 }

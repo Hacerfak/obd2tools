@@ -521,4 +521,75 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get statusIncomplete => 'Incompleto';
+
+  @override
+  String get chartNow => 'Agora';
+
+  @override
+  String get chartTitle10s => 'Gráfico em Tempo Real';
+
+  @override
+  String get sessionStats => 'Estatísticas da Sessão';
+
+  @override
+  String get statMin => 'Mínimo';
+
+  @override
+  String get statMax => 'Máximo';
+
+  @override
+  String get milTitle => 'Luz de Injeção (MIL)';
+
+  @override
+  String get milStatusOn => 'ACESA';
+
+  @override
+  String get milStatusOff => 'APAGADA';
+
+  @override
+  String get confirmedErrors => 'Erros Confirmados';
+
+  @override
+  String dtcCountFormat(int count) {
+    return '$count DTC(s)';
+  }
+
+  @override
+  String ignitionTypeFormat(String type) {
+    return 'Tipo de Ignição: $type';
+  }
+
+  @override
+  String get ignitionCompression => 'Compressão (Diesel)';
+
+  @override
+  String get ignitionSpark => 'Ciclo Otto (Gasolina / Flex)';
+
+  @override
+  String get readinessMonitorsTitle =>
+      'Monitores de Prontidão (Readiness Checks)';
+
+  @override
+  String supportedEgtSensors(int bank) {
+    return 'Sensores EGT Suportados (Banco $bank)';
+  }
+
+  @override
+  String sensorLabelIndex(int index) {
+    return 'Sensor $index';
+  }
+
+  @override
+  String get cumulativeTitle => 'Grandeza Cumulativa / Status';
+
+  @override
+  String get cumulativeDesc =>
+      'Sensores de contagem contínua ou estado em texto não suportam estatísticas de oscilação.';
+
+  @override
+  String get setGraphFps => 'Taxa de atualização dos gráficos';
+
+  @override
+  String get setGraphFpsDesc =>
+      'Ajuste a fluidez visual (FPS) das curvas dos sensores';
 }

@@ -7,6 +7,7 @@ import '../parser/parsers/egt_parser.dart';
 import '../state/obd_providers.dart';
 import '../connection/obd_manager.dart';
 import '../state/technical_data_service.dart';
+import '../widgets/live_sensor_chart.dart';
 
 class SensorDetailScreen extends ConsumerStatefulWidget {
   final ObdPid pid;
@@ -193,7 +194,7 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
                   if (isMonitorStatusPid)
                     _buildMonitorView(context, ref, onSurface, l10n, appColors)
                   else if (isEgtPid)
-                    _buildEgtView(context, ref, onSurface)
+                    _buildEgtView(context, ref, onSurface, l10n)
                   else
                     _buildStandardView(
                       context,
@@ -243,6 +244,10 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
           isPid41: widget.pid.id == 0x41,
         );
 
+        final String ignitionText = monitorStatus.isDiesel
+            ? l10n.ignitionCompression
+            : l10n.ignitionSpark;
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -251,8 +256,10 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
                 children: [
                   Expanded(
                     child: _buildSummaryCard(
-                      title: "Luz de Injeção (MIL)",
-                      value: monitorStatus.isMilOn ? "ACESA" : "APAGADA",
+                      title: l10n.milTitle,
+                      value: monitorStatus.isMilOn
+                          ? l10n.milStatusOn
+                          : l10n.milStatusOff,
                       color: monitorStatus.isMilOn
                           ? appColors.critical
                           : appColors.normal,
@@ -265,8 +272,8 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: _buildSummaryCard(
-                      title: "Erros Confirmados",
-                      value: "${monitorStatus.dtcCount} DTC(s)",
+                      title: l10n.confirmedErrors,
+                      value: l10n.dtcCountFormat(monitorStatus.dtcCount),
                       color: monitorStatus.dtcCount > 0
                           ? appColors.warning
                           : appColors.normal,
@@ -294,7 +301,7 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    "Tipo de Ignição: ${monitorStatus.isDiesel ? 'Compressão (Diesel)' : 'Ciclo Otto (Gasolina / Flex)'}",
+                    l10n.ignitionTypeFormat(ignitionText),
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: onSurface,
@@ -306,7 +313,7 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
             ),
             const SizedBox(height: 24),
             Text(
-              "Monitores de Prontidão (Readiness Checks)",
+              l10n.readinessMonitorsTitle,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -380,7 +387,12 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
   }
 
   // --- VISUALIZAÇÃO DOS SENSORES MULTI-EGT (PIDs 78 e 79) ---
-  Widget _buildEgtView(BuildContext context, WidgetRef ref, Color onSurface) {
+  Widget _buildEgtView(
+    BuildContext context,
+    WidgetRef ref,
+    Color onSurface,
+    AppLocalizations l10n,
+  ) {
     return Consumer(
       builder: (context, ref, _) {
         final sensorData = ref.watch(
@@ -396,16 +408,17 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
           );
         }
 
+        final bankNumber = widget.pid.id == 0x78 ? 1 : 2;
         final egtStatus = EgtStatus.fromBytes(
           sensorData.rawBytes!,
-          bank: widget.pid.id == 0x78 ? 1 : 2,
+          bank: bankNumber,
         );
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Sensores EGT Suportados (Banco ${egtStatus.bank})",
+              l10n.supportedEgtSensors(bankNumber),
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -453,7 +466,7 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              "Sensor ${sensor.index}",
+                              l10n.sensorLabelIndex(sensor.index),
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 13,
@@ -498,7 +511,7 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
     );
   }
 
-  // --- VISUALIZAÇÃO PADRÃO (VALOR INSTANTÂNEO E ESTATÍSTICAS) ---
+  // --- VISUALIZAÇÃO PADRÃO (VALOR INSTANTÂNEO, ESTATÍSTICAS E GRÁFICO DE 10S ABAIXO) ---
   Widget _buildStandardView(
     BuildContext context,
     WidgetRef ref,
@@ -522,7 +535,6 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
         ),
         const SizedBox(height: 8),
 
-        // VALOR INSTANTÂNEO
         Consumer(
           builder: (context, ref, _) {
             final sensorData = ref.watch(
@@ -580,49 +592,77 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
             }
           },
         ),
-        const SizedBox(height: 48),
+        const SizedBox(height: 32),
 
-        // ESTATÍSTICAS DA SESSÃO OU AVISO DE ACUMULATIVO
         if (showStats) ...[
-          Text(
-            "Estatísticas da Sessão",
-            style: TextStyle(
-              color: onSurface.withValues(alpha: 0.54),
-              fontSize: 16,
-            ),
-          ),
-          const SizedBox(height: 16),
           Consumer(
             builder: (context, ref, _) {
               final sensorData = ref.watch(
                 realTimeStateProvider.select((data) => data[widget.pid.name]),
               );
-              double currentMin = 0.0;
-              double currentMax = 0.0;
+
+              final currentValue = sensorData?.value ?? 0.0;
+              final health = widget.pid.evaluateHealth != null
+                  ? widget.pid.evaluateHealth!(currentValue)
+                  : null;
+              final activeColor = _getActiveColor(health, appColors);
+
+              double currentMin = currentValue;
+              double currentMax = currentValue;
               if (sensorData != null && sensorData.history.isNotEmpty) {
                 currentMin = sensorData.history.reduce((a, b) => a < b ? a : b);
                 currentMax = sensorData.history.reduce((a, b) => a > b ? a : b);
               }
-              return Row(
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: _buildStatCard(
-                      "Mínimo",
-                      currentMin,
-                      widget.pid.unit,
-                      onSurface,
-                      Colors.blueAccent,
+                  Text(
+                    l10n.sessionStats,
+                    style: TextStyle(
+                      color: onSurface.withValues(alpha: 0.54),
+                      fontSize: 16,
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildStatCard(
-                      "Máximo",
-                      currentMax,
-                      widget.pid.unit,
-                      onSurface,
-                      Colors.redAccent,
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildStatCard(
+                          l10n.statMin,
+                          currentMin,
+                          widget.pid.unit,
+                          onSurface,
+                          Colors.blueAccent,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _buildStatCard(
+                          l10n.statMax,
+                          currentMax,
+                          widget.pid.unit,
+                          onSurface,
+                          Colors.redAccent,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 32),
+
+                  Text(
+                    l10n.chartTitle10s,
+                    style: TextStyle(
+                      color: onSurface.withValues(alpha: 0.54),
+                      fontSize: 16,
                     ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  LiveSensorChart(
+                    currentValue: currentValue,
+                    lineTileColor: activeColor,
+                    unit: widget.pid.unit,
                   ),
                 ],
               );
@@ -640,7 +680,7 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  "Grandeza Cumulativa / Status",
+                  l10n.cumulativeTitle,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -649,7 +689,7 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  "Sensores de contagem contínua ou estado em texto não suportam estatísticas de oscilação.",
+                  l10n.cumulativeDesc,
                   textAlign: TextAlign.center,
                   style: TextStyle(color: onSurface.withValues(alpha: 0.38)),
                 ),
@@ -730,7 +770,7 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
             Row(
               children: [
                 Icon(
-                  title == "Mínimo"
+                  iconColor == Colors.blueAccent
                       ? Icons.arrow_downward_rounded
                       : Icons.arrow_upward_rounded,
                   color: iconColor,

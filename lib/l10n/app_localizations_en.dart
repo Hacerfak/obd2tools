@@ -521,4 +521,74 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get statusIncomplete => 'Incomplete';
+
+  @override
+  String get chartNow => 'Now';
+
+  @override
+  String get chartTitle10s => 'Real-Time Chart';
+
+  @override
+  String get sessionStats => 'Session Statistics';
+
+  @override
+  String get statMin => 'Minimum';
+
+  @override
+  String get statMax => 'Maximum';
+
+  @override
+  String get milTitle => 'Check Engine Light (MIL)';
+
+  @override
+  String get milStatusOn => 'ON';
+
+  @override
+  String get milStatusOff => 'OFF';
+
+  @override
+  String get confirmedErrors => 'Confirmed Errors';
+
+  @override
+  String dtcCountFormat(int count) {
+    return '$count DTC(s)';
+  }
+
+  @override
+  String ignitionTypeFormat(String type) {
+    return 'Ignition Type: $type';
+  }
+
+  @override
+  String get ignitionCompression => 'Compression (Diesel)';
+
+  @override
+  String get ignitionSpark => 'Spark (Gasoline / Flex)';
+
+  @override
+  String get readinessMonitorsTitle => 'Readiness Checks';
+
+  @override
+  String supportedEgtSensors(int bank) {
+    return 'Supported EGT Sensors (Bank $bank)';
+  }
+
+  @override
+  String sensorLabelIndex(int index) {
+    return 'Sensor $index';
+  }
+
+  @override
+  String get cumulativeTitle => 'Cumulative Value / Status';
+
+  @override
+  String get cumulativeDesc =>
+      'Continuous count or text status sensors do not support oscillation statistics.';
+
+  @override
+  String get setGraphFps => 'Graph refresh rate';
+
+  @override
+  String get setGraphFpsDesc =>
+      'Adjust visual smoothness (FPS) for sensor charts';
 }
