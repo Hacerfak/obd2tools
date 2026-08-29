@@ -470,85 +470,85 @@ class AppLocalizationsHi extends AppLocalizations {
   String get infoShareSubject => 'वाहन की जानकारी - OBD2 Tools';
 
   @override
-  String get monMisfire => 'Misfire';
+  String get monMisfire => 'मिसफ़ायर (Misfire)';
 
   @override
-  String get monFuelSystem => 'Fuel System';
+  String get monFuelSystem => 'ईंधन प्रणाली (Fuel System)';
 
   @override
-  String get monComponents => 'Comprehensive Components';
+  String get monComponents => 'व्यापक घटक (Components)';
 
   @override
-  String get monCatalyst => 'Catalyst';
+  String get monCatalyst => 'उत्प्रेरक कनवर्टर (Catalyst)';
 
   @override
-  String get monHeatedCatalyst => 'Heated Catalyst';
+  String get monHeatedCatalyst => 'हीटेड उत्प्रेरक (Heated Catalyst)';
 
   @override
-  String get monEvaporativeSystem => 'Evaporative System';
+  String get monEvaporativeSystem => 'वाष्पीकरण प्रणाली (EVAP)';
 
   @override
-  String get monSecondaryAir => 'Secondary Air System';
+  String get monSecondaryAir => 'द्वितीयक वायु प्रणाली';
 
   @override
-  String get monGpfFilter => 'Gasoline Particulate Filter';
+  String get monGpfFilter => 'पेट्रोल कण फ़िल्टर (GPF)';
 
   @override
-  String get monOxygenSensor => 'Oxygen Sensor';
+  String get monOxygenSensor => 'ऑक्सीजन सेंसर (O2 Sensor)';
 
   @override
-  String get monOxygenHeater => 'Oxygen Sensor Heater';
+  String get monOxygenHeater => 'ऑक्सीजन सेंसर हीटर';
 
   @override
-  String get monEgrVvt => 'EGR and/or VVT System';
+  String get monEgrVvt => 'EGR और/या VVT प्रणाली';
 
   @override
-  String get monNmhcCatalyst => 'NMHC Catalyst';
+  String get monNmhcCatalyst => 'NMHC उत्प्रेरक';
 
   @override
-  String get monNoxScr => 'NOx/SCR Monitor';
+  String get monNoxScr => 'NOx/SCR मॉनिटर';
 
   @override
-  String get monBoostPressure => 'Boost Pressure System';
+  String get monBoostPressure => 'बूस्ट दबाव प्रणाली (Turbo)';
 
   @override
-  String get monExhaustGasSensor => 'Exhaust Gas Sensor';
+  String get monExhaustGasSensor => 'निकास गैस सेंसर';
 
   @override
-  String get monPmFilter => 'PM Filter Monitoring';
+  String get monPmFilter => 'PM फ़िल्टर मॉनिटरिंग (DPF)';
 
   @override
-  String get statusComplete => 'Complete';
+  String get statusComplete => 'पूर्ण';
 
   @override
-  String get statusIncomplete => 'Incomplete';
+  String get statusIncomplete => 'अपूर्ण';
 
   @override
-  String get chartNow => 'Now';
+  String get chartNow => 'अभी';
 
   @override
-  String get chartTitle10s => 'Real-Time Chart';
+  String get chartTitle10s => 'रियल-टाइम चार्ट';
 
   @override
-  String get sessionStats => 'Session Statistics';
+  String get sessionStats => 'सत्र सांख्यिकी';
 
   @override
-  String get statMin => 'Minimum';
+  String get statMin => 'न्यूनतम';
 
   @override
-  String get statMax => 'Maximum';
+  String get statMax => 'अधिकतम';
 
   @override
-  String get milTitle => 'Check Engine Light (MIL)';
+  String get milTitle => 'चेक इंजन लाइट (MIL)';
 
   @override
-  String get milStatusOn => 'ON';
+  String get milStatusOn => 'चालू (ON)';
 
   @override
-  String get milStatusOff => 'OFF';
+  String get milStatusOff => 'बंद (OFF)';
 
   @override
-  String get confirmedErrors => 'Confirmed Errors';
+  String get confirmedErrors => 'पुष्ट त्रुटियां';
 
   @override
   String dtcCountFormat(int count) {
@@ -557,39 +557,39 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String ignitionTypeFormat(String type) {
-    return 'Ignition Type: $type';
+    return 'इग्निशन का प्रकार: $type';
   }
 
   @override
-  String get ignitionCompression => 'Compression (Diesel)';
+  String get ignitionCompression => 'संपीडन (डीजल)';
 
   @override
-  String get ignitionSpark => 'Spark (Gasoline / Flex)';
+  String get ignitionSpark => 'स्पार्क (पेट्रोल / फ्लेक्स)';
 
   @override
-  String get readinessMonitorsTitle => 'Readiness Checks';
+  String get readinessMonitorsTitle => 'तत्परता जांच (Readiness Checks)';
 
   @override
   String supportedEgtSensors(int bank) {
-    return 'Supported EGT Sensors (Bank $bank)';
+    return 'समर्थित EGT सेंसर (बैंक $bank)';
   }
 
   @override
   String sensorLabelIndex(int index) {
-    return 'Sensor $index';
+    return 'सेंसर $index';
   }
 
   @override
-  String get cumulativeTitle => 'Cumulative Value / Status';
+  String get cumulativeTitle => 'संचयी मूल्य / स्थिति';
 
   @override
   String get cumulativeDesc =>
-      'Continuous count or text status sensors do not support oscillation statistics.';
+      'निरंतर गिनती या टेक्स्ट स्थिति सेंसर दोलन आंकड़ों का समर्थन नहीं करते हैं।';
 
   @override
-  String get setGraphFps => 'Graph refresh rate';
+  String get setGraphFps => 'ग्राफ़ रिफ़्रेश दर';
 
   @override
   String get setGraphFpsDesc =>
-      'Adjust visual smoothness (FPS) for sensor charts';
+      'सेंसर चार्ट के लिए दृश्य सहजता (FPS) को समायोजित करें';
 }

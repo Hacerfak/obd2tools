@@ -454,126 +454,124 @@ class AppLocalizationsZh extends AppLocalizations {
   String get infoShareSubject => '车辆信息 - OBD2 Tools';
 
   @override
-  String get monMisfire => 'Misfire';
+  String get monMisfire => '失火监测 (Misfire)';
 
   @override
-  String get monFuelSystem => 'Fuel System';
+  String get monFuelSystem => '燃油系统';
 
   @override
-  String get monComponents => 'Comprehensive Components';
+  String get monComponents => '综合组件';
 
   @override
-  String get monCatalyst => 'Catalyst';
+  String get monCatalyst => '催化转换器';
 
   @override
-  String get monHeatedCatalyst => 'Heated Catalyst';
+  String get monHeatedCatalyst => '加热型催化转换器';
 
   @override
-  String get monEvaporativeSystem => 'Evaporative System';
+  String get monEvaporativeSystem => '蒸发排放系统 (EVAP)';
 
   @override
-  String get monSecondaryAir => 'Secondary Air System';
+  String get monSecondaryAir => '二次空气系统';
 
   @override
-  String get monGpfFilter => 'Gasoline Particulate Filter';
+  String get monGpfFilter => '汽油颗粒捕集器 (GPF)';
 
   @override
-  String get monOxygenSensor => 'Oxygen Sensor';
+  String get monOxygenSensor => '氧传感器';
 
   @override
-  String get monOxygenHeater => 'Oxygen Sensor Heater';
+  String get monOxygenHeater => '氧传感器加热器';
 
   @override
-  String get monEgrVvt => 'EGR and/or VVT System';
+  String get monEgrVvt => 'EGR 和/或 VVT 系统';
 
   @override
-  String get monNmhcCatalyst => 'NMHC Catalyst';
+  String get monNmhcCatalyst => 'NMHC 催化剂';
 
   @override
-  String get monNoxScr => 'NOx/SCR Monitor';
+  String get monNoxScr => 'NOx/SCR 监视器';
 
   @override
-  String get monBoostPressure => 'Boost Pressure System';
+  String get monBoostPressure => '增压系统 (Turbo)';
 
   @override
-  String get monExhaustGasSensor => 'Exhaust Gas Sensor';
+  String get monExhaustGasSensor => '废气传感器';
 
   @override
-  String get monPmFilter => 'PM Filter Monitoring';
+  String get monPmFilter => '颗粒物过滤器监测 (DPF)';
 
   @override
-  String get statusComplete => 'Complete';
+  String get statusComplete => '已完成';
 
   @override
-  String get statusIncomplete => 'Incomplete';
+  String get statusIncomplete => '未完成';
 
   @override
-  String get chartNow => 'Now';
+  String get chartNow => '现在';
 
   @override
-  String get chartTitle10s => 'Real-Time Chart';
+  String get chartTitle10s => '实时图表';
 
   @override
-  String get sessionStats => 'Session Statistics';
+  String get sessionStats => '会话统计';
 
   @override
-  String get statMin => 'Minimum';
+  String get statMin => '最小值';
 
   @override
-  String get statMax => 'Maximum';
+  String get statMax => '最大值';
 
   @override
-  String get milTitle => 'Check Engine Light (MIL)';
+  String get milTitle => '发动机故障灯 (MIL)';
 
   @override
-  String get milStatusOn => 'ON';
+  String get milStatusOn => '开启';
 
   @override
-  String get milStatusOff => 'OFF';
+  String get milStatusOff => '关闭';
 
   @override
-  String get confirmedErrors => 'Confirmed Errors';
+  String get confirmedErrors => '已确认的错误';
 
   @override
   String dtcCountFormat(int count) {
-    return '$count DTC(s)';
+    return '$count 个故障码';
   }
 
   @override
   String ignitionTypeFormat(String type) {
-    return 'Ignition Type: $type';
+    return '点火类型: $type';
   }
 
   @override
-  String get ignitionCompression => 'Compression (Diesel)';
+  String get ignitionCompression => '压燃 (柴油)';
 
   @override
-  String get ignitionSpark => 'Spark (Gasoline / Flex)';
+  String get ignitionSpark => '点燃 (汽油 / Flex)';
 
   @override
-  String get readinessMonitorsTitle => 'Readiness Checks';
+  String get readinessMonitorsTitle => '就绪状态检查 (Readiness Checks)';
 
   @override
   String supportedEgtSensors(int bank) {
-    return 'Supported EGT Sensors (Bank $bank)';
+    return '支持的 EGT 传感器 (气缸排 $bank)';
   }
 
   @override
   String sensorLabelIndex(int index) {
-    return 'Sensor $index';
+    return '传感器 $index';
   }
 
   @override
-  String get cumulativeTitle => 'Cumulative Value / Status';
+  String get cumulativeTitle => '累积值 / 状态';
 
   @override
-  String get cumulativeDesc =>
-      'Continuous count or text status sensors do not support oscillation statistics.';
+  String get cumulativeDesc => '连续计数或文本状态传感器不支持波动统计。';
 
   @override
-  String get setGraphFps => 'Graph refresh rate';
+  String get setGraphFps => '图表刷新率';
 
   @override
-  String get setGraphFpsDesc =>
-      'Adjust visual smoothness (FPS) for sensor charts';
+  String get setGraphFpsDesc => '调整传感器图表的视觉流畅度 (FPS)';
 }

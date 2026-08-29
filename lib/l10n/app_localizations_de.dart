@@ -470,67 +470,67 @@ class AppLocalizationsDe extends AppLocalizations {
   String get infoShareSubject => 'Fahrzeuginformationen - OBD2 Tools';
 
   @override
-  String get monMisfire => 'Misfire';
+  String get monMisfire => 'Fehlzündungen (Misfire)';
 
   @override
-  String get monFuelSystem => 'Fuel System';
+  String get monFuelSystem => 'Kraftstoffsystem';
 
   @override
-  String get monComponents => 'Comprehensive Components';
+  String get monComponents => 'Umfassende Komponenten';
 
   @override
-  String get monCatalyst => 'Catalyst';
+  String get monCatalyst => 'Katalysator';
 
   @override
-  String get monHeatedCatalyst => 'Heated Catalyst';
+  String get monHeatedCatalyst => 'Beheizter Katalysator';
 
   @override
-  String get monEvaporativeSystem => 'Evaporative System';
+  String get monEvaporativeSystem => 'Verdunstungssystem (EVAP)';
 
   @override
-  String get monSecondaryAir => 'Secondary Air System';
+  String get monSecondaryAir => 'Sekundärluftsystem';
 
   @override
-  String get monGpfFilter => 'Gasoline Particulate Filter';
+  String get monGpfFilter => 'Ottopartikelfilter (GPF)';
 
   @override
-  String get monOxygenSensor => 'Oxygen Sensor';
+  String get monOxygenSensor => 'Lambdasonde (Sauerstoffsensor)';
 
   @override
-  String get monOxygenHeater => 'Oxygen Sensor Heater';
+  String get monOxygenHeater => 'Lambdasondenheizung';
 
   @override
-  String get monEgrVvt => 'EGR and/or VVT System';
+  String get monEgrVvt => 'EGR- und/oder VVT-System';
 
   @override
-  String get monNmhcCatalyst => 'NMHC Catalyst';
+  String get monNmhcCatalyst => 'NMHC-Katalysator';
 
   @override
-  String get monNoxScr => 'NOx/SCR Monitor';
+  String get monNoxScr => 'NOx/SCR-Überwachung';
 
   @override
-  String get monBoostPressure => 'Boost Pressure System';
+  String get monBoostPressure => 'Ladedrucksystem (Turbo)';
 
   @override
-  String get monExhaustGasSensor => 'Exhaust Gas Sensor';
+  String get monExhaustGasSensor => 'Abgassensor';
 
   @override
-  String get monPmFilter => 'PM Filter Monitoring';
+  String get monPmFilter => 'Dieselpartikelfilter-Überwachung (DPF)';
 
   @override
-  String get statusComplete => 'Complete';
+  String get statusComplete => 'Abgeschlossen';
 
   @override
-  String get statusIncomplete => 'Incomplete';
+  String get statusIncomplete => 'Unvollständig';
 
   @override
-  String get chartNow => 'Now';
+  String get chartNow => 'Jetzt';
 
   @override
-  String get chartTitle10s => 'Real-Time Chart';
+  String get chartTitle10s => 'Echtzeit-Diagramm';
 
   @override
-  String get sessionStats => 'Session Statistics';
+  String get sessionStats => 'Sitzungsstatistiken';
 
   @override
   String get statMin => 'Minimum';
@@ -539,16 +539,16 @@ class AppLocalizationsDe extends AppLocalizations {
   String get statMax => 'Maximum';
 
   @override
-  String get milTitle => 'Check Engine Light (MIL)';
+  String get milTitle => 'Motorkontrollleuchte (MIL)';
 
   @override
-  String get milStatusOn => 'ON';
+  String get milStatusOn => 'EIN';
 
   @override
-  String get milStatusOff => 'OFF';
+  String get milStatusOff => 'AUS';
 
   @override
-  String get confirmedErrors => 'Confirmed Errors';
+  String get confirmedErrors => 'Bestätigte Fehler';
 
   @override
   String dtcCountFormat(int count) {
@@ -557,21 +557,21 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String ignitionTypeFormat(String type) {
-    return 'Ignition Type: $type';
+    return 'Zündungsart: $type';
   }
 
   @override
-  String get ignitionCompression => 'Compression (Diesel)';
+  String get ignitionCompression => 'Kompression (Diesel)';
 
   @override
-  String get ignitionSpark => 'Spark (Gasoline / Flex)';
+  String get ignitionSpark => 'Funke (Benzin / Flex)';
 
   @override
-  String get readinessMonitorsTitle => 'Readiness Checks';
+  String get readinessMonitorsTitle => 'Bereitschaftstests (Readiness Checks)';
 
   @override
   String supportedEgtSensors(int bank) {
-    return 'Supported EGT Sensors (Bank $bank)';
+    return 'Unterstützte EGT-Sensoren (Bank $bank)';
   }
 
   @override
@@ -580,16 +580,16 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get cumulativeTitle => 'Cumulative Value / Status';
+  String get cumulativeTitle => 'Kumulativer Wert / Status';
 
   @override
   String get cumulativeDesc =>
-      'Continuous count or text status sensors do not support oscillation statistics.';
+      'Kontinuierliche Zähler oder Textstatus-Sensoren unterstützen keine Oszillationsstatistiken.';
 
   @override
-  String get setGraphFps => 'Graph refresh rate';
+  String get setGraphFps => 'Aktualisierungsrate der Diagramme';
 
   @override
   String get setGraphFpsDesc =>
-      'Adjust visual smoothness (FPS) for sensor charts';
+      'Passen Sie die visuelle Flüssigkeit (FPS) für Sensordiagramme an';
 }

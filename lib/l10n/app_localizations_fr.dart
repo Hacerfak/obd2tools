@@ -470,67 +470,67 @@ class AppLocalizationsFr extends AppLocalizations {
   String get infoShareSubject => 'Informations du véhicule - OBD2 Tools';
 
   @override
-  String get monMisfire => 'Misfire';
+  String get monMisfire => 'Ratés d\'Allumage (Misfire)';
 
   @override
-  String get monFuelSystem => 'Fuel System';
+  String get monFuelSystem => 'Système de Carburant';
 
   @override
-  String get monComponents => 'Comprehensive Components';
+  String get monComponents => 'Composants Globaux';
 
   @override
-  String get monCatalyst => 'Catalyst';
+  String get monCatalyst => 'Catalyseur';
 
   @override
-  String get monHeatedCatalyst => 'Heated Catalyst';
+  String get monHeatedCatalyst => 'Catalyseur Chauffé';
 
   @override
-  String get monEvaporativeSystem => 'Evaporative System';
+  String get monEvaporativeSystem => 'Système Évaporatif (EVAP)';
 
   @override
-  String get monSecondaryAir => 'Secondary Air System';
+  String get monSecondaryAir => 'Système d\'Air Secondaire';
 
   @override
-  String get monGpfFilter => 'Gasoline Particulate Filter';
+  String get monGpfFilter => 'Filtre à Particules Essence (GPF)';
 
   @override
-  String get monOxygenSensor => 'Oxygen Sensor';
+  String get monOxygenSensor => 'Sonde Lambda (Capteur d\'Oxygène)';
 
   @override
-  String get monOxygenHeater => 'Oxygen Sensor Heater';
+  String get monOxygenHeater => 'Chauffage de la Sonde Lambda';
 
   @override
-  String get monEgrVvt => 'EGR and/or VVT System';
+  String get monEgrVvt => 'Système EGR et/ou VVT';
 
   @override
-  String get monNmhcCatalyst => 'NMHC Catalyst';
+  String get monNmhcCatalyst => 'Catalyseur NMHC';
 
   @override
-  String get monNoxScr => 'NOx/SCR Monitor';
+  String get monNoxScr => 'Moniteur NOx / SCR';
 
   @override
-  String get monBoostPressure => 'Boost Pressure System';
+  String get monBoostPressure => 'Pression de Suralimentation (Turbo)';
 
   @override
-  String get monExhaustGasSensor => 'Exhaust Gas Sensor';
+  String get monExhaustGasSensor => 'Capteur de Gaz d\'Échappement';
 
   @override
-  String get monPmFilter => 'PM Filter Monitoring';
+  String get monPmFilter => 'Filtre à Particules Diesel (DPF)';
 
   @override
-  String get statusComplete => 'Complete';
+  String get statusComplete => 'Terminé';
 
   @override
-  String get statusIncomplete => 'Incomplete';
+  String get statusIncomplete => 'Incomplet';
 
   @override
-  String get chartNow => 'Now';
+  String get chartNow => 'Maintenant';
 
   @override
-  String get chartTitle10s => 'Real-Time Chart';
+  String get chartTitle10s => 'Graphique en Temps Réel';
 
   @override
-  String get sessionStats => 'Session Statistics';
+  String get sessionStats => 'Statistiques de la Session';
 
   @override
   String get statMin => 'Minimum';
@@ -539,16 +539,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get statMax => 'Maximum';
 
   @override
-  String get milTitle => 'Check Engine Light (MIL)';
+  String get milTitle => 'Voyant Moteur (MIL)';
 
   @override
-  String get milStatusOn => 'ON';
+  String get milStatusOn => 'ALLUMÉ';
 
   @override
-  String get milStatusOff => 'OFF';
+  String get milStatusOff => 'ÉTEINT';
 
   @override
-  String get confirmedErrors => 'Confirmed Errors';
+  String get confirmedErrors => 'Erreurs Confirmées';
 
   @override
   String dtcCountFormat(int count) {
@@ -557,39 +557,40 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String ignitionTypeFormat(String type) {
-    return 'Ignition Type: $type';
+    return 'Type d\'Allumage : $type';
   }
 
   @override
   String get ignitionCompression => 'Compression (Diesel)';
 
   @override
-  String get ignitionSpark => 'Spark (Gasoline / Flex)';
+  String get ignitionSpark => 'Allumage Commandé (Essence / Flex)';
 
   @override
-  String get readinessMonitorsTitle => 'Readiness Checks';
+  String get readinessMonitorsTitle =>
+      'Tests de Disponibilité (Readiness Checks)';
 
   @override
   String supportedEgtSensors(int bank) {
-    return 'Supported EGT Sensors (Bank $bank)';
+    return 'Capteurs EGT Pris en Charge (Banc $bank)';
   }
 
   @override
   String sensorLabelIndex(int index) {
-    return 'Sensor $index';
+    return 'Capteur $index';
   }
 
   @override
-  String get cumulativeTitle => 'Cumulative Value / Status';
+  String get cumulativeTitle => 'Valeur Cumulée / Statut';
 
   @override
   String get cumulativeDesc =>
-      'Continuous count or text status sensors do not support oscillation statistics.';
+      'Les capteurs à comptage continu ou statut textuel ne prennent pas en charge les statistiques d\'oscillation.';
 
   @override
-  String get setGraphFps => 'Graph refresh rate';
+  String get setGraphFps => 'Taux de rafraîchissement des graphiques';
 
   @override
   String get setGraphFpsDesc =>
-      'Adjust visual smoothness (FPS) for sensor charts';
+      'Ajustez la fluidité visuelle (FPS) des courbes de capteurs';
 }

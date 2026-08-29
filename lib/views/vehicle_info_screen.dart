@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '/l10n/app_localizations.dart';
 import '../state/obd_providers.dart';
+import '../widgets/loading_large_ad.dart';
 
 class VehicleInfoScreen extends ConsumerStatefulWidget {
   const VehicleInfoScreen({super.key});
@@ -29,8 +30,18 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
 
   void _requestData() async {
     setState(() => _isLoading = true);
-    ref.read(obdManagerProvider).requestVehicleInfo();
-    await Future.delayed(const Duration(milliseconds: 2500));
+
+    final isMobile = !kIsWeb && (Platform.isAndroid || Platform.isIOS);
+    final minDuration = isMobile
+        ? const Duration(seconds: 10)
+        : Duration(seconds: 3);
+
+    // Solicita as informações e garante 10 segundos de exibição para o anúncio
+    await Future.wait([
+      Future(() => ref.read(obdManagerProvider).requestVehicleInfo()),
+      Future.delayed(minDuration),
+    ]);
+
     if (mounted) {
       setState(() => _isLoading = false);
     }
@@ -152,19 +163,23 @@ class _VehicleInfoScreenState extends ConsumerState<VehicleInfoScreen> {
             Expanded(
               child: _isLoading
                   ? Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          CircularProgressIndicator(color: primaryColor),
-                          const SizedBox(height: 16),
-                          Text(
-                            l10n.infoConsulting,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: onSurface.withValues(alpha: 0.54),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const LoadingLargeAd(),
+                            const SizedBox(height: 24),
+                            CircularProgressIndicator(color: primaryColor),
+                            const SizedBox(height: 16),
+                            Text(
+                              l10n.infoConsulting,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: onSurface.withValues(alpha: 0.54),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     )
                   : vehicleInfo.isEmpty

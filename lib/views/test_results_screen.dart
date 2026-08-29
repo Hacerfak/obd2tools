@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '/l10n/app_localizations.dart';
 import '../state/obd_providers.dart';
 import '../parser/parsers/mode_06_parser.dart';
 import '../state/technical_data_service.dart';
+import '../widgets/loading_large_ad.dart';
 import 'test_detail_screen.dart';
 
 enum TestFilter { all, passed, failed, waiting }
@@ -29,8 +32,18 @@ class _TestResultsScreenState extends ConsumerState<TestResultsScreen> {
 
   void _runScan() async {
     setState(() => _isLoading = true);
-    ref.read(obdManagerProvider).scanTestResults();
-    await Future.delayed(const Duration(milliseconds: 3000));
+
+    final isMobile = !kIsWeb && (Platform.isAndroid || Platform.isIOS);
+    final minDuration = isMobile
+        ? const Duration(seconds: 10)
+        : Duration(seconds: 4);
+
+    // Executa a varredura e garante o tempo mínimo de 10 segundos para exibição do banner
+    await Future.wait([
+      Future(() => ref.read(obdManagerProvider).scanTestResults()),
+      Future.delayed(minDuration),
+    ]);
+
     if (mounted) {
       setState(() => _isLoading = false);
     }
@@ -134,19 +147,23 @@ class _TestResultsScreenState extends ConsumerState<TestResultsScreen> {
             Expanded(
               child: _isLoading
                   ? Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          CircularProgressIndicator(color: appColors.primary),
-                          const SizedBox(height: 16),
-                          Text(
-                            l10n.testConsulting,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: onSurface.withValues(alpha: 0.54),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const LoadingLargeAd(),
+                            const SizedBox(height: 24),
+                            CircularProgressIndicator(color: appColors.primary),
+                            const SizedBox(height: 16),
+                            Text(
+                              l10n.testConsulting,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: onSurface.withValues(alpha: 0.54),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     )
                   : filteredList.isEmpty
@@ -182,7 +199,6 @@ class _TestResultsScreenState extends ConsumerState<TestResultsScreen> {
 
                         final unit = Mode06Parser.getUasUnit(test.cid, l10n);
 
-                        // CONSULTA DIRETA AO DICIONÁRIO TÉCNICO
                         final midHex = test.mid
                             .toRadixString(16)
                             .padLeft(2, '0')

@@ -23,9 +23,11 @@ class _AdMobBannerState extends State<AdMobBanner>
   static const int _maxRetryAttempts = 4; // Tenta no máximo 4 vezes seguidas
 
   Orientation? _currentOrientation;
-  bool? _isLargeScreen;
+  int? _currentWidth;
 
-  final String _adUnitId = 'ca-app-pub-4241608895500197/7309130446';
+  final String _adUnitId = Platform.isAndroid
+      ? 'ca-app-pub-4241608895500197/7309130446'
+      : 'ca-app-pub-4241608895500197/7562768546';
 
   @override
   bool get wantKeepAlive => true;
@@ -35,42 +37,101 @@ class _AdMobBannerState extends State<AdMobBanner>
     super.didChangeDependencies();
 
     final mediaQuery = MediaQuery.of(context);
-    final orientation = mediaQuery.orientation;
-    final isLarge = mediaQuery.size.shortestSide >= 600;
+    final newOrientation = mediaQuery.orientation;
+    final newWidth = mediaQuery.size.width.truncate();
 
-    if (_currentOrientation != orientation || _isLargeScreen != isLarge) {
-      _currentOrientation = orientation;
-      _isLargeScreen = isLarge;
-      _retryAttempts = 0;
+    // Detecta se mudou de posição ou largura
+    if (_currentOrientation != newOrientation || _currentWidth != newWidth) {
+      _currentOrientation = newOrientation;
+      _currentWidth = newWidth;
+
+      // Cancela retentativas pendentes e reseta o estado
       _retryTimer?.cancel();
-      _loadAd(orientation, isLarge);
+      _retryAttempts = 0;
+
+      // Descarta o anúncio antigo e recarrega para a nova largura
+      _reloadAdForNewWidth(newWidth);
     }
   }
 
-  void _loadAd(Orientation orientation, bool isLargeScreen) {
+  Future<void> _reloadAdForNewWidth(int width) async {
     if (kIsWeb || (!Platform.isAndroid && !Platform.isIOS)) return;
 
-    if (_isLoaded || _isLoadingAd) return;
+    // 1. Limpa o anúncio anterior da memória
+    _bannerAd?.dispose();
+    _bannerAd = null;
 
-    _isLoadingAd = true;
+    setState(() {
+      _isLoaded = false;
+      _isLoadingAd = true;
+    });
 
-    final AdSize adSize;
-    if (isLargeScreen) {
-      adSize = orientation == Orientation.portrait
-          ? AdSize.largeBanner
-          : AdSize.fullBanner;
-    } else {
-      adSize = AdSize.banner; // 320x50 padrão
+    // 2. Recalcula o tamanho para a nova largura horizontal
+    final AdSize? adSize = await AdSize.getLargeAnchoredAdaptiveBannerAdSize(
+      width,
+    );
+
+    if (adSize == null) {
+      setState(() => _isLoadingAd = false);
+      return;
     }
 
-    _bannerAd?.dispose();
+    // 3. Instancia e carrega o novo banner
     _bannerAd = BannerAd(
       adUnitId: _adUnitId,
       request: const AdRequest(),
       size: adSize,
       listener: BannerAdListener(
         onAdLoaded: (ad) {
-          debugPrint('AdMob: Anúncio carregado com sucesso!');
+          if (mounted) {
+            setState(() {
+              _isLoaded = true;
+              _isLoadingAd = false;
+            });
+          }
+        },
+        onAdFailedToLoad: (ad, err) {
+          ad.dispose();
+          if (mounted) {
+            setState(() {
+              _isLoaded = false;
+              _isLoadingAd = false;
+            });
+            _scheduleRetry(width);
+          }
+        },
+      ),
+    );
+
+    await _bannerAd?.load();
+  }
+
+  Future<void> _loadAd(int width) async {
+    if (kIsWeb || (!Platform.isAndroid && !Platform.isIOS)) return;
+
+    if (_isLoaded || _isLoadingAd) return;
+
+    _isLoadingAd = true;
+
+    // 1. SOLICITA O TAMANHO ADAPTATIVO BASEADO NA LARGURA TOTAL DA TELA
+    final AdSize? adSize = await AdSize.getLargeAnchoredAdaptiveBannerAdSize(
+      width,
+    );
+
+    if (adSize == null) {
+      _isLoadingAd = false;
+      return;
+    }
+
+    _bannerAd?.dispose();
+    _bannerAd = BannerAd(
+      adUnitId: _adUnitId,
+      request: const AdRequest(),
+      size:
+          adSize, // Aplica o tamanho adaptativo calculando a altura proporcional
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          debugPrint('AdMob: Anúncio adaptativo carregado com sucesso!');
           _retryAttempts = 0; // Zera as tentativas ao obter sucesso
           _retryTimer?.cancel();
           if (mounted) {
@@ -88,22 +149,23 @@ class _AdMobBannerState extends State<AdMobBanner>
               _isLoaded = false;
               _isLoadingAd = false;
             });
-            _scheduleRetry(orientation, isLargeScreen);
+            _scheduleRetry(width);
           }
         },
       ),
-    )..load();
+    );
+
+    await _bannerAd?.load();
   }
 
   // AGENDA UMA NOVA TENTATIVA APÓS ALGUNS SEGUNDOS
-  void _scheduleRetry(Orientation orientation, bool isLargeScreen) {
+  void _scheduleRetry(int width) {
     if (_retryAttempts >= _maxRetryAttempts) {
       debugPrint('AdMob: Limite de retentativas atingido.');
       return;
     }
 
     _retryTimer?.cancel();
-    // Aumenta o tempo a cada tentativa (5s, 10s, 15s, 20s) para não ser bloqueado por spam
     final int delaySeconds = 5 * (_retryAttempts + 1);
     _retryAttempts++;
 
@@ -113,7 +175,7 @@ class _AdMobBannerState extends State<AdMobBanner>
 
     _retryTimer = Timer(Duration(seconds: delaySeconds), () {
       if (mounted && !_isLoaded && !_isLoadingAd) {
-        _loadAd(orientation, isLargeScreen);
+        _loadAd(width);
       }
     });
   }
@@ -135,9 +197,9 @@ class _AdMobBannerState extends State<AdMobBanner>
 
     if (_isLoaded && _bannerAd != null) {
       return Container(
-        alignment: Alignment.center,
-        width: _bannerAd!.size.width.toDouble(),
-        height: _bannerAd!.size.height.toDouble(),
+        color: Theme.of(context).scaffoldBackgroundColor,
+        width: double.infinity, // Força o Container a esticar 100% na largura
+        height: _bannerAd!.size.height.toDouble(), // Altura dinâmica do ad
         child: AdWidget(ad: _bannerAd!),
       );
     }

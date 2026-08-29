@@ -469,126 +469,125 @@ class AppLocalizationsAr extends AppLocalizations {
   String get infoShareSubject => 'معلومات السيارة - OBD2 Tools';
 
   @override
-  String get monMisfire => 'Misfire';
+  String get monMisfire => 'مراقبة إخفاق الاشتعال (Misfire)';
 
   @override
-  String get monFuelSystem => 'Fuel System';
+  String get monFuelSystem => 'نظام الوقود';
 
   @override
-  String get monComponents => 'Comprehensive Components';
+  String get monComponents => 'المكونات الشاملة';
 
   @override
-  String get monCatalyst => 'Catalyst';
+  String get monCatalyst => 'المحول الحفاز (الكتايزر)';
 
   @override
-  String get monHeatedCatalyst => 'Heated Catalyst';
+  String get monHeatedCatalyst => 'المحول الحفاز المسخن';
 
   @override
-  String get monEvaporativeSystem => 'Evaporative System';
+  String get monEvaporativeSystem => 'نظام تبخير الوقود (EVAP)';
 
   @override
-  String get monSecondaryAir => 'Secondary Air System';
+  String get monSecondaryAir => 'نظام الهواء الثانوي';
 
   @override
-  String get monGpfFilter => 'Gasoline Particulate Filter';
+  String get monGpfFilter => 'مرشح الجسيمات للبنزين (GPF)';
 
   @override
-  String get monOxygenSensor => 'Oxygen Sensor';
+  String get monOxygenSensor => 'حساس الأكسجين (حساس الشكمان)';
 
   @override
-  String get monOxygenHeater => 'Oxygen Sensor Heater';
+  String get monOxygenHeater => 'سخان حساس الأكسجين';
 
   @override
-  String get monEgrVvt => 'EGR and/or VVT System';
+  String get monEgrVvt => 'نظام EGR و/أو VVT';
 
   @override
-  String get monNmhcCatalyst => 'NMHC Catalyst';
+  String get monNmhcCatalyst => 'حفاز NMHC';
 
   @override
-  String get monNoxScr => 'NOx/SCR Monitor';
+  String get monNoxScr => 'مراقب NOx / SCR';
 
   @override
-  String get monBoostPressure => 'Boost Pressure System';
+  String get monBoostPressure => 'نظام ضغط الشاحن (التيربو)';
 
   @override
-  String get monExhaustGasSensor => 'Exhaust Gas Sensor';
+  String get monExhaustGasSensor => 'حساس غازات العادم';
 
   @override
-  String get monPmFilter => 'PM Filter Monitoring';
+  String get monPmFilter => 'مراقبة مرشح الجسيمات (DPF)';
 
   @override
-  String get statusComplete => 'Complete';
+  String get statusComplete => 'مكتمل';
 
   @override
-  String get statusIncomplete => 'Incomplete';
+  String get statusIncomplete => 'غير مكتمل';
 
   @override
-  String get chartNow => 'Now';
+  String get chartNow => 'الآن';
 
   @override
-  String get chartTitle10s => 'Real-Time Chart';
+  String get chartTitle10s => 'رسم بياني في الوقت الفعلي';
 
   @override
-  String get sessionStats => 'Session Statistics';
+  String get sessionStats => 'إحصائيات الجلسة';
 
   @override
-  String get statMin => 'Minimum';
+  String get statMin => 'الحد الأدنى';
 
   @override
-  String get statMax => 'Maximum';
+  String get statMax => 'الحد الأقصى';
 
   @override
-  String get milTitle => 'Check Engine Light (MIL)';
+  String get milTitle => 'لمبة المحرك (MIL)';
 
   @override
-  String get milStatusOn => 'ON';
+  String get milStatusOn => 'مضاءة';
 
   @override
-  String get milStatusOff => 'OFF';
+  String get milStatusOff => 'مطفأة';
 
   @override
-  String get confirmedErrors => 'Confirmed Errors';
+  String get confirmedErrors => 'الأخطاء المؤكدة';
 
   @override
   String dtcCountFormat(int count) {
-    return '$count DTC(s)';
+    return '$count كود عطل';
   }
 
   @override
   String ignitionTypeFormat(String type) {
-    return 'Ignition Type: $type';
+    return 'نوع الاشتعال: $type';
   }
 
   @override
-  String get ignitionCompression => 'Compression (Diesel)';
+  String get ignitionCompression => 'ضغط (ديزل)';
 
   @override
-  String get ignitionSpark => 'Spark (Gasoline / Flex)';
+  String get ignitionSpark => 'شرارة (بنزين / مرن)';
 
   @override
-  String get readinessMonitorsTitle => 'Readiness Checks';
+  String get readinessMonitorsTitle => 'فحوصات الجاهزية (Readiness Checks)';
 
   @override
   String supportedEgtSensors(int bank) {
-    return 'Supported EGT Sensors (Bank $bank)';
+    return 'حساسات EGT المدعومة (الصف $bank)';
   }
 
   @override
   String sensorLabelIndex(int index) {
-    return 'Sensor $index';
+    return 'الحساس $index';
   }
 
   @override
-  String get cumulativeTitle => 'Cumulative Value / Status';
+  String get cumulativeTitle => 'القيمة التراكمية / الحالة';
 
   @override
   String get cumulativeDesc =>
-      'Continuous count or text status sensors do not support oscillation statistics.';
+      'حساسات العد المستمر أو الحالة النصية لا تدعم إحصائيات التذبذب.';
 
   @override
-  String get setGraphFps => 'Graph refresh rate';
+  String get setGraphFps => 'معدل تحديث الرسم البياني';
 
   @override
-  String get setGraphFpsDesc =>
-      'Adjust visual smoothness (FPS) for sensor charts';
+  String get setGraphFpsDesc => 'تعديل السلاسة البصرية (FPS) للمخططات البيانية';
 }

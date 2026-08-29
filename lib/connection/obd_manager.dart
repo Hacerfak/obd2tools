@@ -231,6 +231,7 @@ class ObdManager {
 
   // --- CONFIGURAÇÃO INICIAL (HANDSHAKE) ---
   void initializeScanner() {
+    _addLog("Inicializando o ELM327");
     ref
         .read(connectionStateProvider.notifier)
         .updateState(AppConnectionState.connectingBluetooth);
@@ -263,6 +264,15 @@ class ObdManager {
   }
 
   void reset() {
+    _addLog("Executando reset completo do ObdManager...");
+
+    // 1. Cancela timers ativos
+    _cooldownTimer?.cancel();
+    _cooldownTimer = null;
+    _ecuPingTimer?.cancel();
+    _ecuPingTimer = null;
+
+    // 2. Limpa filas de comandos e buffers de resposta
     _commandQueue.clear();
     _buffer = "";
     _lastCommandSent = "";
@@ -270,10 +280,17 @@ class ObdManager {
     _isPollingEnabled = false;
     _isClearingDTCs = false;
     _consecutiveErrors = 0;
+
+    // 3. Reseta estados da busca de ECUs e Multiplexação
     _discoveredEcus.clear();
     _currentActiveEcu = EcuModule.defaultEcu();
-    _cooldownTimer?.cancel();
-    _ecuPingTimer?.cancel();
+    _activeSensorsByEcu.clear();
+    _ecuCycle.clear();
+    _ecuCycleIndex = 0;
+    _pollingIndex = 0;
+
+    // 4. Reseta todos os Providers de estado do Riverpod (purgando o perfil antigo)
+    ref.invalidate(protocolProfileProvider);
     ref.read(realTimeStateProvider.notifier).clearData();
     ref.read(supportedPidsProvider.notifier).clear();
     ref.read(vehicleInfoStateProvider.notifier).updateInfo({});

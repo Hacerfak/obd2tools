@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '/l10n/app_localizations.dart';
 import '../state/obd_providers.dart';
 import '../models/dtc_fault.dart';
+import '../widgets/loading_large_ad.dart';
 import 'fault_detail_screen.dart';
 
 class FaultsScreen extends ConsumerStatefulWidget {
@@ -20,11 +23,25 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(obdManagerProvider).scanAllFaults();
-      if (mounted) {
-        setState(() => _isInitializing = false);
-      }
+      _runScan();
     });
+  }
+
+  void _runScan() async {
+    setState(() => _isInitializing = true);
+
+    final isMobile = !kIsWeb && (Platform.isAndroid || Platform.isIOS);
+    final minDuration = isMobile ? const Duration(seconds: 10) : Duration.zero;
+
+    // Executa a varredura de DTCs e garante o tempo mínimo de 10 segundos para exibição do banner
+    await Future.wait([
+      Future(() => ref.read(obdManagerProvider).scanAllFaults()),
+      Future.delayed(minDuration),
+    ]);
+
+    if (mounted) {
+      setState(() => _isInitializing = false);
+    }
   }
 
   void _showClearDialog(BuildContext context, WidgetRef ref, Color onSurface) {
@@ -96,7 +113,7 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
             const SizedBox(width: 12),
           ],
           IconButton.filledTonal(
-            onPressed: () => ref.read(obdManagerProvider).scanAllFaults(),
+            onPressed: _runScan,
             icon: const Icon(Icons.refresh),
             color: primaryColor,
             tooltip: l10n.btnRefresh,
@@ -172,19 +189,23 @@ class _FaultsScreenState extends ConsumerState<FaultsScreen> {
             Expanded(
               child: isScreenLoading
                   ? Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          CircularProgressIndicator(color: primaryColor),
-                          const SizedBox(height: 16),
-                          Text(
-                            l10n.faultReading,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: onSurface.withValues(alpha: 0.7),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const LoadingLargeAd(),
+                            const SizedBox(height: 24),
+                            CircularProgressIndicator(color: primaryColor),
+                            const SizedBox(height: 16),
+                            Text(
+                              l10n.faultReading,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: onSurface.withValues(alpha: 0.7),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     )
                   : filteredFaults.isEmpty

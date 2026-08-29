@@ -7,6 +7,7 @@ import '/l10n/app_localizations.dart';
 import '../state/obd_providers.dart';
 import 'home_screen.dart';
 import 'package:flutter/foundation.dart';
+import '../widgets/loading_large_ad.dart';
 
 class ConnectionScreen extends ConsumerStatefulWidget {
   final bool attemptAutoConnect;
@@ -22,6 +23,10 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
   bool _isLoadingPaired = true;
   bool _isDiscovering = false;
   StreamSubscription? _discoverySubscription;
+
+  // CONTROLE DO TEMPO MÍNIMO DE EXIBIÇÃO DO ANÚNCIO (10 SEGUNDOS)
+  DateTime? _discoveryStartTime;
+  bool _showReady = false;
 
   @override
   void initState() {
@@ -47,6 +52,13 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
     } else {
       _loadPairedDevices();
     }
+  }
+
+  Duration get adGuardDuration {
+    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+      return const Duration(seconds: 10);
+    }
+    return Duration.zero;
   }
 
   Future<void> _loadPairedDevices() async {
@@ -96,7 +108,11 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
 
   void _startConnection(String macAddress, {bool isAutoConnect = false}) async {
     _discoverySubscription?.cancel();
-    setState(() => _isDiscovering = false);
+    setState(() {
+      _isDiscovering = false;
+      _showReady = false;
+      _discoveryStartTime = null;
+    });
 
     ref
         .read(connectionStateProvider.notifier)
@@ -121,7 +137,6 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
       await prefs.setString('last_mac_address', macAddress.trim());
 
       manager.initializeScanner();
-      // O discoverSupportedSensors agora é chamado internamente após o Handshake do Manager
     } else {
       ref
           .read(connectionStateProvider.notifier)
@@ -146,7 +161,7 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
 
   Widget _buildDeviceList(List<Map<String, String>> devices, IconData icon) {
     final onSurface = Theme.of(context).colorScheme.onSurface;
-    final l10n = AppLocalizations.of(context)!; // Acesso à tradução
+    final l10n = AppLocalizations.of(context)!;
 
     if (devices.isEmpty) {
       return Padding(
@@ -192,18 +207,40 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
     final connState = ref.watch(connectionStateProvider);
     final onSurface = Theme.of(context).colorScheme.onSurface;
     final l10n = AppLocalizations.of(context)!;
-    final appColors = ref
-        .watch(appColorsProvider)
-        .current(context); // BUSCA AS CORES
+    final appColors = ref.watch(appColorsProvider).current(context);
 
     ref.listen(connectionStateProvider, (previous, next) {
+      if (next == AppConnectionState.discoveringSensors) {
+        _discoveryStartTime = DateTime.now();
+        if (mounted) {
+          setState(() => _showReady = false);
+        }
+      }
+
       if (next == AppConnectionState.ready) {
-        Future.delayed(const Duration(milliseconds: 1500), () {
-          if (context.mounted) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const HomeScreen()),
-            );
+        // Verifica se é mobile para exigir os 10 segundos do anúncio
+        final isMobile = !kIsWeb && (Platform.isAndroid || Platform.isIOS);
+        final targetDuration = isMobile
+            ? const Duration(seconds: 10)
+            : Duration.zero;
+
+        final elapsed = _discoveryStartTime != null
+            ? DateTime.now().difference(_discoveryStartTime!)
+            : targetDuration;
+        final remaining = targetDuration - elapsed;
+        final waitDuration = remaining.isNegative ? Duration.zero : remaining;
+
+        Future.delayed(waitDuration, () {
+          if (mounted) {
+            setState(() => _showReady = true);
+            Future.delayed(const Duration(milliseconds: 1500), () {
+              if (context.mounted) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const HomeScreen()),
+                );
+              }
+            });
           }
         });
       }
@@ -364,13 +401,15 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                     style: TextStyle(color: appColors.critical),
                   ),
                 ),
-              ] else if (connState ==
-                  AppConnectionState.discoveringSensors) ...[
+              ] else if (connState == AppConnectionState.discoveringSensors ||
+                  (connState == AppConnectionState.ready && !_showReady)) ...[
                 const Spacer(),
+                const LoadingLargeAd(),
+                const SizedBox(height: 24),
                 Center(
                   child: CircularProgressIndicator(color: appColors.primary),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
                 Text(
                   l10n.connMapping,
                   textAlign: TextAlign.center,
@@ -380,7 +419,8 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                   ),
                 ),
                 const Spacer(),
-              ] else if (connState == AppConnectionState.ready) ...[
+              ] else if (connState == AppConnectionState.ready &&
+                  _showReady) ...[
                 const Spacer(),
                 Center(
                   child: Icon(
@@ -399,7 +439,6 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const Spacer(),
               ],
             ],
           ),

@@ -470,126 +470,126 @@ class AppLocalizationsRu extends AppLocalizations {
   String get infoShareSubject => 'Информация о автомобиле - OBD2 Tools';
 
   @override
-  String get monMisfire => 'Misfire';
+  String get monMisfire => 'Пропуски зажигания (Misfire)';
 
   @override
-  String get monFuelSystem => 'Fuel System';
+  String get monFuelSystem => 'Топливная система';
 
   @override
-  String get monComponents => 'Comprehensive Components';
+  String get monComponents => 'Комплексные компоненты';
 
   @override
-  String get monCatalyst => 'Catalyst';
+  String get monCatalyst => 'Катализатор';
 
   @override
-  String get monHeatedCatalyst => 'Heated Catalyst';
+  String get monHeatedCatalyst => 'Подогреваемый катализатор';
 
   @override
-  String get monEvaporativeSystem => 'Evaporative System';
+  String get monEvaporativeSystem => 'Система улавливания паров (EVAP)';
 
   @override
-  String get monSecondaryAir => 'Secondary Air System';
+  String get monSecondaryAir => 'Система вторичной подачи воздуха';
 
   @override
-  String get monGpfFilter => 'Gasoline Particulate Filter';
+  String get monGpfFilter => 'Сажевый фильтр бензинового двигателя (GPF)';
 
   @override
-  String get monOxygenSensor => 'Oxygen Sensor';
+  String get monOxygenSensor => 'Датчик кислорода (Лямбда-зонд)';
 
   @override
-  String get monOxygenHeater => 'Oxygen Sensor Heater';
+  String get monOxygenHeater => 'Подогреватель датчика кислорода';
 
   @override
-  String get monEgrVvt => 'EGR and/or VVT System';
+  String get monEgrVvt => 'Система EGR / VVT';
 
   @override
-  String get monNmhcCatalyst => 'NMHC Catalyst';
+  String get monNmhcCatalyst => 'Катализатор NMHC';
 
   @override
-  String get monNoxScr => 'NOx/SCR Monitor';
+  String get monNoxScr => 'Монитор NOx / SCR';
 
   @override
-  String get monBoostPressure => 'Boost Pressure System';
+  String get monBoostPressure => 'Система турбонаддува';
 
   @override
-  String get monExhaustGasSensor => 'Exhaust Gas Sensor';
+  String get monExhaustGasSensor => 'Датчик выхлопных газов';
 
   @override
-  String get monPmFilter => 'PM Filter Monitoring';
+  String get monPmFilter => 'Мониторинг сажевого фильтра (DPF)';
 
   @override
-  String get statusComplete => 'Complete';
+  String get statusComplete => 'Завершено';
 
   @override
-  String get statusIncomplete => 'Incomplete';
+  String get statusIncomplete => 'Не завершено';
 
   @override
-  String get chartNow => 'Now';
+  String get chartNow => 'Сейчас';
 
   @override
-  String get chartTitle10s => 'Real-Time Chart';
+  String get chartTitle10s => 'График в реальном времени';
 
   @override
-  String get sessionStats => 'Session Statistics';
+  String get sessionStats => 'Статистика сеанса';
 
   @override
-  String get statMin => 'Minimum';
+  String get statMin => 'Минимум';
 
   @override
-  String get statMax => 'Maximum';
+  String get statMax => 'Максимум';
 
   @override
-  String get milTitle => 'Check Engine Light (MIL)';
+  String get milTitle => 'Индикатор Check Engine (MIL)';
 
   @override
-  String get milStatusOn => 'ON';
+  String get milStatusOn => 'ВКЛ';
 
   @override
-  String get milStatusOff => 'OFF';
+  String get milStatusOff => 'ВЫКЛ';
 
   @override
-  String get confirmedErrors => 'Confirmed Errors';
+  String get confirmedErrors => 'Подтвержденные ошибки';
 
   @override
   String dtcCountFormat(int count) {
-    return '$count DTC(s)';
+    return '$count DTC';
   }
 
   @override
   String ignitionTypeFormat(String type) {
-    return 'Ignition Type: $type';
+    return 'Тип зажигания: $type';
   }
 
   @override
-  String get ignitionCompression => 'Compression (Diesel)';
+  String get ignitionCompression => 'Сжатие (Дизель)';
 
   @override
-  String get ignitionSpark => 'Spark (Gasoline / Flex)';
+  String get ignitionSpark => 'Искровое (Бензин / Flex)';
 
   @override
-  String get readinessMonitorsTitle => 'Readiness Checks';
+  String get readinessMonitorsTitle => 'Мониторы готовности (Readiness Checks)';
 
   @override
   String supportedEgtSensors(int bank) {
-    return 'Supported EGT Sensors (Bank $bank)';
+    return 'Поддерживаемые датчики EGT (Банк $bank)';
   }
 
   @override
   String sensorLabelIndex(int index) {
-    return 'Sensor $index';
+    return 'Датчик $index';
   }
 
   @override
-  String get cumulativeTitle => 'Cumulative Value / Status';
+  String get cumulativeTitle => 'Накопительное значение / Статус';
 
   @override
   String get cumulativeDesc =>
-      'Continuous count or text status sensors do not support oscillation statistics.';
+      'Датчики непрерывного счета или текстового статуса не поддерживают статистику колебаний.';
 
   @override
-  String get setGraphFps => 'Graph refresh rate';
+  String get setGraphFps => 'Частота обновления графиков';
 
   @override
   String get setGraphFpsDesc =>
-      'Adjust visual smoothness (FPS) for sensor charts';
+      'Настройка плавности (FPS) для графиков датчиков';
 }

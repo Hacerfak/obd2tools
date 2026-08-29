@@ -457,126 +457,124 @@ class AppLocalizationsJa extends AppLocalizations {
   String get infoShareSubject => '車両情報 - OBD2 Tools';
 
   @override
-  String get monMisfire => 'Misfire';
+  String get monMisfire => '失火 (Misfire)';
 
   @override
-  String get monFuelSystem => 'Fuel System';
+  String get monFuelSystem => '燃料システム';
 
   @override
-  String get monComponents => 'Comprehensive Components';
+  String get monComponents => '総合コンポーネント';
 
   @override
-  String get monCatalyst => 'Catalyst';
+  String get monCatalyst => '触媒コンバーター';
 
   @override
-  String get monHeatedCatalyst => 'Heated Catalyst';
+  String get monHeatedCatalyst => '加熱型触媒';
 
   @override
-  String get monEvaporativeSystem => 'Evaporative System';
+  String get monEvaporativeSystem => '蒸発ガス排出システム (EVAP)';
 
   @override
-  String get monSecondaryAir => 'Secondary Air System';
+  String get monSecondaryAir => '二次空気導入システム';
 
   @override
-  String get monGpfFilter => 'Gasoline Particulate Filter';
+  String get monGpfFilter => 'ガソリン粒子フィルター (GPF)';
 
   @override
-  String get monOxygenSensor => 'Oxygen Sensor';
+  String get monOxygenSensor => 'O2センサー (酸素センサー)';
 
   @override
-  String get monOxygenHeater => 'Oxygen Sensor Heater';
+  String get monOxygenHeater => 'O2センサーヒーター';
 
   @override
-  String get monEgrVvt => 'EGR and/or VVT System';
+  String get monEgrVvt => 'EGRおよび/またはVVTシステム';
 
   @override
-  String get monNmhcCatalyst => 'NMHC Catalyst';
+  String get monNmhcCatalyst => 'NMHC触媒';
 
   @override
-  String get monNoxScr => 'NOx/SCR Monitor';
+  String get monNoxScr => 'NOx/SCRモニター';
 
   @override
-  String get monBoostPressure => 'Boost Pressure System';
+  String get monBoostPressure => '過給圧システム (ターボ)';
 
   @override
-  String get monExhaustGasSensor => 'Exhaust Gas Sensor';
+  String get monExhaustGasSensor => '排気ガスセンサー';
 
   @override
-  String get monPmFilter => 'PM Filter Monitoring';
+  String get monPmFilter => 'PMフィルターモニタリング (DPF)';
 
   @override
-  String get statusComplete => 'Complete';
+  String get statusComplete => '完了';
 
   @override
-  String get statusIncomplete => 'Incomplete';
+  String get statusIncomplete => '未完了';
 
   @override
-  String get chartNow => 'Now';
+  String get chartNow => '現在';
 
   @override
-  String get chartTitle10s => 'Real-Time Chart';
+  String get chartTitle10s => 'リアルタイムグラフ';
 
   @override
-  String get sessionStats => 'Session Statistics';
+  String get sessionStats => 'セッション統計';
 
   @override
-  String get statMin => 'Minimum';
+  String get statMin => '最小';
 
   @override
-  String get statMax => 'Maximum';
+  String get statMax => '最大';
 
   @override
-  String get milTitle => 'Check Engine Light (MIL)';
+  String get milTitle => 'エンジンチェックランプ (MIL)';
 
   @override
-  String get milStatusOn => 'ON';
+  String get milStatusOn => '点灯';
 
   @override
-  String get milStatusOff => 'OFF';
+  String get milStatusOff => '消灯';
 
   @override
-  String get confirmedErrors => 'Confirmed Errors';
+  String get confirmedErrors => '確認済みエラー';
 
   @override
   String dtcCountFormat(int count) {
-    return '$count DTC(s)';
+    return '$count 件のDTC';
   }
 
   @override
   String ignitionTypeFormat(String type) {
-    return 'Ignition Type: $type';
+    return '点火タイプ: $type';
   }
 
   @override
-  String get ignitionCompression => 'Compression (Diesel)';
+  String get ignitionCompression => '圧縮着火 (ディーゼル)';
 
   @override
-  String get ignitionSpark => 'Spark (Gasoline / Flex)';
+  String get ignitionSpark => '火花点火 (ガソリン / フレックス)';
 
   @override
-  String get readinessMonitorsTitle => 'Readiness Checks';
+  String get readinessMonitorsTitle => 'レディネスチェック (Readiness Checks)';
 
   @override
   String supportedEgtSensors(int bank) {
-    return 'Supported EGT Sensors (Bank $bank)';
+    return 'サポート対象EGTセンサー (バンク $bank)';
   }
 
   @override
   String sensorLabelIndex(int index) {
-    return 'Sensor $index';
+    return 'センサー $index';
   }
 
   @override
-  String get cumulativeTitle => 'Cumulative Value / Status';
+  String get cumulativeTitle => '累積値 / ステータス';
 
   @override
-  String get cumulativeDesc =>
-      'Continuous count or text status sensors do not support oscillation statistics.';
+  String get cumulativeDesc => '連続カウントまたはテキストステータスのセンサーは変動統計をサポートしていません。';
 
   @override
-  String get setGraphFps => 'Graph refresh rate';
+  String get setGraphFps => 'グラフ更新フレームレート';
 
   @override
-  String get setGraphFpsDesc =>
-      'Adjust visual smoothness (FPS) for sensor charts';
+  String get setGraphFpsDesc => 'センサーグラフの視覚的滑らかさ (FPS) を調整';
 }
