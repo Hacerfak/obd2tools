@@ -25,13 +25,11 @@ class LiveSensorChart extends ConsumerStatefulWidget {
 class _LiveSensorChartState extends ConsumerState<LiveSensorChart> {
   Timer? _sampleTimer;
   final List<double> _samples = [];
-  double _smoothedValue = 0.0;
   int _currentFps = 0;
 
   @override
   void initState() {
     super.initState();
-    _smoothedValue = widget.currentValue;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _startTimer(ref.read(graphFpsProvider));
     });
@@ -45,16 +43,19 @@ class _LiveSensorChartState extends ConsumerState<LiveSensorChart> {
     final intervalMs = (1000 / fps).round();
     final maxSamples = (widget.durationSeconds * fps).round();
 
-    if (_samples.isEmpty) {
-      _samples.addAll(List.filled(maxSamples, widget.currentValue));
-    }
+    // Removemos a pre-carga viciada aqui, o gráfico vai nascer da direita para a esquerda.
 
     _sampleTimer = Timer.periodic(Duration(milliseconds: intervalMs), (_) {
       if (!mounted) return;
       setState(() {
-        _smoothedValue += (widget.currentValue - _smoothedValue) * 0.25;
+        // Aplicamos a suavização comparando a ponta atual do buffer, se houver
+        double newValue = widget.currentValue;
+        if (_samples.isNotEmpty) {
+          newValue =
+              _samples.last + (widget.currentValue - _samples.last) * 0.25;
+        }
 
-        _samples.add(_smoothedValue);
+        _samples.add(newValue);
         if (_samples.length > maxSamples) {
           _samples.removeAt(0);
         }
@@ -208,12 +209,15 @@ class _SmoothChartPainter extends CustomPainter {
     _drawTextCentered(canvas, "-5s", Offset(x5s, yBottom + 4));
     _drawTextRightAligned(canvas, nowLabel, Offset(x0s - 4, yBottom + 4));
 
-    // 4. CONVERTE OS PONTOS EM OFFSETS
+    // 4. CONVERTE OS PONTOS EM OFFSETS (Renderizando da direita para a esquerda)
     final double stepX = chartWidth / (samples.length - 1);
     List<Offset> points = [];
 
+    // Calcula o offset inicial para alinhar o gráfico pela direita se ele ainda não preencheu a tela toda
+    final double offsetX = chartWidth - ((samples.length - 1) * stepX);
+
     for (int i = 0; i < samples.length; i++) {
-      double x = marginLeft + (i * stepX);
+      double x = offsetX + (i * stepX);
       double normalizedY = (samples[i] - minY) / rangeY;
       double y = yBottom - (normalizedY * chartHeight);
       points.add(Offset(x, y));

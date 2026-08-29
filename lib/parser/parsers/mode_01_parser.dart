@@ -59,4 +59,36 @@ class Mode01Parser {
     }
     return results;
   }
+
+  static Map<int, ObdReadResult> parseAsIntKeys(String cleanHex) {
+    Map<int, ObdReadResult> results = {};
+    int cursor = cleanHex.indexOf("41");
+    if (cursor == -1) return results;
+    cursor += 2;
+    while (cursor + 2 <= cleanHex.length) {
+      String pidHex = cleanHex.substring(cursor, cursor + 2);
+      int pidId = int.parse(pidHex, radix: 16);
+      cursor += 2;
+      if (pidRegistry.containsKey(pidId)) {
+        final pid = pidRegistry[pidId]!;
+        int dataChars = pid.expectedBytes * 2;
+        if (cursor + dataChars <= cleanHex.length) {
+          String dataHex = cleanHex.substring(cursor, cursor + dataChars);
+          List<int> bytes = [];
+          for (int j = 0; j < dataChars; j += 2) {
+            bytes.add(int.parse(dataHex.substring(j, j + 2), radix: 16));
+          }
+          results[pidId] = ObdReadResult(
+            pid.calculate(bytes),
+            pid.unit,
+            rawBytes: bytes,
+          );
+          cursor += dataChars;
+        } else
+          break;
+      } else
+        break;
+    }
+    return results;
+  }
 }

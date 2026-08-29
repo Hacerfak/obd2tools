@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '/l10n/app_localizations.dart'; // IMPORT DA TRADUÇÃO
-import '../parser/registries/mode_01_registry.dart';
+
+import '/l10n/app_localizations.dart';
 import '../state/obd_providers.dart';
 import '../widgets/sensor_tile.dart';
 import '../views/sensor_detail_screen.dart';
@@ -29,16 +29,12 @@ class _SensorsDashboardScreenState
   }
 
   void _startDashboardPolling() {
-    final supportedPids = ref.read(supportedPidsProvider);
-    final pidsReais = pidRegistry.values
-        .where((pid) => supportedPids.contains(pid.id))
-        .map((pid) => pid.id)
-        .toList();
+    final availableSensors = ref.read(supportedPidsProvider);
 
     ref
         .read(obdManagerProvider)
         .setPollingPids(
-          pidsReais,
+          availableSensors,
           cooldown: const Duration(seconds: 3),
           fastInitialPass: true,
         );
@@ -51,13 +47,9 @@ class _SensorsDashboardScreenState
 
   @override
   Widget build(BuildContext context) {
-    final supportedPids = ref.watch(supportedPidsProvider);
-    final availablePids = pidRegistry.values
-        .where((pid) => supportedPids.contains(pid.id))
-        .toList();
-
+    final availableSensors = ref.watch(supportedPidsProvider);
     final onSurface = Theme.of(context).colorScheme.onSurface;
-    final l10n = AppLocalizations.of(context)!; // Instância de traduções
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       body: Column(
@@ -66,7 +58,7 @@ class _SensorsDashboardScreenState
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              "${l10n.sensTitle} (${availablePids.length})", // Tradução + Contador Dinâmico
+              "${l10n.sensTitle} (${availableSensors.length})",
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -75,10 +67,10 @@ class _SensorsDashboardScreenState
             ),
           ),
           Expanded(
-            child: availablePids.isEmpty
+            child: availableSensors.isEmpty
                 ? Center(
                     child: Text(
-                      l10n.sensNone, // String traduzida
+                      l10n.sensNone,
                       style: TextStyle(
                         color: onSurface.withValues(alpha: 0.54),
                       ),
@@ -91,12 +83,9 @@ class _SensorsDashboardScreenState
                         int crossAxisCount = constraints.maxWidth > 900
                             ? 4
                             : (constraints.maxWidth > 600 ? 3 : 2);
-
-                        // No mobile (<= 600), deixamos o bloco mais alto (1.6) para caber o texto
                         double aspectRatio = constraints.maxWidth > 600
                             ? 2.2
                             : 1.6;
-
                         return GridView.builder(
                           gridDelegate:
                               SliverGridDelegateWithFixedCrossAxisCount(
@@ -105,18 +94,18 @@ class _SensorsDashboardScreenState
                                 mainAxisSpacing: 10,
                                 childAspectRatio: aspectRatio,
                               ),
-                          itemCount: availablePids.length,
+                          itemCount: availableSensors.length,
                           itemBuilder: (context, index) {
-                            final pid = availablePids[index];
+                            final sensor = availableSensors[index];
                             return SensorTile(
-                              pid: pid,
+                              sensor: sensor,
                               onTap: () async {
                                 _obdManager.setPollingPids([]);
                                 await Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) =>
-                                        SensorDetailScreen(pid: pid),
+                                        SensorDetailScreen(sensor: sensor),
                                   ),
                                 );
                                 if (mounted) {

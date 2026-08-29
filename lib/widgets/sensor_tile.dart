@@ -1,31 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../parser/obd_pid.dart';
+import '../models/mapped_sensor.dart';
 import '../state/obd_providers.dart';
 import '../state/technical_data_service.dart';
 
 class SensorTile extends ConsumerWidget {
-  final ObdPid pid;
+  final MappedSensor sensor;
   final VoidCallback onTap;
 
-  const SensorTile({super.key, required this.pid, required this.onTap});
+  const SensorTile({super.key, required this.sensor, required this.onTap});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Busca os dados usando o uniqueId (ex: "0C_7E0")
     final sensorData = ref.watch(
-      realTimeStateProvider.select((data) => data[pid.name]),
+      realTimeStateProvider.select((data) => data[sensor.uniqueId]),
     );
+
     final onSurfaceColor = Theme.of(context).colorScheme.onSurface;
     final appColors = ref.watch(appColorsProvider).current(context);
     final techService = ref.watch(technicalDataProvider);
 
-    final hexId = pid.id.toRadixString(16).padLeft(2, '0').toUpperCase();
+    final hexId = sensor.pid.id.toRadixString(16).padLeft(2, '0').toUpperCase();
     final sensorTechData = techService.getSensorData(hexId);
 
-    // Usa o nome traduzido do JSON ou cai de volta para o nome padrão do PID
     final String displayName = sensorTechData?.name.isNotEmpty == true
-        ? sensorTechData!.name
-        : pid.name;
+        ? "${sensorTechData!.name} (${sensor.module.name})"
+        : sensor.displayName;
 
     final hasValueMap = sensorTechData?.valueMap != null;
 
@@ -37,13 +40,12 @@ class SensorTile extends ConsumerWidget {
     }
 
     SensorHealth? currentHealth =
-        sensorData != null && pid.evaluateHealth != null
-        ? pid.evaluateHealth!(sensorData.value)
+        sensorData != null && sensor.pid.evaluateHealth != null
+        ? sensor.pid.evaluateHealth!(sensorData.value)
         : null;
 
     Color activeColor = getColorForHealth(currentHealth, appColors.primary);
 
-    // Obtém a representação formatada/traduzida do valor
     final displayValue = sensorData != null
         ? techService.getSensorValueDescription(
             hexId,
@@ -63,7 +65,6 @@ class SensorTile extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // NOME DO SENSOR TRADUZIDO
               Text(
                 displayName,
                 style: TextStyle(
@@ -74,7 +75,6 @@ class SensorTile extends ConsumerWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              // VALOR FORMATADO E UNIDADE
               Row(
                 crossAxisAlignment: CrossAxisAlignment.baseline,
                 textBaseline: TextBaseline.alphabetic,
@@ -103,9 +103,9 @@ class SensorTile extends ConsumerWidget {
                             ),
                           ),
                   ),
-                  if (pid.unit.isNotEmpty && !hasValueMap)
+                  if (sensor.pid.unit.isNotEmpty && !hasValueMap)
                     Text(
-                      pid.unit,
+                      sensor.pid.unit,
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,

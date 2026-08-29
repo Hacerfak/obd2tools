@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../parser/registries/mode_01_registry.dart';
+import '../models/mapped_sensor.dart';
 import '../state/obd_providers.dart';
+import '../state/technical_data_service.dart';
 
 class HudSensorSelector extends ConsumerStatefulWidget {
-  final List<int> initialSelection;
-  final Function(List<int>) onSave;
+  final List<MappedSensor> initialSelection;
+  final Function(List<MappedSensor>) onSave;
 
   const HudSensorSelector({
     super.key,
@@ -18,22 +19,22 @@ class HudSensorSelector extends ConsumerStatefulWidget {
 }
 
 class _HudSensorSelectorState extends ConsumerState<HudSensorSelector> {
-  late List<int> _selectedPids;
+  late List<MappedSensor> _selectedSensors;
   String _searchQuery = "";
 
   @override
   void initState() {
     super.initState();
-    _selectedPids = List.from(widget.initialSelection);
+    _selectedSensors = List.from(widget.initialSelection);
   }
 
-  void _toggleSelection(int pidId) {
+  void _toggleSelection(MappedSensor sensor) {
     setState(() {
-      if (_selectedPids.contains(pidId)) {
-        _selectedPids.remove(pidId);
+      if (_selectedSensors.any((s) => s.uniqueId == sensor.uniqueId)) {
+        _selectedSensors.removeWhere((s) => s.uniqueId == sensor.uniqueId);
       } else {
-        if (_selectedPids.length < 12) {
-          _selectedPids.add(pidId);
+        if (_selectedSensors.length < 12) {
+          _selectedSensors.add(sensor);
         }
       }
     });
@@ -41,27 +42,38 @@ class _HudSensorSelectorState extends ConsumerState<HudSensorSelector> {
 
   @override
   Widget build(BuildContext context) {
-    final supportedPids = ref.watch(supportedPidsProvider);
+    final supportedSensors = ref.watch(supportedPidsProvider);
     final onSurface = Theme.of(context).colorScheme.onSurface;
+    final techService = ref.watch(technicalDataProvider);
 
-    final selectedPidsFull = _selectedPids
-        .where((id) => pidRegistry.containsKey(id))
-        .map((id) => pidRegistry[id]!)
-        .toList();
+    // Helper para buscar o nome traduzido do JSON
+    String getLocalizedDisplayName(MappedSensor sensor) {
+      final hexId = sensor.pid.id
+          .toRadixString(16)
+          .padLeft(2, '0')
+          .toUpperCase();
+      final techData = techService.getSensorData(hexId);
+      final translatedName = techData?.name.isNotEmpty == true
+          ? techData!.name
+          : sensor.pid.name;
+      return "$translatedName (${sensor.module.name})";
+    }
 
-    final unselectedPidsFull = pidRegistry.values.where((pid) {
-      bool isSupported = supportedPids.contains(pid.id);
-      bool isNotSelected = !_selectedPids.contains(pid.id);
-      bool matchesSearch = pid.name.toLowerCase().contains(
+    final unselectedSensors = supportedSensors.where((s) {
+      bool isNotSelected = !_selectedSensors.any(
+        (sel) => sel.uniqueId == s.uniqueId,
+      );
+      String localizedName = getLocalizedDisplayName(s);
+      bool matchesSearch = localizedName.toLowerCase().contains(
         _searchQuery.toLowerCase(),
       );
-      return isSupported && isNotSelected && matchesSearch;
+      return isNotSelected && matchesSearch;
     }).toList();
 
-    bool isMaxReached = _selectedPids.length >= 12;
+    bool isMaxReached = _selectedSensors.length >= 12;
 
     return Material(
-      color: Theme.of(context).scaffoldBackgroundColor, // Agora segue o tema!
+      color: Theme.of(context).scaffoldBackgroundColor,
       borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       child: Column(
         children: [
@@ -93,7 +105,7 @@ class _HudSensorSelectorState extends ConsumerState<HudSensorSelector> {
                       ),
                     ),
                     Text(
-                      "${_selectedPids.length}/12 Sensores Selecionados",
+                      "${_selectedSensors.length}/12 Sensores Selecionados",
                       style: TextStyle(
                         color: isMaxReached
                             ? Colors.redAccent
@@ -105,7 +117,7 @@ class _HudSensorSelectorState extends ConsumerState<HudSensorSelector> {
                 ),
                 FilledButton(
                   onPressed: () {
-                    widget.onSave(_selectedPids);
+                    widget.onSave(_selectedSensors);
                     Navigator.pop(context);
                   },
                   style: FilledButton.styleFrom(
@@ -133,9 +145,7 @@ class _HudSensorSelectorState extends ConsumerState<HudSensorSelector> {
                   color: onSurface.withValues(alpha: 0.38),
                 ),
                 filled: true,
-                fillColor: onSurface.withValues(
-                  alpha: 0.05,
-                ), // Input field amigável ao tema
+                fillColor: onSurface.withValues(alpha: 0.05),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -148,9 +158,9 @@ class _HudSensorSelectorState extends ConsumerState<HudSensorSelector> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (selectedPidsFull.isNotEmpty) ...[
+                if (_selectedSensors.isNotEmpty) ...[
                   Padding(
-                    padding: EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.all(16.0),
                     child: Text(
                       "SELECIONADOS (Arraste para reordenar)",
                       style: TextStyle(
@@ -163,28 +173,30 @@ class _HudSensorSelectorState extends ConsumerState<HudSensorSelector> {
                   Flexible(
                     child: ReorderableListView.builder(
                       shrinkWrap: true,
-                      itemCount: selectedPidsFull.length,
+                      itemCount: _selectedSensors.length,
                       onReorderItem: (oldIndex, newIndex) {
                         setState(() {
                           if (newIndex > oldIndex) newIndex -= 1;
-                          final item = _selectedPids.removeAt(oldIndex);
-                          _selectedPids.insert(newIndex, item);
+                          final item = _selectedSensors.removeAt(oldIndex);
+                          _selectedSensors.insert(newIndex, item);
                         });
                       },
                       itemBuilder: (context, index) {
-                        final pid = selectedPidsFull[index];
+                        final sensor = _selectedSensors[index];
                         return ListTile(
-                          key: ValueKey("sel_${pid.id}"),
+                          key: ValueKey("sel_${sensor.uniqueId}"),
                           leading: Icon(
                             Icons.drag_handle,
                             color: onSurface.withValues(alpha: 0.54),
                           ),
                           title: Text(
-                            pid.name,
+                            getLocalizedDisplayName(sensor),
                             style: TextStyle(color: onSurface),
                           ),
                           subtitle: Text(
-                            pid.unit.isEmpty ? "Status" : pid.unit,
+                            sensor.pid.unit.isEmpty
+                                ? "Status"
+                                : sensor.pid.unit,
                             style: TextStyle(
                               color: onSurface.withValues(alpha: 0.38),
                             ),
@@ -194,7 +206,7 @@ class _HudSensorSelectorState extends ConsumerState<HudSensorSelector> {
                               Icons.remove_circle,
                               color: Colors.redAccent,
                             ),
-                            onPressed: () => _toggleSelection(pid.id),
+                            onPressed: () => _toggleSelection(sensor),
                           ),
                         );
                       },
@@ -202,7 +214,7 @@ class _HudSensorSelectorState extends ConsumerState<HudSensorSelector> {
                   ),
                   Divider(color: onSurface.withValues(alpha: 0.1)),
                 ],
-                if (unselectedPidsFull.isNotEmpty) ...[
+                if (unselectedSensors.isNotEmpty) ...[
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Text(
@@ -216,21 +228,21 @@ class _HudSensorSelectorState extends ConsumerState<HudSensorSelector> {
                   ),
                   Expanded(
                     child: ListView.builder(
-                      itemCount: unselectedPidsFull.length,
+                      itemCount: unselectedSensors.length,
                       itemBuilder: (context, index) {
-                        final pid = unselectedPidsFull[index];
+                        final sensor = unselectedSensors[index];
                         final isDisabled = isMaxReached;
                         return ListTile(
-                          key: ValueKey("avail_${pid.id}"),
+                          key: ValueKey("avail_${sensor.uniqueId}"),
                           enabled: !isDisabled,
                           leading: Icon(
-                            pid.isFast ? Icons.speed : Icons.thermostat,
+                            sensor.pid.isFast ? Icons.speed : Icons.thermostat,
                             color: isDisabled
                                 ? onSurface.withValues(alpha: 0.12)
                                 : onSurface.withValues(alpha: 0.54),
                           ),
                           title: Text(
-                            pid.name,
+                            getLocalizedDisplayName(sensor),
                             style: TextStyle(
                               color: isDisabled
                                   ? onSurface.withValues(alpha: 0.24)
@@ -238,7 +250,9 @@ class _HudSensorSelectorState extends ConsumerState<HudSensorSelector> {
                             ),
                           ),
                           subtitle: Text(
-                            pid.unit.isEmpty ? "Status" : pid.unit,
+                            sensor.pid.unit.isEmpty
+                                ? "Status"
+                                : sensor.pid.unit,
                             style: TextStyle(
                               color: isDisabled
                                   ? onSurface.withValues(alpha: 0.12)
@@ -254,11 +268,11 @@ class _HudSensorSelectorState extends ConsumerState<HudSensorSelector> {
                             ),
                             onPressed: isDisabled
                                 ? null
-                                : () => _toggleSelection(pid.id),
+                                : () => _toggleSelection(sensor),
                           ),
                           onTap: isDisabled
                               ? null
-                              : () => _toggleSelection(pid.id),
+                              : () => _toggleSelection(sensor),
                         );
                       },
                     ),

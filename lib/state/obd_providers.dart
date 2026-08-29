@@ -3,6 +3,8 @@ import '../parser/parsers/mode_01_parser.dart';
 import '../connection/obd_connection.dart';
 import '../models/dtc_fault.dart';
 import '../connection/obd_manager.dart';
+import '../models/protocol_profile.dart';
+import '../models/mapped_sensor.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -269,26 +271,26 @@ final vehicleInfoStateProvider =
 // TÚNEL 3: AUTO-DESCOBERTA DE SENSORES (PIDs Suportados)
 // ============================================================================
 
-class SupportedPidsNotifier extends Notifier<Set<int>> {
+class SupportedPidsNotifier extends Notifier<List<MappedSensor>> {
   @override
-  Set<int> build() {
-    return {}; // Começa vazio
+  List<MappedSensor> build() => [];
+
+  void addSensors(List<MappedSensor> sensors) {
+    // Evita duplicatas cruzando o uniqueId
+    final currentIds = state.map((s) => s.uniqueId).toSet();
+    final newSensors = sensors
+        .where((s) => !currentIds.contains(s.uniqueId))
+        .toList();
+    state = [...state, ...newSensors];
   }
 
-  void addPids(List<int> pids) {
-    state = {...state, ...pids};
-  }
-
-  void clear() {
-    state = {};
-  }
+  void clear() => state = [];
 }
 
-final supportedPidsProvider = NotifierProvider<SupportedPidsNotifier, Set<int>>(
-  () {
-    return SupportedPidsNotifier();
-  },
-);
+final supportedPidsProvider =
+    NotifierProvider<SupportedPidsNotifier, List<MappedSensor>>(() {
+      return SupportedPidsNotifier();
+    });
 
 // ============================================================================
 // TÚNEL 4: O GERENTE DE COMANDOS (ObdManager Global)
@@ -598,3 +600,22 @@ class GraphFpsNotifier extends Notifier<int> {
 final graphFpsProvider = NotifierProvider<GraphFpsNotifier, int>(() {
   return GraphFpsNotifier();
 });
+
+// ============================================================================
+// PERFIL DO PROTOCOLO ATIVO
+// ============================================================================
+class ProtocolProfileNotifier extends Notifier<ProtocolProfile> {
+  @override
+  ProtocolProfile build() {
+    return ProtocolProfile.fallback();
+  }
+
+  void setProfile(ProtocolProfile profile) {
+    state = profile;
+  }
+}
+
+final protocolProfileProvider =
+    NotifierProvider<ProtocolProfileNotifier, ProtocolProfile>(() {
+      return ProtocolProfileNotifier();
+    });

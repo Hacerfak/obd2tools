@@ -26,13 +26,11 @@ class HudSensorChart extends ConsumerStatefulWidget {
 class _HudSensorChartState extends ConsumerState<HudSensorChart> {
   Timer? _sampleTimer;
   final List<double> _samples = [];
-  double _smoothedValue = 0.0;
   int _currentFps = 0;
 
   @override
   void initState() {
     super.initState();
-    _smoothedValue = widget.currentValue;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _startTimer(ref.read(graphFpsProvider));
     });
@@ -46,16 +44,16 @@ class _HudSensorChartState extends ConsumerState<HudSensorChart> {
     final intervalMs = (1000 / fps).round();
     final maxSamples = (widget.durationSeconds * fps).round();
 
-    if (_samples.isEmpty) {
-      _samples.addAll(List.filled(maxSamples, widget.currentValue));
-    }
-
     _sampleTimer = Timer.periodic(Duration(milliseconds: intervalMs), (_) {
       if (!mounted) return;
       setState(() {
-        _smoothedValue += (widget.currentValue - _smoothedValue) * 0.25;
+        double newValue = widget.currentValue;
+        if (_samples.isNotEmpty) {
+          newValue =
+              _samples.last + (widget.currentValue - _samples.last) * 0.25;
+        }
 
-        _samples.add(_smoothedValue);
+        _samples.add(newValue);
         if (_samples.length > maxSamples) {
           _samples.removeAt(0);
         }
@@ -204,8 +202,11 @@ class _SmoothHudChartPainter extends CustomPainter {
     final double stepX = size.width / (samples.length - 1);
     List<Offset> points = [];
 
+    // Ajusta o offset para começar a renderizar da direita para a esquerda se não estiver cheio
+    final double offsetX = size.width - ((samples.length - 1) * stepX);
+
     for (int i = 0; i < samples.length; i++) {
-      double x = i * stepX;
+      double x = offsetX + (i * stepX);
       double normalizedY = (samples[i] - minY) / rangeY;
       double y = size.height - (normalizedY * size.height);
       points.add(Offset(x, y));

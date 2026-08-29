@@ -7,7 +7,6 @@ import '/l10n/app_localizations.dart';
 import '../state/obd_providers.dart';
 import 'home_screen.dart';
 import 'package:flutter/foundation.dart';
-import '../parser/registries/mode_01_registry.dart';
 
 class ConnectionScreen extends ConsumerStatefulWidget {
   final bool attemptAutoConnect;
@@ -122,7 +121,7 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
       await prefs.setString('last_mac_address', macAddress.trim());
 
       manager.initializeScanner();
-      manager.discoverSupportedSensors();
+      // O discoverSupportedSensors agora é chamado internamente após o Handshake do Manager
     } else {
       ref
           .read(connectionStateProvider.notifier)
@@ -399,22 +398,6 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                   ),
-                ),
-                const SizedBox(height: 8),
-                Builder(
-                  builder: (context) {
-                    final supported = ref.read(supportedPidsProvider);
-                    final realCount = pidRegistry.values
-                        .where((pid) => supported.contains(pid.id))
-                        .length;
-                    return Text(
-                      l10n.connSensorsMapped(realCount),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: onSurface.withValues(alpha: 0.54),
-                      ),
-                    );
-                  },
                 ),
                 const Spacer(),
               ],

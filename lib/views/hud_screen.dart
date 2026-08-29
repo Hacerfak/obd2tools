@@ -5,8 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+
 import '/l10n/app_localizations.dart';
-import '../parser/registries/mode_01_registry.dart';
+import '../models/mapped_sensor.dart';
 import '../state/obd_providers.dart';
 import '../widgets/obd_gauge.dart';
 import '../connection/obd_manager.dart';
@@ -21,7 +22,7 @@ class HudScreen extends ConsumerStatefulWidget {
 
 class _HudScreenState extends ConsumerState<HudScreen> {
   late final ObdManager _obdManager;
-  final List<int> _activeGaugesPids = [];
+  final List<MappedSensor> _activeGauges = [];
   GaugeStyle _currentStyle = GaugeStyle.digital;
   bool _showTutorial = false;
   final FocusNode _focusNode = FocusNode();
@@ -47,18 +48,35 @@ class _HudScreenState extends ConsumerState<HudScreen> {
 
   Future<void> _loadPreferences() async {
     final prefs = await SharedPreferences.getInstance();
-    final savedPids = prefs.getStringList('hud_pids');
+
+    // Agora salvamos os IDs únicos em String (Ex: "0C_7E0")
+    final savedUniqueIds = prefs.getStringList('hud_sensors_unique_ids');
     final savedStyleIndex = prefs.getInt('hud_style') ?? 0;
     final tutorialShown = prefs.getBool('hud_tutorial_shown') ?? false;
 
+    final supportedSensors = ref.read(supportedPidsProvider);
+
     setState(() {
       _currentStyle = GaugeStyle.values[savedStyleIndex];
-      _activeGaugesPids.clear();
-      if (savedPids != null && savedPids.isNotEmpty) {
-        final uniquePids = savedPids.map(int.parse).toSet().toList();
-        _activeGaugesPids.addAll(uniquePids);
-      } else {
-        _activeGaugesPids.addAll([0x0C, 0x0D, 0x05, 0x04, 0x0F, 0x11]);
+      _activeGauges.clear();
+
+      if (savedUniqueIds != null &&
+          savedUniqueIds.isNotEmpty &&
+          supportedSensors.isNotEmpty) {
+        for (String uid in savedUniqueIds) {
+          try {
+            _activeGauges.add(
+              supportedSensors.firstWhere((s) => s.uniqueId == uid),
+            );
+          } catch (e) {
+            // Sensor estava salvo mas o carro atual não suporta
+          }
+        }
+      }
+
+      // Fallback
+      if (_activeGauges.isEmpty && supportedSensors.isNotEmpty) {
+        _activeGauges.addAll(supportedSensors.take(6));
       }
 
       if (_isMobile && !tutorialShown) {
@@ -66,14 +84,14 @@ class _HudScreenState extends ConsumerState<HudScreen> {
       }
     });
 
-    _obdManager.setPollingPids(_activeGaugesPids);
+    _obdManager.setPollingPids(_activeGauges);
   }
 
-  Future<void> _savePreferences(List<int> newSelection) async {
+  Future<void> _savePreferences(List<MappedSensor> newSelection) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList(
-      'hud_pids',
-      newSelection.map((e) => e.toString()).toList(),
+      'hud_sensors_unique_ids',
+      newSelection.map((e) => e.uniqueId).toList(),
     );
   }
 
@@ -93,7 +111,7 @@ class _HudScreenState extends ConsumerState<HudScreen> {
     final isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
 
-    List<int> displayPids = _activeGaugesPids;
+    List<MappedSensor> displayPids = _activeGauges;
     if (isPhone && isLandscape && displayPids.length > 6) {
       displayPids = displayPids.take(6).toList();
     }
@@ -111,14 +129,14 @@ class _HudScreenState extends ConsumerState<HudScreen> {
               builder: (context) => FractionallySizedBox(
                 heightFactor: 0.9,
                 child: HudSensorSelector(
-                  initialSelection: _activeGaugesPids,
+                  initialSelection: _activeGauges,
                   onSave: (newSelection) {
                     setState(() {
-                      _activeGaugesPids.clear();
-                      _activeGaugesPids.addAll(newSelection);
+                      _activeGauges.clear();
+                      _activeGauges.addAll(newSelection);
                     });
                     _savePreferences(newSelection);
-                    _obdManager.setPollingPids(_activeGaugesPids);
+                    _obdManager.setPollingPids(_activeGauges);
                   },
                 ),
               ),
@@ -214,7 +232,7 @@ class _HudScreenState extends ConsumerState<HudScreen> {
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      "${l10n.tabHud} (${displayPids.length}/${_activeGaugesPids.length})",
+                                      "${l10n.tabHud} (${displayPids.length}/${_activeGauges.length})",
                                       style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
@@ -236,7 +254,7 @@ class _HudScreenState extends ConsumerState<HudScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  "${l10n.tabHud} (${displayPids.length}/${_activeGaugesPids.length})",
+                                  "${l10n.tabHud} (${displayPids.length}/${_activeGauges.length})",
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
@@ -318,9 +336,11 @@ class _HudScreenState extends ConsumerState<HudScreen> {
                                 ),
                             itemCount: totalItems,
                             itemBuilder: (context, index) {
-                              final pidCode = displayPids[index];
-                              final pid = pidRegistry[pidCode]!;
-                              return ObdGauge(pid: pid, style: _currentStyle);
+                              final sensor = displayPids[index];
+                              return ObdGauge(
+                                sensor: sensor,
+                                style: _currentStyle,
+                              );
                             },
                           );
                         },

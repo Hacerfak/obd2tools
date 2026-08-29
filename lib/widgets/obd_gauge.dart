@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../parser/obd_pid.dart';
+import '../models/mapped_sensor.dart';
 import '../state/obd_providers.dart';
 import '../state/technical_data_service.dart';
 import 'hud_sensor_chart.dart';
@@ -15,40 +16,42 @@ class ZoneGradient {
 }
 
 class ObdGauge extends ConsumerWidget {
-  final ObdPid pid;
+  final MappedSensor sensor;
   final GaugeStyle style;
 
-  const ObdGauge({super.key, required this.pid, required this.style});
+  const ObdGauge({super.key, required this.sensor, required this.style});
 
   /// Retorna os limites (Mínimo, Máximo) baseados no PID ou na Unidade
   (double, double) _getMinMaxValues() {
-    // 1. PIDs Específicos com faixas negativas/dedicadas
-    if (pid.id == 0x0E) return (-64.0, 64.0); // Avanço de Ignição (°)
-    if (pid.id == 0x06 ||
-        pid.id == 0x07 ||
-        pid.id == 0x08 ||
-        pid.id == 0x09 ||
-        pid.id == 0x2D) {
+    if (sensor.pid.id == 0x0E) return (-64.0, 64.0); // Avanço de Ignição (°)
+    if (sensor.pid.id == 0x06 ||
+        sensor.pid.id == 0x07 ||
+        sensor.pid.id == 0x08 ||
+        sensor.pid.id == 0x09 ||
+        sensor.pid.id == 0x2D) {
       return (-100.0, 100.0); // Trim de Combustível / Erro EGR (%)
     }
-    if (pid.id == 0x32) return (-8192.0, 8192.0); // Pressão EVAP (Pa)
-    if (pid.id == 0x5D || pid.id == 0x84) {
+    if (sensor.pid.id == 0x32) return (-8192.0, 8192.0); // Pressão EVAP (Pa)
+    if (sensor.pid.id == 0x5D || sensor.pid.id == 0x84) {
       return (-210.0, 300.0);
     } // Ponto de Injeção (°)
-    if (pid.id == 0x61 || pid.id == 0x62 || pid.id == 0xA3) {
+    if (sensor.pid.id == 0x61 ||
+        sensor.pid.id == 0x62 ||
+        sensor.pid.id == 0xA3) {
       return (-125.0, 125.0); // Torque (%)
     }
 
-    // 2. Mapeamento genérico por Unidade
-    if (pid.unit == "RPM") return (0.0, 8000.0);
-    if (pid.unit == "km/h") return (0.0, 220.0);
-    if (pid.unit == "°C" || pid.unit == "C") return (-40.0, 150.0);
-    if (pid.unit == "%") return (0.0, 100.0);
-    if (pid.unit == "V") return (0.0, 16.0);
-    if (pid.unit == "kPa") return (0.0, 255.0);
-    if (pid.unit == "°") return (-64.0, 64.0);
-    if (pid.unit == "λ" || pid.unit == "Lambda") return (0.0, 2.0);
-    if (pid.unit == "Pa") return (-8192.0, 8192.0);
+    if (sensor.pid.unit == "RPM") return (0.0, 8000.0);
+    if (sensor.pid.unit == "km/h") return (0.0, 220.0);
+    if (sensor.pid.unit == "°C" || sensor.pid.unit == "C")
+      return (-40.0, 150.0);
+    if (sensor.pid.unit == "%") return (0.0, 100.0);
+    if (sensor.pid.unit == "V") return (0.0, 16.0);
+    if (sensor.pid.unit == "kPa") return (0.0, 255.0);
+    if (sensor.pid.unit == "°") return (-64.0, 64.0);
+    if (sensor.pid.unit == "λ" || sensor.pid.unit == "Lambda")
+      return (0.0, 2.0);
+    if (sensor.pid.unit == "Pa") return (-8192.0, 8192.0);
 
     return (0.0, 100.0);
   }
@@ -56,16 +59,22 @@ class ObdGauge extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final sensorData = ref.watch(
-      realTimeStateProvider.select((data) => data[pid.name]),
+      realTimeStateProvider.select((data) => data[sensor.uniqueId]),
     );
     final onSurface = Theme.of(context).colorScheme.onSurface;
     final appColors = ref.watch(appColorsProvider).current(context);
 
-    final hexId = pid.id.toRadixString(16).padLeft(2, '0').toUpperCase();
+    final hexId = sensor.pid.id.toRadixString(16).padLeft(2, '0').toUpperCase();
     final techData = ref.watch(technicalDataProvider).getSensorData(hexId);
-    final String shortName = techData?.shortName.isNotEmpty == true
+
+    final String baseShortName = techData?.shortName.isNotEmpty == true
         ? techData!.shortName
-        : pid.name;
+        : (techData?.name.isNotEmpty == true
+              ? techData!.name
+              : sensor.pid.name);
+
+    // Substituímos o sensor.module.txHeader pelo sensor.module.name para ficar legível
+    final String displayShortName = "$baseShortName (${sensor.module.name})";
 
     Color getColorForHealth(SensorHealth? health, Color defaultColor) {
       if (health == SensorHealth.normal) return appColors.normal;
@@ -79,7 +88,7 @@ class ObdGauge extends ConsumerWidget {
       double maxY,
       Color defaultColor,
     ) {
-      if (pid.evaluateHealth == null) {
+      if (sensor.pid.evaluateHealth == null) {
         return ZoneGradient([defaultColor, defaultColor], [0.0, 1.0]);
       }
       List<Color> colors = [];
@@ -89,7 +98,7 @@ class ObdGauge extends ConsumerWidget {
       for (int i = 0; i <= steps; i++) {
         double percent = i / steps;
         double val = minY + (percent * (maxY - minY));
-        SensorHealth health = pid.evaluateHealth!(val);
+        SensorHealth health = sensor.pid.evaluateHealth!(val);
         Color healthColor = getColorForHealth(health, defaultColor);
         if (lastHealth != null && health != lastHealth) {
           colors.add(getColorForHealth(lastHealth, defaultColor));
@@ -108,17 +117,15 @@ class ObdGauge extends ConsumerWidget {
     double currentValue = sensorData?.value ?? 0.0;
     List<double> history = sensorData?.history ?? [];
 
-    // RESOLUÇÃO DE MÍNIMO E MÁXIMO
     final (minValue, maxValue) = _getMinMaxValues();
 
-    // NORMALIZAÇÃO AJUSTADA PARA ESCALAS COM VALORES NEGATIVOS
     double range = maxValue - minValue;
     double percent = range == 0
         ? 0.0
         : ((currentValue - minValue) / range).clamp(0.0, 1.0);
 
-    SensorHealth? currentHealth = pid.evaluateHealth != null
-        ? pid.evaluateHealth!(currentValue)
+    SensorHealth? currentHealth = sensor.pid.evaluateHealth != null
+        ? sensor.pid.evaluateHealth!(currentValue)
         : null;
 
     Color activeColor = getColorForHealth(currentHealth, appColors.primary);
@@ -146,8 +153,8 @@ class ObdGauge extends ConsumerWidget {
             ? HudSensorChart(
                 currentValue: currentValue,
                 color: activeColor,
-                unit: pid.unit,
-                shortName: shortName,
+                unit: sensor.pid.unit,
+                shortName: displayShortName,
               )
             : style == GaugeStyle.stats
             ? _buildStatsPanel(
@@ -155,7 +162,7 @@ class ObdGauge extends ConsumerWidget {
                 history,
                 onSurface,
                 activeColor,
-                shortName,
+                displayShortName,
               )
             : Column(
                 children: [
@@ -194,7 +201,9 @@ class ObdGauge extends ConsumerWidget {
                                   child: FittedBox(
                                     fit: BoxFit.scaleDown,
                                     child: Text(
-                                      pid.unit.isEmpty ? "--" : pid.unit,
+                                      sensor.pid.unit.isEmpty
+                                          ? "--"
+                                          : sensor.pid.unit,
                                       style: TextStyle(
                                         fontSize: size * 0.13,
                                         fontWeight: FontWeight.bold,
@@ -221,7 +230,7 @@ class ObdGauge extends ConsumerWidget {
                           fit: BoxFit.contain,
                           child: Text(
                             currentValue.toStringAsFixed(
-                              pid.unit == "RPM" ? 0 : 1,
+                              sensor.pid.unit == "RPM" ? 0 : 1,
                             ),
                             style: TextStyle(
                               fontSize: 100,
@@ -240,7 +249,7 @@ class ObdGauge extends ConsumerWidget {
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 2.0),
                         child: Text(
-                          shortName.toUpperCase(),
+                          displayShortName.toUpperCase(),
                           textAlign: TextAlign.center,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -273,7 +282,8 @@ class ObdGauge extends ConsumerWidget {
       currentMin = history.reduce((a, b) => a < b ? a : b);
       currentMax = history.reduce((a, b) => a > b ? a : b);
     }
-    String formatVal(double v) => v.toStringAsFixed(pid.unit == "RPM" ? 0 : 1);
+    String formatVal(double v) =>
+        v.toStringAsFixed(sensor.pid.unit == "RPM" ? 0 : 1);
 
     return Column(
       children: [
@@ -303,7 +313,7 @@ class ObdGauge extends ConsumerWidget {
             child: FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
-                pid.unit.isEmpty ? "--" : pid.unit,
+                sensor.pid.unit.isEmpty ? "--" : sensor.pid.unit,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,

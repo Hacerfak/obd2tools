@@ -7,6 +7,7 @@ import 'package:math_expressions/math_expressions.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../state/obd_providers.dart';
+import '../connection/obd_manager.dart';
 import 'package:flutter/foundation.dart';
 
 class DebugConsoleScreen extends ConsumerStatefulWidget {
@@ -17,6 +18,7 @@ class DebugConsoleScreen extends ConsumerStatefulWidget {
 }
 
 class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
+  late final ObdManager _obdManager;
   final TextEditingController _headerController = TextEditingController();
   final TextEditingController _commandController = TextEditingController();
   final TextEditingController _formulaController = TextEditingController();
@@ -35,10 +37,13 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
   @override
   void initState() {
     super.initState();
+    _obdManager = ref.read(obdManagerProvider);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(obdManagerProvider).setPollingPids([]);
+      _obdManager.setPollingPids([]);
     });
-    _rawSubscription = ref.read(obdManagerProvider).logStream.listen((data) {
+
+    _rawSubscription = _obdManager.logStream.listen((data) {
       _processResponse(data);
     });
   }
@@ -50,37 +55,13 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
     _commandController.dispose();
     _formulaController.dispose();
     _scrollController.dispose();
+
+    // --- PROTEÇÃO DE SAÍDA ---
+    // Limpa a fila do terminal e força o ELM327 a voltar para os parâmetros
+    // base de operação do aplicativo antes de devolver o controle para as outras telas.
+    _obdManager.resetElmToDefaults();
+
     super.dispose();
-  }
-
-  /// Formata uma String Hexadecimal para o padrão espaçado (ex: "410C1AF8" -> "41 0C 1A F8")
-  String _formatHex(String input) {
-    String trimmed = input.trim();
-    if (trimmed.isEmpty) return trimmed;
-
-    // Se for comando AT, texto especial do ELM327 ou log do sistema, mantém o texto original
-    if (trimmed.toUpperCase().startsWith("AT") ||
-        trimmed.contains("NO DATA") ||
-        trimmed.contains("ERROR") ||
-        trimmed.contains("OK") ||
-        trimmed.contains("?")) {
-      return trimmed;
-    }
-
-    String cleanHex = trimmed
-        .replaceAll(RegExp(r'[^0-9A-Fa-f]'), '')
-        .toUpperCase();
-    if (cleanHex.length < 2) return trimmed;
-
-    List<String> chunks = [];
-    for (int i = 0; i < cleanHex.length; i += 2) {
-      if (i + 2 <= cleanHex.length) {
-        chunks.add(cleanHex.substring(i, i + 2));
-      } else {
-        chunks.add(cleanHex.substring(i));
-      }
-    }
-    return chunks.join(" ");
   }
 
   void _printToConsole(
@@ -89,6 +70,7 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
     bool isSuccess = false,
   }) {
     if (!mounted) return;
+
     setState(() {
       if (isSuccess) {
         _consoleLogs.add("[OK] $text");
@@ -97,6 +79,7 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
         _consoleLogs.add("$prefix$text");
       }
     });
+
     Future.delayed(const Duration(milliseconds: 100), () {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
@@ -110,24 +93,23 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
 
   void _sendCommand() {
     if (_isScanning) return;
-    final obdManager = ref.read(obdManagerProvider);
     final header = _headerController.text.trim().toUpperCase();
     final command = _commandController.text.trim().toUpperCase();
 
     if (header.isEmpty && command.isEmpty) return;
 
-    // Permite o envio apenas do cabeçalho (Header)
     if (header.isNotEmpty) {
       final headerCmd = "AT SH $header";
       _printToConsole(headerCmd, isCommand: true);
-      obdManager.sendCustomCommand(headerCmd);
+      _obdManager.sendCustomCommand(headerCmd);
     }
 
-    // Permite o envio do comando com formatação espaçada no console
     if (command.isNotEmpty) {
-      final formattedCmd = _formatHex(command);
-      _printToConsole(formattedCmd, isCommand: true);
-      obdManager.sendCustomCommand(command);
+      _printToConsole(
+        command,
+        isCommand: true,
+      ); // Exibe exatamente o que o usuário digitou
+      _obdManager.sendCustomCommand(command);
     }
   }
 
@@ -140,6 +122,7 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
       ).showSnackBar(SnackBar(content: Text(l10n.dbgEmpty)));
       return;
     }
+
     try {
       final text = _consoleLogs.join('\n');
       if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
@@ -179,6 +162,7 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
     final prefixCtrl = TextEditingController(text: "22");
     final startCtrl = TextEditingController(text: "1100");
     final endCtrl = TextEditingController(text: "11FF");
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -248,11 +232,14 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
       _scanStart = int.parse(startHex.trim(), radix: 16);
       _scanCurrent = _scanStart;
       _scanEnd = int.parse(endHex.trim(), radix: 16);
+
       if (_scanCurrent > _scanEnd) throw Exception(l10n.dbgErrorBounds);
+
       setState(() {
         _isScanning = true;
         _consoleLogs.clear();
       });
+
       _printToConsole(
         l10n.dbgScanStarting(
           "$_scanPrefix${startHex.toUpperCase()}",
@@ -260,8 +247,9 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
         ),
         isSuccess: true,
       );
+
       if (_scanHeader.isNotEmpty) {
-        ref.read(obdManagerProvider).sendCustomCommand("AT SH $_scanHeader");
+        _obdManager.sendCustomCommand("AT SH $_scanHeader");
         Future.delayed(const Duration(milliseconds: 300), () {
           if (_isScanning) _sendNextScanCommand();
         });
@@ -278,31 +266,33 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
   void _sendNextScanCommand() {
     if (!_isScanning || !mounted) return;
     final l10n = AppLocalizations.of(context)!;
+
     if (_scanCurrent > _scanEnd) {
       setState(() => _isScanning = false);
       _printToConsole(l10n.dbgScanComplete, isSuccess: true);
       return;
     }
+
     String hexSuffix = _scanCurrent
         .toRadixString(16)
         .padLeft(4, '0')
         .toUpperCase();
     String command = "$_scanPrefix$hexSuffix";
-    ref.read(obdManagerProvider).sendCustomCommand(command);
+    _obdManager.sendCustomCommand(command);
   }
 
   // --- PROCESSAMENTO DE RESPOSTA ---
   void _processResponse(String response) {
     if (!mounted) return;
     final l10n = AppLocalizations.of(context)!;
-    final formattedResponse = _formatHex(response);
 
+    // Imprime sempre a resposta BRUTA, exatamente como veio do ELM327
     if (_isScanning) {
       String cleanHex = response.replaceAll(RegExp(r'[^0-9A-Fa-f]'), '');
       if (!response.contains("NO DATA") &&
           !response.contains("ERROR") &&
           !cleanHex.startsWith("7F")) {
-        _printToConsole(formattedResponse, isSuccess: true);
+        _printToConsole(response, isSuccess: true);
       }
       setState(() {
         _scanCurrent++;
@@ -313,8 +303,10 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
       return;
     }
 
-    _printToConsole(formattedResponse);
+    _printToConsole(response);
 
+    // O Testador de Fórmulas continua removendo os espaços por baixo dos panos
+    // para conseguir fatiar os bytes corretamente (A, B, C, etc), mas isso não afeta a UI.
     final formula = _formulaController.text.trim().toUpperCase();
     if (formula.isEmpty ||
         response.contains("NO DATA") ||
@@ -336,10 +328,12 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
         Parser p = Parser();
         Expression exp = p.parse(formula);
         ContextModel cm = ContextModel();
+
         List<String> variableNames = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
         for (var v in variableNames) {
           cm.bindVariable(Variable(v), Number(0.0));
         }
+
         int byteIndex = 0;
         for (
           int i = 0;
@@ -356,6 +350,7 @@ class _DebugConsoleScreenState extends ConsumerState<DebugConsoleScreen> {
             byteIndex++;
           }
         }
+
         double result = exp.evaluate(EvaluationType.REAL, cm);
         String formattedResult = result == result.truncateToDouble()
             ? result.toInt().toString()

@@ -1,17 +1,24 @@
 import 'dart:async';
 import 'dart:collection';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'obd_connection.dart';
-import '/parser/obd_parser.dart';
+import '../parser/obd_parser.dart';
 import '../parser/parsers/mode_01_parser.dart';
 import '../parser/parsers/mode_06_parser.dart';
 import '../parser/parsers/mode_09_parser.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../state/obd_providers.dart';
-import '../state/technical_data_service.dart';
 import '../parser/parsers/dtc_parser.dart';
 import '../parser/parsers/mode_02_parser.dart';
+import '../parser/registries/mode_01_registry.dart';
+
+import '../state/obd_providers.dart';
+import '../state/technical_data_service.dart';
+
 import '../models/dtc_fault.dart';
-import 'package:flutter/foundation.dart';
+import '../models/protocol_profile.dart';
+import '../models/ecu_module.dart';
+import '../models/mapped_sensor.dart';
 
 class ObdManager {
   final ObdConnection connection;
@@ -19,6 +26,7 @@ class ObdManager {
 
   final Queue<String> _commandQueue = Queue<String>();
   String _buffer = "";
+  String _lastCommandSent = "";
 
   bool _isWaitingForResponse = false;
   bool _isClearingDTCs = false;
@@ -28,9 +36,7 @@ class ObdManager {
 
   // CONTROLES DE VARREDURA E COOLDOWN
   bool _isPollingEnabled = false;
-  List<int> _activePollingPids = [];
   int _pollingIndex = 0;
-
   Duration _pollingCooldown = Duration.zero;
   bool _isFastInitialPass = false;
   Timer? _cooldownTimer;
@@ -39,13 +45,18 @@ class ObdManager {
   int _consecutiveErrors = 0;
   Timer? _ecuPingTimer;
 
+  // NOVAS VARIÁVEIS DE GERENCIAMENTO DE MÓDULO (MULTIPLEXAÇÃO)
+  List<EcuModule> _discoveredEcus = [];
+  EcuModule _currentActiveEcu = EcuModule.defaultEcu();
+
+  Map<String, List<MappedSensor>> _activeSensorsByEcu = {};
+  List<String> _ecuCycle = [];
+  int _ecuCycleIndex = 0;
+
   ObdManager({required this.connection, required this.ref}) {
     connection.dataStream.listen(_onDataReceived);
 
-    // NOVO: Quando o ObdConnection gritar que caiu, a gente limpa a sujeira
-    // e avisa o Riverpod (que vai triggar a Snackbar na sua HomeScreen!)
     connection.onDisconnected = () {
-      // Impede loops infinitos se já estiver desconectado
       if (ref.read(connectionStateProvider) !=
           AppConnectionState.disconnected) {
         forceDisconnect();
@@ -55,9 +66,8 @@ class ObdManager {
 
   // --- COMANDOS CUSTOMIZADOS (TERMINAL) ---
   void sendCustomCommand(String command) {
-    //_addLog("Terminal enviando: $command");
-    _isPollingEnabled = false; // Pausa a varredura do painel
-    _commandQueue.clear(); // Limpa a fila
+    _isPollingEnabled = false;
+    _commandQueue.clear();
     queueCommand(command);
   }
 
@@ -75,8 +85,8 @@ class ObdManager {
 
   // --- DIAGNÓSTICO ---
   void scanAllFaults() {
-    _isPollingEnabled = false; // Desliga o dashboard
-    _commandQueue.clear(); // Limpa lixo na fila
+    _isPollingEnabled = false;
+    _commandQueue.clear();
 
     ref.read(dtcStateProvider.notifier).clearCodes();
     ref.read(dtcStateProvider.notifier).setLoading(true);
@@ -96,7 +106,7 @@ class ObdManager {
   void requestVehicleInfo() {
     _addLog("Solicitando mapeamento do Modo 09 (PIDs Suportados)...");
     _isPollingEnabled = false;
-    queueCommand("0900"); // A mágica começa aqui!
+    queueCommand("0900");
   }
 
   // --- TESTES DE MONITORES (MODO 06) ---
@@ -106,7 +116,6 @@ class ObdManager {
     ref.read(testResultsProvider.notifier).clear();
     ref.read(testResultsProvider.notifier).setLoading(true);
 
-    // 1. Tática de Força Bruta (Mapeamento Padrão)
     queueCommand("0600");
     queueCommand("0620");
     queueCommand("0640");
@@ -116,17 +125,10 @@ class ObdManager {
     queueCommand("06C0");
     queueCommand("06E0");
 
-    // 2. Tática de Busca Cega (Ignoramos se a GM diz não suportar, pedimos à força!)
-
-    // Sondas Lambdas (Banco 1 - Sensores 1 e 2)
     queueCommand("0601");
     queueCommand("0602");
-
-    // Catalisador (Banco 1 e 2)
     queueCommand("0621");
     queueCommand("0622");
-
-    // VVT / Comando de Válvulas
     queueCommand("0635");
 
     Future.delayed(const Duration(seconds: 15), () {
@@ -137,20 +139,37 @@ class ObdManager {
     });
   }
 
-  // --- VARREDURA E CARROSSEL ---
+  // --- VARREDURA E CARROSSEL (MULTIPLEXADO) ---
   void setPollingPids(
-    List<int> pids, {
+    List<MappedSensor> sensors, {
     Duration cooldown = Duration.zero,
     bool fastInitialPass = false,
   }) {
-    _activePollingPids = pids;
-    _isPollingEnabled = pids.isNotEmpty;
-    _pollingIndex = 0;
-
+    _isPollingEnabled = sensors.isNotEmpty;
     _pollingCooldown = cooldown;
     _isFastInitialPass = fastInitialPass;
-    _cooldownTimer?.cancel();
+
+    // SALVA COMANDOS DE CONFIGURAÇÃO ANTES DE LIMPAR A FILA
+    // Isso impede que os resets (AT S0, AT H0) sejam apagados
+    // pela troca rápida de tela!
+    final pendingAtCommands = _commandQueue
+        .where((cmd) => cmd.startsWith("AT"))
+        .toList();
+
     _commandQueue.clear();
+    _commandQueue.addAll(pendingAtCommands); // Devolve os comandos protegidos
+
+    _cooldownTimer?.cancel();
+
+    // Agrupa os sensores solicitados por ECU
+    _activeSensorsByEcu.clear();
+    for (var s in sensors) {
+      _activeSensorsByEcu.putIfAbsent(s.module.txHeader, () => []).add(s);
+    }
+
+    _ecuCycle = _activeSensorsByEcu.keys.toList();
+    _ecuCycleIndex = 0;
+    _pollingIndex = 0;
 
     if (_isPollingEnabled && !_isWaitingForResponse) {
       _triggerNextPollingRequest();
@@ -158,30 +177,49 @@ class ObdManager {
   }
 
   void _triggerNextPollingRequest() {
-    if (!_isPollingEnabled || _activePollingPids.isEmpty) return;
+    if (!_isPollingEnabled || _ecuCycle.isEmpty) return;
+
+    // Pega a ECU da rodada
+    String targetTxHeader = _ecuCycle[_ecuCycleIndex];
+    List<MappedSensor> ecuSensors = _activeSensorsByEcu[targetTxHeader]!;
 
     List<int> pidsToRequest = [];
     int count = 0;
 
-    while (count < 6 && count < _activePollingPids.length) {
-      if (_pollingIndex >= _activePollingPids.length) {
+    // Coleta até 6 PIDs da ECU atual
+    while (count < 6 && count < ecuSensors.length) {
+      if (_pollingIndex >= ecuSensors.length) {
         _pollingIndex = 0;
-        _isFastInitialPass = false; // Acabou o turbo inicial
+        _isFastInitialPass = false;
+
+        // Passa a vez para o próximo módulo
+        _ecuCycleIndex = (_ecuCycleIndex + 1) % _ecuCycle.length;
+        break;
       }
-      pidsToRequest.add(_activePollingPids[_pollingIndex]);
+      pidsToRequest.add(ecuSensors[_pollingIndex].pid.id);
       _pollingIndex++;
       count++;
     }
 
-    String multiCommand = "01";
-    for (var pid in pidsToRequest) {
-      multiCommand += pid.toRadixString(16).padLeft(2, '0').toUpperCase();
+    if (pidsToRequest.isNotEmpty) {
+      // APONTA O ELM327 PARA O MÓDULO ALVO ANTES DE PEDIR OS DADOS
+      queueCommand("AT SH $targetTxHeader");
+
+      String multiCommand = "01";
+      for (var pid in pidsToRequest) {
+        multiCommand += pid.toRadixString(16).padLeft(2, '0').toUpperCase();
+      }
+      queueCommand(multiCommand);
+    } else {
+      _triggerNextPollingRequest();
     }
-    queueCommand(multiCommand);
   }
 
-  // --- CONFIGURAÇÃO INICIAL AT ---
-  void initializeScanner() {
+  // --- RESTAURAÇÃO DE FORMATAÇÃO ---
+  void resetElmToDefaults() {
+    _addLog("Restaurando parâmetros base do ELM327...");
+    _isPollingEnabled = false;
+    _commandQueue.clear(); // Limpa resquícios do que o usuário digitou
     queueCommand("AT Z");
     queueCommand("AT E0");
     queueCommand("AT L0");
@@ -189,11 +227,28 @@ class ObdManager {
     queueCommand("AT H0");
     queueCommand("AT AT2");
     queueCommand("AT SP 0");
-    queueCommand("AT RV");
-    queueCommand("AT DP");
+  }
+
+  // --- CONFIGURAÇÃO INICIAL (HANDSHAKE) ---
+  void initializeScanner() {
+    ref
+        .read(connectionStateProvider.notifier)
+        .updateState(AppConnectionState.connectingBluetooth);
+
+    queueCommand("AT Z");
+    queueCommand("AT E0");
+    queueCommand("AT L0");
+    queueCommand("AT S0");
+    queueCommand("AT H0");
+    queueCommand("AT AT2");
+    queueCommand("AT SP 0");
+
+    queueCommand("0100"); // Acorda a ECU
+    queueCommand("AT DPN"); // Pergunta qual protocolo pegou
   }
 
   void discoverSupportedSensors() {
+    // Esse método agora é chamado internamente após o DPN ou H1
     ref.read(supportedPidsProvider.notifier).clear();
     queueCommand("0100");
   }
@@ -210,10 +265,13 @@ class ObdManager {
   void reset() {
     _commandQueue.clear();
     _buffer = "";
+    _lastCommandSent = "";
     _isWaitingForResponse = false;
     _isPollingEnabled = false;
     _isClearingDTCs = false;
     _consecutiveErrors = 0;
+    _discoveredEcus.clear();
+    _currentActiveEcu = EcuModule.defaultEcu();
     _cooldownTimer?.cancel();
     _ecuPingTimer?.cancel();
     ref.read(realTimeStateProvider.notifier).clearData();
@@ -226,8 +284,8 @@ class ObdManager {
   void _processQueue() {
     if (_isWaitingForResponse || _commandQueue.isEmpty) return;
     _isWaitingForResponse = true;
-    String nextCommand = _commandQueue.removeFirst();
-    connection.sendCommand(nextCommand);
+    _lastCommandSent = _commandQueue.removeFirst();
+    connection.sendCommand(_lastCommandSent);
   }
 
   void _onDataReceived(String data) {
@@ -254,19 +312,14 @@ class ObdManager {
           response.contains("BUS INIT")) {
         final currentState = ref.read(connectionStateProvider);
 
-        // SEGREDO 1: Se o erro ocorrer logo na partida (antes do painel abrir),
-        // é certeza que a ignição está desligada. Pula direto para a espera da chave!
         if (currentState == AppConnectionState.connectingBluetooth ||
             currentState == AppConnectionState.discoveringSensors) {
           _addLog("ECU não respondeu à inicialização. Solicitando ignição...");
           _commandQueue.clear();
-
-          // MUDA PARA A TELA DA CHAVE AMARELA AUTOMATICAMENTE
           ref
               .read(connectionStateProvider.notifier)
               .updateState(AppConnectionState.waitingForEcu);
 
-          // Fica "cutucando" a ECU a cada 3 segundos até o motorista girar a chave
           _ecuPingTimer?.cancel();
           _ecuPingTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
             queueCommand("0100");
@@ -274,8 +327,6 @@ class ObdManager {
           return;
         }
 
-        // SEGREDO 2: Se o erro ocorrer durante a viagem (painel ativo),
-        // usa a tolerância de 5 erros seguidos para não cair por uma interferência boba.
         if (_isPollingEnabled) {
           _consecutiveErrors++;
           _addLog("ALERTA: Erro de comunicação. (Falha $_consecutiveErrors/5)");
@@ -292,19 +343,86 @@ class ObdManager {
 
             _ecuPingTimer?.cancel();
             _ecuPingTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
-              queueCommand("0100"); // Ping leve
+              queueCommand("0100");
             });
           }
-        } else {
-          // Ignora erros normais pontuais em Freeze Frame e Modo 06
         }
         return;
       }
 
       String rawResponse = response.replaceAll("SEARCHING...", "").trim();
-      String cleanHex = ObdParser.cleanRawResponse(rawResponse);
 
-      // 2. A ECU ACORDOU!
+      // === 2. INTERCEPTA O HANDSHAKE DO PROTOCOLO ===
+      if (_lastCommandSent == "AT DPN") {
+        final profile = ProtocolProfile.fromElmNumber(rawResponse);
+        ref.read(protocolProfileProvider.notifier).setProfile(profile);
+        _addLog(
+          "Protocolo detectado: ${profile.protocolName} (Raw: $rawResponse)",
+        );
+
+        if (profile.supportsCanHeaders) {
+          _addLog(
+            "Bus CAN detectado. Lendo Headers para identificar ECUs presentes...",
+          );
+          queueCommand("AT H1"); // Liga Headers
+          queueCommand("0100"); // Pergunta PIDs base com os Headers aparecendo
+        } else {
+          _addLog("Barramento K-Line. Módulo Único.");
+          _discoveredEcus = [EcuModule.defaultEcu()];
+          ref
+              .read(connectionStateProvider.notifier)
+              .updateState(AppConnectionState.discoveringSensors);
+          queueCommand("0100"); // Segue padrão
+        }
+        return;
+      }
+
+      // === 3. RECEBEU A LISTA DE MÓDULOS (FASE AT H1) ===
+      if (_lastCommandSent == "0100" &&
+          ref.read(protocolProfileProvider).supportsCanHeaders &&
+          rawResponse.contains("4100")) {
+        if (_discoveredEcus.isEmpty) {
+          _discoveredEcus = ObdParser.discoverEcusFromH1(
+            rawResponse,
+            ref.read(protocolProfileProvider),
+          );
+          _addLog(
+            "Módulos encontrados: ${_discoveredEcus.map((e) => e.name).join(', ')}",
+          );
+
+          queueCommand("AT H0"); // Desliga os headers para limpar a formatação
+
+          ref
+              .read(connectionStateProvider.notifier)
+              .updateState(AppConnectionState.discoveringSensors);
+          ref.read(supportedPidsProvider.notifier).clear();
+
+          // Pagina módulo por módulo isoladamente
+          for (var ecu in _discoveredEcus) {
+            queueCommand("AT SH ${ecu.txHeader}");
+            queueCommand("0100");
+          }
+          return;
+        }
+      }
+
+      // === 4. RASTREADOR DE FOCO DE MÓDULO ===
+      if (_lastCommandSent.startsWith("AT SH ")) {
+        String tx = _lastCommandSent.substring(6).trim();
+        _currentActiveEcu = _discoveredEcus.firstWhere(
+          (e) => e.txHeader == tx,
+          orElse: () => EcuModule.defaultEcu(),
+        );
+        return; // AT SH retorna apenas "OK", não precisa de parser
+      }
+
+      // Limpeza pelo Perfil
+      final profile = ref.read(protocolProfileProvider);
+      String cleanHex = ObdParser.cleanRawResponse(rawResponse, profile);
+
+      if (cleanHex.isEmpty) return;
+
+      // === 5. A ECU ACORDOU! ===
       if (cleanHex.startsWith("41") ||
           cleanHex.startsWith("42") ||
           cleanHex.startsWith("43") ||
@@ -326,50 +444,74 @@ class ObdManager {
         }
       }
 
-      // 3. ROTEAMENTO MODO 01 (Sensores e Paginação)
+      // === 6. ROTEAMENTO MODO 01 (Sensores e Paginação por ECU) ===
       if (cleanHex.startsWith("41")) {
-        // Agora aceita a descoberta dinâmica de 00 até C0!
+        // Mapeamento e Paginação
         if (RegExp(r'^41(00|20|40|60|80|A0|C0)').hasMatch(cleanHex)) {
           final RegExp supportRegex = RegExp(
             r'41(00|20|40|60|80|A0|C0)([0-9A-F]{8})',
           );
           final matches = supportRegex.allMatches(cleanHex);
+
           for (final match in matches) {
-            String pidHex = match.group(1)!;
-            String dataHex = match.group(2)!;
-            int basePid = int.parse(pidHex, radix: 16);
+            int basePid = int.parse(match.group(1)!, radix: 16);
             List<int> supported = Mode01Parser.parseSupportedPids(
-              dataHex,
+              match.group(2)!,
               basePid,
             );
 
-            ref.read(supportedPidsProvider.notifier).addPids(supported);
+            // Transforma o número do PID em um MappedSensor amarrado ao módulo ativo
+            List<MappedSensor> mapped = supported
+                .where((id) => pidRegistry.containsKey(id))
+                .map(
+                  (id) => MappedSensor(
+                    pid: pidRegistry[id]!,
+                    module: _currentActiveEcu,
+                  ),
+                )
+                .toList();
+
+            ref.read(supportedPidsProvider.notifier).addSensors(mapped);
 
             if (supported.contains(basePid + 0x20)) {
               String nextHex = (basePid + 0x20)
                   .toRadixString(16)
                   .padLeft(2, '0')
                   .toUpperCase();
+              queueCommand(
+                "AT SH ${_currentActiveEcu.txHeader}",
+              ); // Garante foco
               queueCommand("01$nextHex");
             } else {
-              final currentState = ref.read(connectionStateProvider);
-              if (currentState == AppConnectionState.discoveringSensors) {
+              if (ref.read(connectionStateProvider) ==
+                  AppConnectionState.discoveringSensors) {
                 ref
                     .read(connectionStateProvider.notifier)
                     .updateState(AppConnectionState.ready);
               }
             }
           }
-        } else {
-          Map<String, ObdReadResult> parsedData = Mode01Parser.parse(cleanHex);
-          if (parsedData.isNotEmpty) {
-            ref.read(realTimeStateProvider.notifier).updateData(parsedData);
+        }
+        // Leitura em Tempo Real (Dashboard)
+        else {
+          Map<int, ObdReadResult> parsedData = Mode01Parser.parseAsIntKeys(
+            cleanHex,
+          );
+          Map<String, ObdReadResult> finalData = {};
+
+          parsedData.forEach((pidId, result) {
+            String uniqueId =
+                "${pidId.toRadixString(16).padLeft(2, '0').toUpperCase()}_${_currentActiveEcu.txHeader}";
+            finalData[uniqueId] = result;
+          });
+
+          if (finalData.isNotEmpty) {
+            ref.read(realTimeStateProvider.notifier).updateData(finalData);
           }
         }
       }
-      // LÊ TESTES DE MONITORES (Modo 06)
+      // === LÊ TESTES DE MONITORES (Modo 06) ===
       else if (cleanHex.startsWith("46")) {
-        // Se for a resposta do mapeamento usando nossa tática de Força Bruta
         if (RegExp(r'46(00|20|40|60|80|A0|C0|E0)').hasMatch(cleanHex)) {
           final RegExp supportRegex = RegExp(
             r'46(00|20|40|60|80|A0|C0|E0)([0-9A-F]{8})',
@@ -378,16 +520,13 @@ class ObdManager {
 
           for (final match in matches) {
             int basePid = int.parse(match.group(1)!, radix: 16);
-            String dataHex = match.group(2)!;
-
             List<int> supported = Mode01Parser.parseSupportedPids(
-              dataHex,
+              match.group(2)!,
               basePid,
             );
 
             for (int mid in supported) {
               if (mid % 0x20 != 0) {
-                // Aqui nós pedimos diretamente o teste aprovado pela máscara!
                 String hexReq = mid
                     .toRadixString(16)
                     .padLeft(2, '0')
@@ -396,28 +535,23 @@ class ObdManager {
               }
             }
           }
-        }
-        // Se for a resposta de um teste específico (ex: 4601, 46A2...)
-        else {
+        } else {
           List<Mode06Result> parsedData = Mode06Parser.parse(cleanHex);
           for (var result in parsedData) {
             ref.read(testResultsProvider.notifier).addResult(result);
           }
         }
       }
-      // MODO 09 - Info do Veículo
+      // === MODO 09 - Info do Veículo ===
       else if (cleanHex.startsWith("49")) {
-        // Se for a resposta do mapeamento (0900 -> 4900)
         if (cleanHex.startsWith("4900")) {
           final RegExp supportRegex = RegExp(r'4900([0-9A-F]{8})');
           final match = supportRegex.firstMatch(cleanHex);
           if (match != null) {
-            String dataHex = match.group(1)!;
-            // Reutiliza o nosso decodificador de bits do Modo 01!
-            List<int> supported = Mode01Parser.parseSupportedPids(dataHex, 0);
-
-            _addLog("Mapeamento 09 concluído. PIDs suportados: $supported");
-            // Dispara automaticamente a fila pedindo os dados que o carro suporta
+            List<int> supported = Mode01Parser.parseSupportedPids(
+              match.group(1)!,
+              0,
+            );
             for (int pid in supported) {
               if (pid != 0) {
                 String hexReq = pid
@@ -428,10 +562,7 @@ class ObdManager {
               }
             }
           }
-        }
-        // Se for a resposta com os dados em si (ex: 4902...)
-        else {
-          // ✅ Como deve ficar:
+        } else {
           final mode09Json = ref.read(technicalDataProvider).mode09Data;
           Map<String, String> parsedInfo = Mode09Parser.parse(
             cleanHex,
@@ -442,35 +573,32 @@ class ObdManager {
           }
         }
       }
-      // LÊ FALHAS CONFIRMADAS (Modo 03)
+      // === LÊ FALHAS CONFIRMADAS (Modo 03) ===
       else if (cleanHex.startsWith("43")) {
         List<String> dtcs = DtcParser.parse(cleanHex, "43");
         ref.read(dtcStateProvider.notifier).addCodes(dtcs, DtcStatus.confirmed);
       }
-      // LÊ FALHAS PENDENTES (Modo 07)
+      // === LÊ FALHAS PENDENTES (Modo 07) ===
       else if (cleanHex.startsWith("47")) {
         List<String> dtcs = DtcParser.parse(cleanHex, "47");
         ref.read(dtcStateProvider.notifier).addCodes(dtcs, DtcStatus.pending);
       }
-      // LÊ FALHAS PERMANENTES (Modo 0A)
+      // === LÊ FALHAS PERMANENTES (Modo 0A) ===
       else if (cleanHex.startsWith("4A")) {
         List<String> dtcs = DtcParser.parse(cleanHex, "4A");
         ref.read(dtcStateProvider.notifier).addCodes(dtcs, DtcStatus.permanent);
       }
-      // FREEZE FRAME (Modo 02)
+      // === FREEZE FRAME (Modo 02) ===
       else if (cleanHex.startsWith("42")) {
-        // Libera a passagem para mapeamento de todos os Freeze Frames
         if (RegExp(r'42(00|20|40|60|80|A0|C0)00').hasMatch(cleanHex)) {
           final RegExp supportRegex = RegExp(
             r'42(00|20|40|60|80|A0|C0)00([0-9A-F]{8})',
           );
           final matches = supportRegex.allMatches(cleanHex);
           for (final match in matches) {
-            String pidHex = match.group(1)!;
-            String dataHex = match.group(2)!;
-            int basePid = int.parse(pidHex, radix: 16);
+            int basePid = int.parse(match.group(1)!, radix: 16);
             List<int> supported = Mode01Parser.parseSupportedPids(
-              dataHex,
+              match.group(2)!,
               basePid,
             );
 
@@ -498,7 +626,7 @@ class ObdManager {
           }
         }
       }
-      // APAGA FALHAS (Modo 04)
+      // === APAGA FALHAS (Modo 04) ===
       else if (cleanHex.startsWith("44") ||
           (_isClearingDTCs && rawResponse == "OK")) {
         _isClearingDTCs = false;
@@ -508,18 +636,22 @@ class ObdManager {
       }
     } finally {
       if (_isPollingEnabled && _commandQueue.isEmpty) {
-        // Puxa o intervalo escolhido pelo usuário nas Configurações
         int userInterval = ref.read(pollingIntervalProvider);
         Duration delay = Duration(milliseconds: userInterval);
 
-        // Se a tela de dashboard pediu um resfriamento maior (ex: 3s), respeitamos o maior
+        final profile = ref.read(protocolProfileProvider);
+
+        // PROTEÇÃO DE BARRAMENTO LENTO
+        if (delay < profile.minPollingInterval) {
+          delay = profile.minPollingInterval;
+        }
+
         if (_pollingCooldown > delay) delay = _pollingCooldown;
 
         _cooldownTimer?.cancel();
 
-        if (_isFastInitialPass || delay == Duration.zero) {
-          // Mesmo no modo "Tempo Real", damos 10ms de respiro para o Flutter desenhar a tela e o celular não fritar
-          _cooldownTimer = Timer(const Duration(milliseconds: 10), () {
+        if (_isFastInitialPass) {
+          _cooldownTimer = Timer(profile.minPollingInterval, () {
             if (_isPollingEnabled && _commandQueue.isEmpty) {
               _triggerNextPollingRequest();
             }
@@ -532,12 +664,10 @@ class ObdManager {
           });
         }
       } else if (!_isPollingEnabled && _commandQueue.isEmpty) {
-        // Encerra apenas o carregamento de DTCs se ele estiver rodando
         if (ref.read(dtcStateProvider).isLoading) {
           ref.read(dtcStateProvider.notifier).setLoading(false);
           _addLog("Diagnóstico concluído com sucesso.");
         }
-        // Encerra Loading do Modo 06 de forma natural (quando não há mais comandos pendentes)
         if (ref.read(testResultsProvider.notifier).isLoading) {
           ref.read(testResultsProvider.notifier).setLoading(false);
           _addLog("Varredura de Modo 06 concluída naturalmente.");

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '/l10n/app_localizations.dart';
 import '../parser/obd_pid.dart';
+import '../models/mapped_sensor.dart'; // NOVO IMPORT
 import '../parser/parsers/monitor_status_parser.dart';
 import '../parser/parsers/egt_parser.dart';
 import '../state/obd_providers.dart';
@@ -10,9 +12,10 @@ import '../state/technical_data_service.dart';
 import '../widgets/live_sensor_chart.dart';
 
 class SensorDetailScreen extends ConsumerStatefulWidget {
-  final ObdPid pid;
+  // AGORA RECEBEMOS O MAPPED SENSOR, QUE CONTÉM O PID E O MÓDULO (ECU)
+  final MappedSensor sensor;
 
-  const SensorDetailScreen({super.key, required this.pid});
+  const SensorDetailScreen({super.key, required this.sensor});
 
   @override
   ConsumerState<SensorDetailScreen> createState() => _SensorDetailScreenState();
@@ -26,7 +29,8 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
     super.initState();
     _obdManager = ref.read(obdManagerProvider);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _obdManager.setPollingPids([widget.pid.id]);
+      // AGORA PASSAMOS O MAPPED SENSOR PARA O POLLING
+      _obdManager.setPollingPids([widget.sensor]);
     });
   }
 
@@ -105,20 +109,23 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
     final techService = ref.watch(technicalDataProvider);
 
     final bool isMonitorStatusPid =
-        widget.pid.id == 0x01 || widget.pid.id == 0x41;
-    final bool isEgtPid = widget.pid.id == 0x78 || widget.pid.id == 0x79;
+        widget.sensor.pid.id == 0x01 || widget.sensor.pid.id == 0x41;
+    final bool isEgtPid =
+        widget.sensor.pid.id == 0x78 || widget.sensor.pid.id == 0x79;
 
-    final String hexId = widget.pid.id
+    final String hexId = widget.sensor.pid.id
         .toRadixString(16)
         .padLeft(2, '0')
         .toUpperCase();
     final techData = techService.getSensorData(hexId);
     final hasValueMap = techData?.valueMap != null;
-    final String displayName = techData?.name.isNotEmpty == true
-        ? techData!.name
-        : widget.pid.name;
 
-    final bool showStats = _isChartable(widget.pid.unit, hasValueMap);
+    // NOME AMIGÁVEL DA UI (Usando biblioteca ou fallback do modelo com nome do módulo)
+    final String displayName = techData?.name.isNotEmpty == true
+        ? "${techData!.name} (${widget.sensor.module.name})"
+        : widget.sensor.displayName;
+
+    final bool showStats = _isChartable(widget.sensor.pid.unit, hasValueMap);
 
     return Scaffold(
       appBar: AppBar(
@@ -226,8 +233,9 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
   ) {
     return Consumer(
       builder: (context, ref, _) {
+        // BUSCANDO PELO UNIQUE_ID
         final sensorData = ref.watch(
-          realTimeStateProvider.select((data) => data[widget.pid.name]),
+          realTimeStateProvider.select((data) => data[widget.sensor.uniqueId]),
         );
 
         if (sensorData == null || sensorData.rawBytes == null) {
@@ -241,7 +249,7 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
 
         final monitorStatus = ObdMonitorStatus.fromBytes(
           sensorData.rawBytes!,
-          isPid41: widget.pid.id == 0x41,
+          isPid41: widget.sensor.pid.id == 0x41,
         );
 
         final String ignitionText = monitorStatus.isDiesel
@@ -251,7 +259,7 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (widget.pid.id == 0x01) ...[
+            if (widget.sensor.pid.id == 0x01) ...[
               Row(
                 children: [
                   Expanded(
@@ -395,8 +403,9 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
   ) {
     return Consumer(
       builder: (context, ref, _) {
+        // BUSCANDO PELO UNIQUE_ID
         final sensorData = ref.watch(
-          realTimeStateProvider.select((data) => data[widget.pid.name]),
+          realTimeStateProvider.select((data) => data[widget.sensor.uniqueId]),
         );
 
         if (sensorData == null || sensorData.rawBytes == null) {
@@ -408,7 +417,7 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
           );
         }
 
-        final bankNumber = widget.pid.id == 0x78 ? 1 : 2;
+        final bankNumber = widget.sensor.pid.id == 0x78 ? 1 : 2;
         final egtStatus = EgtStatus.fromBytes(
           sensorData.rawBytes!,
           bank: bankNumber,
@@ -437,11 +446,11 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
               ),
               itemCount: egtStatus.sensors.length,
               itemBuilder: (context, index) {
-                final sensor = egtStatus.sensors[index];
+                final sensorEgt = egtStatus.sensors[index];
 
                 return Card(
                   elevation: 0,
-                  color: sensor.isSupported
+                  color: sensorEgt.isSupported
                       ? Theme.of(
                           context,
                         ).colorScheme.primary.withValues(alpha: 0.08)
@@ -449,7 +458,7 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                     side: BorderSide(
-                      color: sensor.isSupported
+                      color: sensorEgt.isSupported
                           ? Theme.of(
                               context,
                             ).colorScheme.primary.withValues(alpha: 0.3)
@@ -466,35 +475,35 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              l10n.sensorLabelIndex(sensor.index),
+                              l10n.sensorLabelIndex(sensorEgt.index),
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 13,
-                                color: sensor.isSupported
+                                color: sensorEgt.isSupported
                                     ? onSurface
                                     : onSurface.withValues(alpha: 0.38),
                               ),
                             ),
                             Icon(
-                              sensor.isSupported
+                              sensorEgt.isSupported
                                   ? Icons.sensors_rounded
                                   : Icons.sensors_off_rounded,
                               size: 16,
-                              color: sensor.isSupported
+                              color: sensorEgt.isSupported
                                   ? Theme.of(context).colorScheme.primary
                                   : onSurface.withValues(alpha: 0.3),
                             ),
                           ],
                         ),
                         Text(
-                          sensor.isSupported
-                              ? "${sensor.temperature.toStringAsFixed(1)} °C"
+                          sensorEgt.isSupported
+                              ? "${sensorEgt.temperature.toStringAsFixed(1)} °C"
                               : "N/A",
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.w900,
                             fontFamily: 'Monospace',
-                            color: sensor.isSupported
+                            color: sensorEgt.isSupported
                                 ? onSurface
                                 : onSurface.withValues(alpha: 0.3),
                           ),
@@ -537,12 +546,15 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
 
         Consumer(
           builder: (context, ref, _) {
+            // BUSCANDO PELO UNIQUE_ID
             final sensorData = ref.watch(
-              realTimeStateProvider.select((data) => data[widget.pid.name]),
+              realTimeStateProvider.select(
+                (data) => data[widget.sensor.uniqueId],
+              ),
             );
             final health =
-                sensorData != null && widget.pid.evaluateHealth != null
-                ? widget.pid.evaluateHealth!(sensorData.value)
+                sensorData != null && widget.sensor.pid.evaluateHealth != null
+                ? widget.sensor.pid.evaluateHealth!(sensorData.value)
                 : null;
             final activeColor = _getActiveColor(health, appColors);
 
@@ -577,10 +589,10 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
                       fontFamily: 'Monospace',
                     ),
                   ),
-                  if (widget.pid.unit.isNotEmpty) ...[
+                  if (widget.sensor.pid.unit.isNotEmpty) ...[
                     const SizedBox(width: 8),
                     Text(
-                      widget.pid.unit,
+                      widget.sensor.pid.unit,
                       style: TextStyle(
                         fontSize: 24,
                         color: onSurface.withValues(alpha: 0.7),
@@ -597,13 +609,16 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
         if (showStats) ...[
           Consumer(
             builder: (context, ref, _) {
+              // BUSCANDO PELO UNIQUE_ID
               final sensorData = ref.watch(
-                realTimeStateProvider.select((data) => data[widget.pid.name]),
+                realTimeStateProvider.select(
+                  (data) => data[widget.sensor.uniqueId],
+                ),
               );
 
               final currentValue = sensorData?.value ?? 0.0;
-              final health = widget.pid.evaluateHealth != null
-                  ? widget.pid.evaluateHealth!(currentValue)
+              final health = widget.sensor.pid.evaluateHealth != null
+                  ? widget.sensor.pid.evaluateHealth!(currentValue)
                   : null;
               final activeColor = _getActiveColor(health, appColors);
 
@@ -631,7 +646,7 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
                         child: _buildStatCard(
                           l10n.statMin,
                           currentMin,
-                          widget.pid.unit,
+                          widget.sensor.pid.unit,
                           onSurface,
                           Colors.blueAccent,
                         ),
@@ -641,7 +656,7 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
                         child: _buildStatCard(
                           l10n.statMax,
                           currentMax,
-                          widget.pid.unit,
+                          widget.sensor.pid.unit,
                           onSurface,
                           Colors.redAccent,
                         ),
@@ -662,7 +677,7 @@ class _SensorDetailScreenState extends ConsumerState<SensorDetailScreen> {
                   LiveSensorChart(
                     currentValue: currentValue,
                     lineTileColor: activeColor,
-                    unit: widget.pid.unit,
+                    unit: widget.sensor.pid.unit,
                   ),
                 ],
               );
