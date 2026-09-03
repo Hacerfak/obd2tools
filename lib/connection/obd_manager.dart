@@ -49,7 +49,7 @@ class ObdManager {
   List<EcuModule> _discoveredEcus = [];
   EcuModule _currentActiveEcu = EcuModule.defaultEcu();
 
-  Map<String, List<MappedSensor>> _activeSensorsByEcu = {};
+  final Map<String, List<MappedSensor>> _activeSensorsByEcu = {};
   List<String> _ecuCycle = [];
   int _ecuCycleIndex = 0;
 
@@ -81,6 +81,12 @@ class ObdManager {
   void queueCommand(String command) {
     _commandQueue.add(command);
     _processQueue();
+  }
+
+  void stopEcuPing() {
+    _ecuPingTimer?.cancel();
+    _ecuPingTimer = null;
+    _addLog("Ping automático da ECU pausado para depuração manual.");
   }
 
   // --- DIAGNÓSTICO ---

@@ -8,6 +8,7 @@ import '../state/obd_providers.dart';
 import 'home_screen.dart';
 import 'package:flutter/foundation.dart';
 import '../widgets/loading_large_ad.dart';
+import 'debug_console_screen.dart';
 
 class ConnectionScreen extends ConsumerStatefulWidget {
   final bool attemptAutoConnect;
@@ -387,19 +388,52 @@ class _ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                   child: CircularProgressIndicator(color: appColors.warning),
                 ),
                 const Spacer(),
-                TextButton(
-                  onPressed: () {
-                    ref.read(obdManagerProvider).forceDisconnect();
-                    setState(() {
-                      _isLoadingPaired = false;
-                      _isDiscovering = false;
-                    });
-                    _loadPairedDevices();
-                  },
-                  child: Text(
-                    l10n.btnCancel,
-                    style: TextStyle(color: appColors.critical),
-                  ),
+
+                // --- NOVOS BOTÕES DE AÇÃO ---
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    OutlinedButton.icon(
+                      onPressed: () {
+                        // Pausa o envio automático de '0100' para liberar a linha do terminal
+                        ref.read(obdManagerProvider).stopEcuPing();
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const DebugConsoleScreen(),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.terminal),
+                      label: Text(l10n.dbgTitle),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: appColors.primary,
+                        side: BorderSide(
+                          color: appColors.primary.withValues(alpha: 0.5),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextButton(
+                      onPressed: () {
+                        ref.read(obdManagerProvider).forceDisconnect();
+                        setState(() {
+                          _isLoadingPaired = false;
+                          _isDiscovering = false;
+                        });
+                        _loadPairedDevices();
+                      },
+                      child: Text(
+                        l10n.btnCancel,
+                        style: TextStyle(color: appColors.critical),
+                      ),
+                    ),
+                  ],
                 ),
               ] else if (connState == AppConnectionState.discoveringSensors ||
                   (connState == AppConnectionState.ready && !_showReady)) ...[

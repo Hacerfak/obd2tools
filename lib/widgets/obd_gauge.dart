@@ -43,14 +43,16 @@ class ObdGauge extends ConsumerWidget {
 
     if (sensor.pid.unit == "RPM") return (0.0, 8000.0);
     if (sensor.pid.unit == "km/h") return (0.0, 220.0);
-    if (sensor.pid.unit == "°C" || sensor.pid.unit == "C")
+    if (sensor.pid.unit == "°C" || sensor.pid.unit == "C") {
       return (-40.0, 150.0);
+    }
     if (sensor.pid.unit == "%") return (0.0, 100.0);
     if (sensor.pid.unit == "V") return (0.0, 16.0);
     if (sensor.pid.unit == "kPa") return (0.0, 255.0);
     if (sensor.pid.unit == "°") return (-64.0, 64.0);
-    if (sensor.pid.unit == "λ" || sensor.pid.unit == "Lambda")
+    if (sensor.pid.unit == "λ" || sensor.pid.unit == "Lambda") {
       return (0.0, 2.0);
+    }
     if (sensor.pid.unit == "Pa") return (-8192.0, 8192.0);
 
     return (0.0, 100.0);

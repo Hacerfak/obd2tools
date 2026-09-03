@@ -84,10 +84,12 @@ class Mode01Parser {
             rawBytes: bytes,
           );
           cursor += dataChars;
-        } else
+        } else {
           break;
-      } else
+        }
+      } else {
         break;
+      }
     }
     return results;
   }
