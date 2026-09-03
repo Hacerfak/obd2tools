@@ -233,6 +233,7 @@ class ObdManager {
     queueCommand("AT H0");
     queueCommand("AT AT2");
     queueCommand("AT SP 0");
+    queueCommand("AT ST FF");
   }
 
   // --- CONFIGURAÇÃO INICIAL (HANDSHAKE) ---
@@ -249,6 +250,7 @@ class ObdManager {
     queueCommand("AT H0");
     queueCommand("AT AT2");
     queueCommand("AT SP 0");
+    queueCommand("AT ST FF");
 
     queueCommand("0100"); // Acorda a ECU
     queueCommand("AT DPN"); // Pergunta qual protocolo pegou
@@ -383,6 +385,23 @@ class ObdManager {
           "Protocolo detectado: ${profile.protocolName} (Raw: $rawResponse)",
         );
 
+        // --- CORREÇÃO DE REDE 29-BIT ---
+        // Se o protocolo for 7, 8, 9, A7, A8 ou A9 (Redes de 29-bit), o endereço muda!
+        if (rawResponse.contains("7") ||
+            rawResponse.contains("8") ||
+            rawResponse.contains("9")) {
+          // Passando os parâmetros posicionalmente na ordem correta exigida pela classe EcuModule
+          _currentActiveEcu = const EcuModule(
+            "18DAF110", // rxHeader
+            "18DA10F1", // txHeader
+            EcuType.engine, // type
+            "Motor", // name
+          );
+        } else {
+          _currentActiveEcu = EcuModule.defaultEcu(); // 11-bit padrão (7E0)
+        }
+        // -------------------------------
+
         if (profile.supportsCanHeaders) {
           _addLog(
             "Bus CAN detectado. Lendo Headers para identificar ECUs presentes...",
@@ -391,7 +410,7 @@ class ObdManager {
           queueCommand("0100"); // Pergunta PIDs base com os Headers aparecendo
         } else {
           _addLog("Barramento K-Line. Módulo Único.");
-          _discoveredEcus = [EcuModule.defaultEcu()];
+          _discoveredEcus = [_currentActiveEcu];
           ref
               .read(connectionStateProvider.notifier)
               .updateState(AppConnectionState.discoveringSensors);
@@ -409,6 +428,12 @@ class ObdManager {
             rawResponse,
             ref.read(protocolProfileProvider),
           );
+
+          // Se o seu parser não conseguiu identificar a ECU de 29-bit, usamos a ECU ativa garantida
+          if (_discoveredEcus.isEmpty) {
+            _discoveredEcus = [_currentActiveEcu];
+          }
+
           _addLog(
             "Módulos encontrados: ${_discoveredEcus.map((e) => e.name).join(', ')}",
           );
